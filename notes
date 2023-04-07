@@ -6,18 +6,24 @@ What if imdb id is set as @Id and tmdb id as a normal column
 -> then series & movie will have imdb_id as a PK/FK (default) -> no issue
 imdb_id will be used for 
 
-
-
-
 Issues with tmdb_id
 -> tmdb_id can be same for a movie and a series.
 Since I want to maintain a common database, I will need to add a letter in id and remove the same while passing it to the 3rd party api
 
-
-
-
-
-select s1_0.imdb_id,case when s1_1.imdb_id is not null then 1 when s1_2.imdb_id is not null then 2 when s1_0.imdb_id is not null then 0 end,s1_0.backdrop_path,(CASE WHEN EXISTS (SELECT * FROM track_servie.movie m WHERE m.imdb_id = s1_0.imdb_id AND m.watched = 1) THEN 1 ELSE (SELECT CASE WHEN (SELECT COUNT(*) FROM track_servie.episode e WHERE e.series_id=s1_0.id AND e.watched=1)=(SELECT ser.number_of_episodes FROM track_servie.series ser WHERE ser.imdb_id=s1_0.imdb_id) THEN 1 ELSE 0 END) END),s1_0.id,s1_0.original_title,s1_0.overview,s1_0.poster_path,s1_0.status,s1_0.tagline,s1_0.title,s1_1.release_date,s1_1.runtime,s1_1.watched,(SELECT COUNT(*) FROM track_servie.episode e WHERE e.series_id=s1_2.id AND e.watched=1),s1_2.first_air_date,s1_2.last_air_date,s1_2.number_of_episodes,s1_2.number_of_seasons,s1_2.imdb_id,(SELECT CASE WHEN (SELECT COUNT(*) FROM track_servie.episode e WHERE e.series_id=s1_2.id AND e.watched=1)=s1_2.number_of_episodes THEN 1 ELSE 0 END) from servie s1_0 left join movie s1_1 on s1_0.imdb_id=s1_1.imdb_id left join series s1_2 on s1_0.imdb_id=s1_2.imdb_id order by s1_0.title asc limit ?,?];
-
 ######################################################################################################################################################
-Episode []
+Changes to track of each user
+
+Episode
+- watched
+- stillPath
+Season
+- watched (not sure, since it can be calculated from episode's watched)
+- posterPath
+Series
+- watched (not sure, since it can be calculated from episode's watched)
+Movie
+- watched
+Servie
+- posterPath
+- backdropPath
+######################################################################################################################################################
