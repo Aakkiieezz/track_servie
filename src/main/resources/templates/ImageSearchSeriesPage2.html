@@ -28,8 +28,9 @@
 
     <h3 th:text="${type == 'tv' ? 'Series Backdrops' : 'Movie Backdrops'}"></h3>
     <div class="row center">
-        <div class="col-xxl-3 col-sm-4 col-6 rounded image-container backdrop" th:each="image : ${backdrops}"
-            th:if="${image.iso_639_1 == null or image.iso_639_1 == 'en'}">
+        <!-- <div class="col-xxl-3 col-sm-4 col-6 rounded image-container backdrop" th:each="image : ${backdrops}"
+            th:if="${image.iso_639_1 == null or image.iso_639_1 == 'en'}"> -->
+        <div class="col-xxl-3 col-sm-4 col-6 rounded image-container backdrop" th:each="image : ${backdrops}">
             <a th:href="@{'/api/servies/'+${tmdbId}+'/backdropChange?type='+${type}+'&filePath='+${image.filePath}}">
                 <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${image.filePath}" />
             </a>

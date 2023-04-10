@@ -17,8 +17,8 @@ import lombok.Data;
 public class User
 {
     @Id
-    @Column(name = "id")
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
     private int id;
     // ---------------------------------------------------------------
     @Column(name = "name")

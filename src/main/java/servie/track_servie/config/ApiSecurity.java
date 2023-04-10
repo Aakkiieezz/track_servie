@@ -1,6 +1,5 @@
 package servie.track_servie.config;
 
-// import app.CivicDutyWellness.filter.AuthenticationTokenFilter;
 import lombok.RequiredArgsConstructor;
 import servie.track_servie.filter.AuthenticationTokenFilter;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -27,17 +26,15 @@ public class ApiSecurity
 {
     private final AuthenticationTokenFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
-    // private static final String[] SWAGGER_ENDPOINTS = {"/swagger-ui/**"};
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception
     {
         http.csrf().disable().authorizeHttpRequests(auth ->
         {
-            auth.requestMatchers("/api/auth/**").permitAll();
+            auth.requestMatchers("/api/**").permitAll();
             auth.anyRequest().authenticated();
-        }).formLogin().loginPage("/login").permitAll().and().logout().logoutUrl("/logout").permitAll().and().sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authenticationProvider(authenticationProvider).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        // .formLogin(login -> login.loginPage("/api/auth/login").permitAll().defaultSuccessUrl("/api/users/p1", true).failureUrl("/api/users/p2")).sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authenticationProvider(authenticationProvider).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
+        }).sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authenticationProvider(authenticationProvider).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 
@@ -61,8 +58,11 @@ public class ApiSecurity
     {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("*"));
+        // configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
         configuration.setAllowedMethods(List.of("*"));
+        // configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
+        // configuration.setAllowedHeaders(Arrays.asList("*"));
         configuration.setAllowCredentials(true);
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);

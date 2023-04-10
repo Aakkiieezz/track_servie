@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import servie.track_servie.dto.operationsHomePageDtos.GenreDtoHomePage;
 import servie.track_servie.dto.operationsHomePageDtos.ResponseDtoHomePage;
@@ -46,12 +47,25 @@ public class ServieController
     // Returns SearchPage containing all searched Servies from 3rd party api
     // ??? what happens when required is true and no default is given
     @GetMapping("search")
-    public String searchServies(@RequestParam(value = "type", required = true) String type, @RequestParam(value = "query", required = true) String servieName, @RequestParam(value = "pageNumber", defaultValue = "1") int pageNumber, Model model)
+    // @CrossOrigin(origins = "http://localhost:8080")
+    public String searchServies(@RequestParam(value = "type", required = true) String type, @RequestParam(value = "query", required = true) String servieName, @RequestParam(value = "pageNumber", defaultValue = "1") int pageNumber, Model model/*
+                                                                                                                                                                                                                                                   * , @RequestHeader HttpHeaders headers
+                                                                                                                                                                                                                                                   */, HttpServletRequest request)
     {
-        SearchResultDtoSearchPage searchListDto = servieService.searchServies(type, servieName, pageNumber);
-        model.addAttribute("searchList", searchListDto);
+        // checking if token exists in header
+        // String authorizationHeader = headers.getFirst("Authorization");
+        // System.out.println(authorizationHeader);
+        // checking if token exists in header
+        // System.out.println(request.getHeader("Authorization"));
+        SearchResultDtoSearchPage response = servieService.searchServies(type, servieName, pageNumber);
+        model.addAttribute("response", response);
         // should the type be inside the model attribute "searchList" ?
+        model.addAttribute("query", servieName);
         model.addAttribute("type", type);
+        // return new ResponseEntity<>("Not a thymeleaf template, just a String",
+        // HttpStatus.OK);
+        // request.setAttribute("isthymeleaf", true);
+        // model.addAttribute("thymeleafServletRequest", true);
         return "SearchPage";
     }
 

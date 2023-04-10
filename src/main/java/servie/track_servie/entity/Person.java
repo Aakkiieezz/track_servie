@@ -11,32 +11,34 @@ import lombok.Data;
 public class Person
 {
     @Column(name = "adult")
-    private boolean adult;
+    private Boolean adult;
     // ---------------------------------------------------------------
     @Column(name = "gender")
-    private int gender;
+    private Integer gender;
     // ---------------------------------------------------------------
     @Id
     @Column(name = "id")
-    private int id;
+    private Integer id;
     // ---------------------------------------------------------------
-    @Column(name = "known_for_department")
     @JsonProperty("known_for_department")
+    @Column(name = "known_for_department")
     private String knownForDepartment;
     // ---------------------------------------------------------------
     @Column(name = "name")
     private String name;
     // ---------------------------------------------------------------
     @Column(name = "popularity")
-    private Float popularity;
+    private Integer popularity;
     // ---------------------------------------------------------------
-    @Column(name = "profile_path")
     @JsonProperty("profile_path")
+    @Column(name = "profile_path")
     private String profilePath;
     // ---------------------------------------------------------------
-    @Column(name = "character")
-    private String character;
+    @JsonProperty("character")
+    @Column(name = "role")
+    private String role;
     // ---------------------------------------------------------------
-    @Column(name = "order")
-    private int order;
+    @JsonProperty("order")
+    @Column(name = "position")
+    private Integer position;
 }

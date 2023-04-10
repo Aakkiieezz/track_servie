@@ -25,14 +25,22 @@
 </head>
 
 <body>
-  <form th:action="@{/api/series/search}">
-    <span class="material-icons">search</span>
+  <form th:action=" @{/api/servies/search}">
     <input type="text" id="query" name="query">
-    <button class="btn btn-light" type="submit">Search</button>
+    &nbsp;
+    &nbsp;
+    <i class="bi bi-arrow-down-up"></i>
+    <select th:name="type">
+      <option value="movie">Movie</option>
+      <option value="tv">Series</option>
+    </select>
+    <button class="btn btn-light" type="submit">
+      <i class="bi bi-search"></i>
+    </button>
   </form>
 
   <div class="row">
-    <div class="col-xxl-1 col-sm-2 col-3 rounded image-container poster" th:each="series : ${searchList.results}">
+    <div class="col-xxl-1 col-sm-2 col-3 rounded image-container poster" th:each="series : ${response.results}">
       <a th:href="@{'/api/series/'+${series.id}+'/search'}">
         <img th:src="'https://www.themoviedb.org/t/p/original'+${series.posterPath}" />
       </a>
@@ -44,6 +52,24 @@
     </div>
   </div>
   <!-- ??? to utilize all feilds of response object -->
+
+  <nav th:if="${response.total_pages > 1}">
+    <ul class="pagination">
+      <li class="page-item" th:classappend="${response.page == 1} ? disabled">
+        <a class="page-link"
+          th:href="@{'/api/servies/search?query='+${query}+'&type='+${type}+'&pageNumber='+${response.page-1}}">Previous</a>
+      </li>
+      <li class="page-item" th:each="i: ${#numbers.sequence(1,response.total_pages)}"
+        th:classappend="${response.page == i} ? disabled">
+        <a class="page-link"
+          th:href="@{'/api/servies/search?query='+${query}+'&type='+${type}+'&pageNumber='+${i}}">[[${i}]]</a>
+      </li>
+      <li class="page-item" th:classappend="${response.page == response.total_pages} ? disabled">
+        <a class="page-link"
+          th:href="@{'/api/servies/search?query='+${query}+'&type='+${type}+'&pageNumber='+${response.page+1}}">Next</a>
+      </li>
+    </ul>
+  </nav>
 </body>
 
 </html>

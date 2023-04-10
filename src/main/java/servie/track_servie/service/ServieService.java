@@ -1,7 +1,9 @@
 package servie.track_servie.service;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -14,6 +16,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import servie.track_servie.dto.ExternalIdsDto;
 import servie.track_servie.dto.operationsHomePageDtos.ResponseDtoHomePage;
 import servie.track_servie.dto.operationsImage.Image;
@@ -24,6 +28,7 @@ import servie.track_servie.entity.Episode;
 import servie.track_servie.entity.Genre;
 import servie.track_servie.entity.Key;
 import servie.track_servie.entity.Movie;
+import servie.track_servie.entity.MovieCollectionDetails;
 import servie.track_servie.entity.Season;
 import servie.track_servie.entity.Series;
 import servie.track_servie.entity.Servie;
@@ -31,6 +36,7 @@ import servie.track_servie.exception.GenreNotFoundException;
 import servie.track_servie.exception.TmdbIdNotFoundException;
 import servie.track_servie.repository.EpisodeRepository;
 import servie.track_servie.repository.GenreRepository;
+import servie.track_servie.repository.MovieCollectionDetailsRepository;
 import servie.track_servie.repository.MovieRepository;
 import servie.track_servie.repository.SeriesRepository;
 import servie.track_servie.repository.ServieRepository;
@@ -50,6 +56,8 @@ public class ServieService
     private EpisodeRepository episodeRepository;
     @Autowired
     private MovieRepository movieRepository;
+    @Autowired
+    private MovieCollectionDetailsRepository movieCollectionDetailsRepository;
     @Value("${tmdb.api.key}")
     private String apiKey;
 
@@ -60,7 +68,7 @@ public class ServieService
         HttpEntity<?> httpEntity = new HttpEntity<>(headers);
         if(type.equals("tv"))
         {
-            ResponseEntity<Series> seriesResponse = restTemplate.exchange("https://api.themoviedb.org/3/tv/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Series.class);
+            ResponseEntity<Series> seriesResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Series.class);
             Series series = seriesResponse.getBody();
             if(series!=null)
             {
@@ -70,7 +78,7 @@ public class ServieService
                 int j = series.getSeasons().get(0).getSeasonNumber();
                 while(i<=totalSeasons)
                 {
-                    ResponseEntity<Season> response = restTemplate.exchange("https://api.themoviedb.org/3/tv/"+tmdbId+"/season/"+i+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Season.class);
+                    ResponseEntity<Season> response = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+tmdbId+"/season/"+i+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Season.class);
                     Season season = response.getBody();
                     if(season!=null)
                     {
@@ -84,7 +92,7 @@ public class ServieService
                     i++;
                 }
                 series.setSeasons(seasons);
-                ResponseEntity<ExternalIdsDto> response = restTemplate.exchange("https://api.themoviedb.org/3/tv/"+tmdbId+"/external_ids?api_key="+apiKey, HttpMethod.GET, httpEntity, ExternalIdsDto.class);
+                ResponseEntity<ExternalIdsDto> response = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+tmdbId+"/external_ids?api_key="+apiKey, HttpMethod.GET, httpEntity, ExternalIdsDto.class);
                 ExternalIdsDto imdb = response.getBody();
                 if(imdb!=null)
                     series.setImdbId(imdb.getImdb_id());
@@ -94,11 +102,65 @@ public class ServieService
         }
         else
         {
-            ResponseEntity<Movie> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/movie/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
+            // ObjectMapper objectMapper = new ObjectMapper();
+            // ResponseEntity<String> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/movie/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, String.class);
+            // String movieData = movieResponse.getBody();
+            // Map<String, Object> movieMap = objectMapper.readValue(movieData, new TypeReference<Map<String, Object>>()
+            // {});
+            // Movie movie = new Movie();
+            // movie.setBackdropPath((String) movieMap.get("backdrop_path"));
+            // movie.setChildtype("movie");
+            // Map<String, Object> collectionMap = objectMapper.readValue((String) movieMap.get("belongs_to_collection"), new TypeReference<Map<String, Object>>()
+            // {});
+            // movie.setCollectionId((Integer) collectionMap.get("id"));
+            // movie.setCollectionName((String) collectionMap.get("name"));
+            // movie.setCollectionPosterPath((String) collectionMap.get("poster_path"));
+            // movie.setCollectionBackdropPath((String) collectionMap.get("backdrop_path"));
+            // movie.setCompleted(false);
+            // movie.setGenres((Set<Genre>) movieMap.get("genres"));
+            // movie.setImdbId();
+            // movie.setOverview(movieData);
+            // movie.setPosterPath((String) jsonMap.get("poster_path"));
+            // movie.setReleaseDate(movieData);
+            // movie.setRuntime(tmdbId);
+            // movie.setStatus(movieData);
+            // movie.setTagline(movieData);
+            // movie.setTitle(movieData);
+            // movie.setTmdbId(tmdbId);
+            // movie.setWatched(null);
+            // List<Map<String, Object>> movieList = (List<Map<String, Object>>) movieMap.get("parts");
+            // MovieCollectionDetails movieCollectionDetails = new MovieCollectionDetails();
+            // movie.setCollection();
+            ResponseEntity<Movie> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
             Movie movie = movieResponse.getBody();
             if(movie!=null)
+            {
                 movie.setChildtype("movie");
-            servieRepository.save(movie);
+                if(movie.getBelongsToCollection()!=null)
+                {
+                    int collectionId = movie.getBelongsToCollection().getCollectionId();
+                    ResponseEntity<MovieCollectionDetails> movieCollectionResponse = restTemplate.exchange("https://api.themoviedb.org/3/collection/"+collectionId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, MovieCollectionDetails.class);
+                    MovieCollectionDetails movieCollectionDetails = movieCollectionResponse.getBody();
+                    if(movieCollectionDetails!=null)
+                    {
+                        // each movie has no [ImdbId, collection(Id,name,poster,backdrop), runtime, tagline, status] , no genres only genreIds
+                        List<Movie> movies = new ArrayList<Movie>();
+                        for(Movie part : movieCollectionDetails.getMovies())
+                        {
+                            ResponseEntity<Movie> movieResponse2 = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+part.getTmdbId()+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
+                            part = movieResponse2.getBody();
+                            part.setChildtype("movie");
+                            part.setCollection(movieCollectionDetails);
+                            part.setGenres(null);
+                            movies.add(part);
+                        }
+                        movieCollectionDetails.setMovies(movies);
+                        movieCollectionDetailsRepository.save(movieCollectionDetails);
+                        return;
+                    }
+                }
+                servieRepository.save(movie);
+            }
         }
     }
 

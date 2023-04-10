@@ -24,12 +24,12 @@ import lombok.EqualsAndHashCode;
 @Table(name = "series")
 public class Series extends Servie
 {
-    @Column(name = "number_of_seasons")
     @JsonProperty("number_of_seasons")
+    @Column(name = "number_of_seasons")
     private Integer numberOfSeasons;
     // ---------------------------------------------------------------
-    @Column(name = "number_of_episodes")
     @JsonProperty("number_of_episodes")
+    @Column(name = "number_of_episodes")
     private Integer numberOfEpisodes;
     // ---------------------------------------------------------------
     @Formula(value = "(SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.watched = 1)")
@@ -39,12 +39,12 @@ public class Series extends Servie
     @Formula(value = "(SELECT CASE WHEN (SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.watched = 1) = number_of_episodes THEN true ELSE false END)")
     private Boolean watched = false;
     // ---------------------------------------------------------------
-    @Column(name = "first_air_date")
     @JsonProperty("first_air_date")
+    @Column(name = "first_air_date")
     private String firstAirDate;
     // ---------------------------------------------------------------
-    @Column(name = "last_air_date")
     @JsonProperty("last_air_date")
+    @Column(name = "last_air_date")
     private String lastAirDate;
     // ---------------------------------------------------------------
     @OneToMany(cascade = CascadeType.ALL)

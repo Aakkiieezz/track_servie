@@ -1,6 +1,7 @@
 package servie.track_servie.entity;
 
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -14,8 +15,8 @@ import lombok.Setter;
 @Entity
 public class Genre
 {
-    @Column(name = "id")
     @Id
+    @Column(name = "id")
     private Integer id;
     // ---------------------------------------------------------------
     @Column(name = "name")

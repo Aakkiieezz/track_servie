@@ -14,8 +14,8 @@ import lombok.Data;
 @Entity
 public class Season
 {
-    @Column(name = "id")
     @Id
+    @Column(name = "id")
     private String id;
     // ---------------------------------------------------------------
     @Column(name = "name")
@@ -24,8 +24,8 @@ public class Season
     @Column(name = "tmdb_id")
     private Integer tmdbId;
     // ---------------------------------------------------------------
-    @Column(name = "episode_count")
     @JsonProperty("episode_count")
+    @Column(name = "episode_count")
     private Integer episodeCount;
     // ---------------------------------------------------------------
     // ??? Once try SQL's IF statement
@@ -38,12 +38,12 @@ public class Season
     @Column(name = "overview", length = 10000)
     private String overview;
     // ---------------------------------------------------------------
-    @Column(name = "poster_path")
     @JsonProperty("poster_path")
+    @Column(name = "poster_path")
     private String posterPath;
     // ---------------------------------------------------------------
-    @Column(name = "season_number")
     @JsonProperty("season_number")
+    @Column(name = "season_number")
     private Integer seasonNumber;
     // ---------------------------------------------------------------
     @OneToMany(cascade = CascadeType.ALL)

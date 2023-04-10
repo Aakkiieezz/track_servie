@@ -1,8 +1,5 @@
 package servie.track_servie.filter;
 
-// import app.CivicDutyWellness.model.CivicUser;
-// import app.CivicDutyWellness.service.JwtUserDetailsService;
-// import app.CivicDutyWellness.utils.jwt.JwtUtils;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,7 +14,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
@@ -35,10 +31,11 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter
     {
         try
         {
-            String jwt = parseJwt(request);
-            if(jwt!=null /* && jwtUtils.validateJwtToken(jwt) */)
+            String authorizationHeader = request.getHeader("Authorization");
+            if(authorizationHeader!=null && authorizationHeader.startsWith("Bearer "))
             {
-                String username = jwtUtils.getUserNameFromJwtToken(jwt);
+                String token = authorizationHeader.substring(7);
+                String username = jwtUtils.getUserNameFromJwtToken(token);
                 AuthUser userDetails = userDetailsService.loadUserByUsername(username);
                 UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(userDetails, null, userDetails.getAuthorities());
                 authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
@@ -52,13 +49,64 @@ public class AuthenticationTokenFilter extends OncePerRequestFilter
         filterChain.doFilter(request, response);
     }
 
-    private String parseJwt(HttpServletRequest request)
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request)
     {
-        String headerAuth = request.getHeader("Authorization");
-        if(StringUtils.hasText(headerAuth) && headerAuth.startsWith("Bearer "))
+        // getting either endpoint url or css stylesheet folderPath, but no path containing "thymeleaf"
+        String uri = request.getRequestURI();
+        if(uri!=null && (uri.startsWith("/templates") || uri.endsWith(".html") || uri.contains("/css/mystyles.css")))
         {
-            return headerAuth.substring(7);
+            return true;
         }
-        return null;
+        // DispatcherType dispatcherType = request.getDispatcherType();
+        // if (dispatcherType != null && dispatcherType.equals(DispatcherType.FORWARD))
+        // {
+        // // String servletPath = request.getServletPath();
+        // // if (servletPath != null && servletPath.startsWith("/thymeleaf/"))
+        // // return true;
+        // return true;
+        // }
+        // getting either endpoint url or css stylesheet folderPath, but no path containing "thymeleaf"
+        // String servletPath = request.getServletPath();
+        // if (servletPath != null && servletPath.startsWith("/thymeleaf/")) {
+        //     return true;
+        // }
+        // String acceptHeader = request.getHeader("Accept");
+        // if (acceptHeader != null && acceptHeader.startsWith("text/html")) {
+        // return true;
+        // }
+        // if ((Boolean) request.getAttribute("isthymeleaf"))
+        // return true;
+        // getting null all the time
+        // String headerValue = request.getHeader("X-Thymeleaf-Servlet");
+        // if (headerValue != null && headerValue.equals("true"))
+        //     return true;
+        // getting null all the time
+        // String paramValue = request.getParameter("thymeleafServlet");
+        // if (paramValue != null && paramValue.equals("true"))
+        //     return true;
+        // getting null all the time
+        // boolean isThymeleafRequest = false;
+        // Object thymeleafServletRequestObj = request.getAttribute("thymeleafServletRequest");
+        // if (thymeleafServletRequestObj instanceof Boolean) {
+        //     isThymeleafRequest = (Boolean) thymeleafServletRequestObj;
+        //     return isThymeleafRequest;
+        // }
+        // getting null all the time
+        // boolean isThymeleaf = false;
+        // Object thymeleafRequestObj = request.getAttribute("isthymeleaf");
+        // if (thymeleafRequestObj instanceof Boolean) {
+        //     isThymeleaf = (Boolean) thymeleafRequestObj;
+        //     return isThymeleaf;
+        // }
+        // getting null all the time
+        // String thymeleafServlet = (String) request.getAttribute("thymeleafServlet");
+        // if (thymeleafServlet != null && thymeleafServlet.equals("thymeleaf"))
+        //     return true;
+        // Boolean isThymeleafEnabled = env.getProperty("spring.thymeleaf.servlet.enabled", Boolean.class);
+        // if(isThymeleafEnabled!=null && isThymeleafEnabled)
+        //     return true;
+        return Boolean.TRUE.equals(request.getAttribute("SHOULD_NOT_FILTER"));
+        // return false;
     }
 }
