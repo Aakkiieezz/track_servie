@@ -1,20 +1,25 @@
 package servie.track_servie.controller;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import servie.track_servie.dto.operationsHomePageDtos.GenreDtoHomePage;
-import servie.track_servie.dto.operationsHomePageDtos.ResponseDtoHomePage;
-import servie.track_servie.dto.operationsImage.Image;
-import servie.track_servie.dto.operationsSearch.SearchPageDtos.SearchResultDtoSearchPage;
-import servie.track_servie.entity.Servie;
+import servie.track_servie.payload.dtos.operationsHomePageDtos.GenreDtoHomePage;
+import servie.track_servie.payload.dtos.operationsHomePageDtos.ResponseDtoHomePage;
+import servie.track_servie.payload.dtos.operationsImage.Image;
+import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SearchResultDtoSearchPage;
+import servie.track_servie.entities.Servie;
 import servie.track_servie.service.GenreService;
 import servie.track_servie.service.ServieService;
 
@@ -35,15 +40,16 @@ public class ServieController
 
     // Returns HomePage containing all Servies from the database which matches the filter
     @GetMapping("")
-    public String getServiesByFilter(@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "24") int pageSize, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, @RequestParam(value = "genreIds", defaultValue = "") List<Integer> genreIds, @RequestParam(value = "watched", defaultValue = "") Boolean watched, Model model)
+    public String getServiesByFilter(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "24") int pageSize, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, @RequestParam(value = "genreIds", defaultValue = "") List<Integer> genreIds, @RequestParam(value = "watched", defaultValue = "") Boolean watched, Model model)
     {
-        ResponseDtoHomePage response = servieService.getServiesByFilter(pageNumber, pageSize, sortBy, sortDir, genreIds, watched);
+        ResponseDtoHomePage response = servieService.getServiesByFilter(type, pageNumber, pageSize, sortBy, sortDir, genreIds, watched);
         List<GenreDtoHomePage> genres = genreService.getGenres();
         model.addAttribute("genres", genres);
         model.addAttribute("response", response);
         return "HomePage";
     }
 
+    // ---------------------------------------------------------------
     // Returns SearchPage containing all searched Servies from 3rd party api
     // ??? what happens when required is true and no default is given
     @GetMapping("search")
@@ -96,7 +102,7 @@ public class ServieController
     {
         Servie servie = servieService.getServie(type, tmdbId);
         model.addAttribute("servie", servie);
-        return "SeriesPage";
+        return "ServiePage";
     }
 
     // Removes specific Series(including all its Seasons,Episodes,...) from the database
@@ -112,27 +118,39 @@ public class ServieController
      * 'java.lang.String' to required type 'java.lang.Integer'; nested exception is
      * java.lang.NumberFormatException: For input string: "remove"
      */
-    @GetMapping("remove")
-    public String removeServie(@RequestParam(value = "id", required = true) String imdbId, HttpSession session)
+    @PostMapping("remove")
+    @ResponseBody
+    public Map<String, Object> removeServie(@RequestBody Map<String, Object> payload)
     {
+        String imdbId = (String) payload.get("imdbId");
         servieService.removeServie(imdbId);
-        session.setAttribute("msg", "Item Removed Successfully...!");
-        return "redirect:/api/servies";
+        return Collections.singletonMap("success", true);
     }
 
     // Toggles the watch button of Series located on HomePage
     @GetMapping("{tmdbId}/toggleback")
     public String toggleSeriesWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type)
     {
-        servieService.toggleSeriesWatch(type, tmdbId);
+        servieService.toggleServieWatch(type, tmdbId);
         return "redirect:/api/servies";
+    }
+
+    // trial - to delete
+    @PostMapping("tog")
+    @ResponseBody
+    public Map<String, Object> updateWatched(@RequestBody Map<String, Object> payload)
+    {
+        Integer tmdbId = Integer.parseInt((String) payload.get("tmdbId"));
+        String childtype = (String) payload.get("childtype");
+        servieService.toggleServieWatch(childtype, tmdbId);
+        return Collections.singletonMap("success", true);
     }
 
     // Toggles the watch button of Series located on SeriesPage
     @GetMapping("{tmdbId}/toggle")
     public String toggleSerWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type)
     {
-        servieService.toggleSeriesWatch(type, tmdbId);
+        servieService.toggleServieWatch(type, tmdbId);
         return "redirect:/api/servies/"+tmdbId+"?type="+type;
     }
 

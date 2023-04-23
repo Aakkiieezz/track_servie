@@ -2,7 +2,7 @@ package servie.track_servie.repository;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import servie.track_servie.entity.Season;
+import servie.track_servie.entities.Season;
 
 @Repository
 public interface SeasonRepository extends JpaRepository<Season, String>

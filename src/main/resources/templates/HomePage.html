@@ -24,72 +24,139 @@
   <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
   <script>
-
-    function toggleWatch(event, tmdbId, childtype) {
-      console.log(tmdbId + ' lol ' + childtype);
-      // prevent the default behavior of the click event
-      event.preventDefault();
-
-      var url = '/api/servies/' + tmdbId + '/toggleback' + '?type=' + childtype;
-
-      // perform the AJAX request to toggle the watch status
+    function toggleWatch(tmdbId, childtype, watched) {
       $.ajax({
-        url: url,
-        method: 'GET',
+        type: "POST",
+        url: "/api/servies/tog",
+        data: JSON.stringify({ tmdbId: tmdbId, childtype: childtype, watched: watched }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
         success: function (data) {
-          // handle the response from the server
-          // var watchIcon = document.getElementById('watch-icon-' + tmdbId);
-          // if (watchIcon) {
-          //   if (data.completed) {
-          //     watchIcon.innerHTML = '<i class="bi bi-eye-slash-fill"></i>';
-          //   } else {
-          //     watchIcon.innerHTML = '<i class="bi bi-eye-fill"></i>';
-          //   }
-          // }
-          console.log('congrats- toggle fone');
-
+          if (data.success) {
+            var movieDiv = $("#servie-" + tmdbId);
+            if (watched) {
+              movieDiv.find(".bi-eye-fill").removeClass("bi-eye-fill").addClass("bi-eye-slash-fill");
+            } else {
+              movieDiv.find(".bi-eye-slash-fill").removeClass("bi-eye-slash-fill").addClass("bi-eye-fill");
+            }
+          } else {
+            alert("Failed to update watched status.");
+          }
         },
-        error: function (jqXHR, textStatus, errorThrown) {
-          // handle errors
-          console.log('Request failed. Returned status of ' + jqXHR.status);
+        error: function () {
+          alert("Failed to update watched status.");
         }
       });
     }
-  </script>
 
+    function removeServie(imdbId) {
+      $.ajax({
+        type: "POST",
+        url: "/api/servies/remove",
+        data: JSON.stringify({ imdbId: imdbId }),
+        contentType: "application/json; charset=utf-8",
+        dataType: "json",
+        success: function (data) {
+          $('#servie-' + imdbId).remove();
+        },
+        error: function () {
+          alert("Failed to remove servie");
+        }
+      });
+    }
+
+    $(document).ready(function () {
+      // Get references to the dropdowns
+      var genreDropdown = $('#genreIds');
+      var typeDropdown = $('#type');
+
+      // Add event listener to type dropdown
+      typeDropdown.on('change', function () {
+        // Get selected value from type dropdown
+        var selectedType = $(this).val();
+
+        // Enable all options in genre dropdown
+        genreDropdown.find('option').prop('disabled', false);
+
+        // Disable options in genre dropdown based on selected type
+        if (selectedType === 'movie') {
+          // Disable options with values [12, 15, 16, 17, 20, 21]
+          genreDropdown.find('option[value="12"], option[value="15"], option[value="16"], option[value="17"], option[value="20"], option[value="21"]').prop('disabled', true);
+        } else if (selectedType === 'tv') {
+          // Disable options with values [10, 11, 13, 18, 22, 23]
+          genreDropdown.find('option[value="10"], option[value="11"], option[value="13"], option[value="18"], option[value="22"], option[value="23"]').prop('disabled', true);
+        }
+      });
+    });
+  </script>
 
   <title>Home Page</title>
 </head>
 
 <body>
-  <!-- <div th:if="${session.msg}">
-    <div class="alert alert-success text-center" role="alert" th:text="${session.msg}"></div>
-    <th:block th:text="${#session.removeAttribute('msg')}"></th:block>
-  </div> -->
-
   <div class="container-fluid">
     <div class="row">
       <div class="col-9">
-        <form th:action="@{/api/servies/}">
+        <form th:action="@{/api/servies}">
+          <i class="bi bi-arrow-down-up"></i>
+          <select name="type" id="type">
+            <option value="">Servies</option>
+            <option value="movie">Movies</option>
+            <option value="tv">Series</option>
+          </select>
+          &nbsp;
+          &nbsp;
           <i class="bi bi-filter-right"></i>
-          <select th:name="sortBy">
+          <select name="sortBy">
             <option value="title">Title</option>
             <option value="date">Release Date</option>
           </select>
           &nbsp;
           &nbsp;
           <i class="bi bi-arrow-down-up"></i>
-          <select th:name="sortDir">
+          <select name="sortDir">
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
           </select>
           &nbsp;
           &nbsp;
           Genre :
-          <select name="genreIds" multiple="multiple">
-            <option value="">Select an Option</option>
-            <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}"></option>
+          <select name="genreIds" id="genreIds" multiple="multiple">
+            <option value="">Select Genres</option>
+            <!-- <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}"></option> -->
+            <option value="1">Action</option>
+            <option value="2">Adventure</option>
+            <option value="3">Animation</option>
+            <option value="4">Comedy</option>
+            <option value="5">Crime</option>
+            <option value="6">Documentary</option>
+            <option value="7">Drama</option>
+            <option value="8">Family</option>
+            <option value="9">Fantasy</option>
+            <option value="10">History</option>
+            <option value="11">Horror</option>
+            <option value="12">Kids</option>
+            <option value="13">Music</option>
+            <option value="14">Mystery</option>
+            <option value="15">News</option>
+            <option value="16">Politics</option>
+            <option value="17">Reality</option>
+            <option value="18">Romance</option>
+            <option value="19">Science Fiction</option>
+            <option value="20">Soap</option>
+            <option value="21">Talk</option>
+            <option value="22">TV Movie</option>
+            <option value="23">Thriller</option>
+            <option value="24">War</option>
+            <option value="25">Western</option>
           </select>
+          &nbsp;
+          &nbsp;
+          Languages :
+          <!-- <select th:field="*{languages}" multiple="multiple">
+            <option value="">Select Languages</option>
+            <option th:each="lang : ${languages}" th:value="${lang.getCode()}" th:text="${lang.getFullName()}"></option>
+          </select> -->
           &nbsp;
           &nbsp;
           <i class="bi bi-eye-fill"></i>
@@ -126,17 +193,18 @@
 
     </div>
     <div class="row center">
-      <div class="col-xxl-1 col-sm-2 col-3 image-container poster" th:each="servie : ${response.servies}">
-        <div th:if="${servie instanceof T(servie.track_servie.entity.Movie)}">
+      <div class="col-xxl-1 col-sm-2 col-3 image-container poster" th:each="servie : ${response.servies}"
+        th:id="'servie-' + ${servie.imdbId}">
+        <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}">
           <a th:href="@{'/api/servies/'+${servie.tmdbId}+'?type=movie'}">
-            <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}" />
+            <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
+              alt="Poster Unavailable" />
           </a>
           <div class="buttons-container">
             <strong th:text="${servie.title}"></strong>
             <br>
             <span th:unless="${#strings.isEmpty(servie.releaseDate)}"
               th:text="${servie.releaseDate.substring(0,4)}"></span>
-            <!-- toggle watch icon -->
             <!-- hyperlink way -->
             <a th:href="@{'/api/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
               <div th:if="${servie.completed}">
@@ -147,24 +215,26 @@
               </div>
             </a>
             <!-- javascript+ajax+jquery -->
-            <div onclick="toggleWatch(event, '${servie.tmdbId}', '${servie.childtype}')">
-              <div th:if="${servie.completed}">
-                <i class="bi bi-eye-slash-fill"></i>
-              </div>
-              <div th:unless="${servie.completed}">
-                <i class="bi bi-eye-fill"></i>
-              </div>
-            </div>
+            <a href="#" th:if="${servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+              onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), false)">
+              <i class="bi bi-eye-slash-fill"></i>
+            </a>
+            <a href="#" th:if="${not servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+              onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), true)">
+              <i class="bi bi-eye-fill"></i>
+            </a>
 
             <a th:href="@{'/api/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
               <i class="bi bi-file-image"></i>
             </a>
-            <a th:href="@{'/api/servies/remove?id='+${servie.imdbId}}">
+
+            <a href="#" th:imdbId="${servie.imdbId}" onclick="removeServie(this.getAttribute('imdbId'))">
               <i class="bi bi-x-circle-fill"></i>
             </a>
+
           </div>
         </div>
-        <div th:if="${servie instanceof T(servie.track_servie.entity.Series)}">
+        <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}">
           <a th:href="@{'/api/servies/'+${servie.tmdbId}+'?type=tv'}">
             <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}" />
           </a>
@@ -186,7 +256,7 @@
             <a th:href="@{'/api/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
               <i class="bi bi-file-image"></i>
             </a>
-            <a th:href="@{'/api/servies/remove?id='+${servie.imdbId}}">
+            <a href="#" th:imdbId="${servie.imdbId}" onclick="removeServie(this.getAttribute('imdbId'))">
               <i class="bi bi-x-circle-fill"></i>
             </a>
             <div class="progress-bar">

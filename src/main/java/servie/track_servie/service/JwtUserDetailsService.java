@@ -1,8 +1,8 @@
 package servie.track_servie.service;
 
 import jakarta.transaction.Transactional;
-import servie.track_servie.entity.AuthUser;
-import servie.track_servie.entity.User;
+import servie.track_servie.entities.AuthUser;
+import servie.track_servie.entities.User;
 import servie.track_servie.repository.PermissionRepository;
 import servie.track_servie.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;

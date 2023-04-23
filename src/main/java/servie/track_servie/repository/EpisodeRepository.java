@@ -3,7 +3,7 @@ package servie.track_servie.repository;
 import java.util.List;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
-import servie.track_servie.entity.Episode;
+import servie.track_servie.entities.Episode;
 
 @Repository
 public interface EpisodeRepository extends JpaRepository<Episode, String>

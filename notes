@@ -1,10 +1,11 @@
 # Base fixed points :
+
 tmdb id is a must have
 imdb id is optional
 
 What if imdb id is set as @Id and tmdb id as a normal column
 -> then series & movie will have imdb_id as a PK/FK (default) -> no issue
-imdb_id will be used for 
+imdb_id will be used for
 
 Issues with tmdb_id
 -> tmdb_id can be same for a movie and a series.
@@ -14,16 +15,118 @@ Since I want to maintain a common database, I will need to add a letter in id an
 Changes to track of each user
 
 Episode
+
 - watched
 - stillPath
+
 Season
+
 - watched (not sure, since it can be calculated from episode's watched)
 - posterPath
+
 Series
+
 - watched (not sure, since it can be calculated from episode's watched)
+
 Movie
+
 - watched
+
 Servie
+
 - posterPath
 - backdropPath
+
+UserServie Table
+user_id imdb_id season_number episode_number servie_watched(T) servie_poster servie_backdrop season_poster episode_watched
+
+UserSeries
+userId imdbId watched(T)
+
 ######################################################################################################################################################
+Image Resolutions :
+Posters
+0.667 500 x 750
+0.708 600 x 848
+0.667 600 x 900
+0.667 640 x 960
+0.666 649 x 974
+0.667 720 x 1080
+0.667 750 x 1124
+0.666 765 x 1148
+0.667 864 x 1296
+0.667 900 x 1350
+0.667 1000 x 1500
+0.675 1080 x 1600
+0.667 1080 x 1620
+0.671 1030 x 1536
+0.751 1350 x 1798
+0.667 1364 x 2046
+0.667 1365 x 2048
+0.675 1382 x 2048
+0.698 1430 x 2048
+0.701 1435 x 2048
+0.75 1536 x 2048
+0.674 1554 x 2304
+0.667 2000 x 3000
+0.675 2000 x 2964
+
+Backdrops
+1.778 1280 x 720
+1.78 1367 x 768
+1.778 1636 x 920
+1.778 1920 x 1080
+1.777 1960 x 1103
+1.778 2000 x 1125
+1.777 2132 x 1200
+1.778 2560 x 1440
+1.777 2764 x 1555
+1.778 2827 x 1590
+1.778 2999 x 1687
+1.778 3840 x 2160
+
+######################################################################################################################################################
+Filters :
+
+Search servie based on multiple selected genres
+Search servie based on watched status
+Search servie based on its type Movie/Series
+Search servie based on its original language
+
+0 0 0
+0 0 1
+0 1 0
+0 1 1
+1 0 0
+1 0 1
+1 1 0
+1 1 1
+
+######################################################################################################################################################
+Akash list of genres
+
+Action
+Adventure
+Animation
+Comedy
+Crime
+Documentary
+Drama
+Family
+Fantasy
+M History
+M Horror
+S Kids
+M Music
+Mystery
+S News
+S Politics
+S Reality
+M Romance
+Science Fiction
+S Soap
+S Talk
+M TV Movie
+M Thriller
+War
+Western

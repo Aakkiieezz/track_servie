@@ -10,12 +10,12 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import servie.track_servie.entity.Episode;
-import servie.track_servie.dto.EntityDtoConversion;
-import servie.track_servie.dto.operationsEpisodePageDtos.EpisodeDtoEpisodePage;
-import servie.track_servie.dto.operationsImage.Image;
-import servie.track_servie.dto.operationsImage.EpisodePageDtos.EpisodeStillsDto;
-import servie.track_servie.dto.operationsSearch.EpisodePageDtos.EpisodeDtoSearchEpisodePage;
+import servie.track_servie.payload.dtos.operationsEpisodePageDtos.EpisodeDtoEpisodePage;
+import servie.track_servie.payload.dtos.operationsImage.Image;
+import servie.track_servie.payload.dtos.operationsImage.EpisodePageDtos.EpisodeStillsDto;
+import servie.track_servie.payload.dtos.operationsSearch.EpisodePageDtos.EpisodeDtoSearchEpisodePage;
+import servie.track_servie.entities.Episode;
+import servie.track_servie.payload.dtos.EntityDtoConversion;
 import servie.track_servie.repository.EpisodeRepository;
 
 @Service

@@ -8,9 +8,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import servie.track_servie.dto.operationsImage.Image;
-import servie.track_servie.dto.operationsSearch.SeasonPageDtos.SeasonDtoSearchSeasonPage;
-import servie.track_servie.dto.operationsSeasonPageDtos.SeasonDtoSeasonPage;
+import servie.track_servie.payload.dtos.operationsImage.Image;
+import servie.track_servie.payload.dtos.operationsSearch.SeasonPageDtos.SeasonDtoSearchSeasonPage;
+import servie.track_servie.payload.dtos.operationsSeasonPageDtos.SeasonDtoSeasonPage;
 import servie.track_servie.service.SeasonService;
 
 @Controller

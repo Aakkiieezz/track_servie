@@ -7,8 +7,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import servie.track_servie.dto.operationsSearch.SeriesPageDtos.SeasonDtoSearchSeriesPage;
-import servie.track_servie.dto.operationsSearch.SeriesPageDtos.SeriesDtoSearchSeriesPage;
+import servie.track_servie.payload.dtos.operationsSearch.SeriesPageDtos.SeasonDtoSearchSeriesPage;
+import servie.track_servie.payload.dtos.operationsSearch.SeriesPageDtos.SeriesDtoSearchSeriesPage;
 
 @Service
 public class SeriesService

@@ -2,7 +2,7 @@ package servie.track_servie.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import servie.track_servie.entity.User;
+import servie.track_servie.entities.User;
 import servie.track_servie.repository.UserRepository;
 
 @Service
