@@ -8,9 +8,10 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class UserServieKey implements Serializable
+public class UserEpisodeKey implements Serializable
 {
+    private String episodeId;
     private Integer userId;
     private Integer tmdbId;
-    private String childtype;
+    private Integer seasonNumber;
 }

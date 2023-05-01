@@ -2,6 +2,7 @@ package servie.track_servie.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,6 +20,8 @@ public class EpisodeController
 {
     @Autowired
     EpisodeService episodeService;
+    @Value("${userId}")
+    private Integer userId;
 
     // Returns EpisodePage containing selected Episode from SeasonPage
     @GetMapping("")
@@ -42,7 +45,7 @@ public class EpisodeController
     @GetMapping("toggleback")
     public String toggleEpisodeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber)
     {
-        episodeService.toggleEpisodeWatch(tmdbId, seasonNumber, episodeNumber);
+        episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNumber, episodeNumber);
         return "redirect:/api/series/"+tmdbId+"/Season/"+seasonNumber;
     }
 
@@ -50,7 +53,7 @@ public class EpisodeController
     @GetMapping("toggle")
     public String toggleEpWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber)
     {
-        episodeService.toggleEpisodeWatch(tmdbId, seasonNumber, episodeNumber);
+        episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNumber, episodeNumber);
         return "redirect:/api/series/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
     }
 

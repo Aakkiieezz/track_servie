@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -31,6 +32,8 @@ public class ServieController
     private ServieService servieService;
     @Autowired
     private GenreService genreService;
+    @Value("${userId}")
+    private Integer userId;
 
     @GetMapping("login")
     public String showLoginForm()
@@ -42,7 +45,7 @@ public class ServieController
     @GetMapping("")
     public String getServiesByFilter(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "24") int pageSize, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, @RequestParam(value = "genreIds", defaultValue = "") List<Integer> genreIds, @RequestParam(value = "watched", defaultValue = "") Boolean watched, Model model)
     {
-        ResponseDtoHomePage response = servieService.getServiesByFilter(type, pageNumber, pageSize, sortBy, sortDir, genreIds, watched);
+        ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, pageNumber, pageSize, sortBy, sortDir, genreIds, watched);
         List<GenreDtoHomePage> genres = genreService.getGenres();
         model.addAttribute("genres", genres);
         model.addAttribute("response", response);
@@ -91,7 +94,7 @@ public class ServieController
     @GetMapping("add")
     public String addServie(@RequestParam(value = "type", required = true) String type, @RequestParam(value = "id", required = true) Integer tmdbId, HttpSession session)
     {
-        servieService.addServie(type, tmdbId);
+        servieService.addServie(userId, type, tmdbId);
         session.setAttribute("msg", "Item Added Successfully...!");
         return "redirect:/api/servies";
     }
@@ -131,7 +134,7 @@ public class ServieController
     @GetMapping("{tmdbId}/toggleback")
     public String toggleSeriesWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type)
     {
-        servieService.toggleServieWatch(type, tmdbId);
+        servieService.toggleServieWatch(userId, type, tmdbId);
         return "redirect:/api/servies";
     }
 
@@ -142,7 +145,7 @@ public class ServieController
     {
         Integer tmdbId = Integer.parseInt((String) payload.get("tmdbId"));
         String childtype = (String) payload.get("childtype");
-        servieService.toggleServieWatch(childtype, tmdbId);
+        servieService.toggleServieWatch(userId, childtype, tmdbId);
         return Collections.singletonMap("success", true);
     }
 
@@ -150,7 +153,7 @@ public class ServieController
     @GetMapping("{tmdbId}/toggle")
     public String toggleSerWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type)
     {
-        servieService.toggleServieWatch(type, tmdbId);
+        servieService.toggleServieWatch(userId, type, tmdbId);
         return "redirect:/api/servies/"+tmdbId+"?type="+type;
     }
 

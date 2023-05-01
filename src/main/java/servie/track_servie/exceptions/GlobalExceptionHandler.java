@@ -12,8 +12,8 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler
 {
-    @ExceptionHandler(TmdbIdNotFoundException.class)
-    public ResponseEntity<String> notFound(TmdbIdNotFoundException e)
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> notFound(ResourceNotFoundException e)
     {
         String msg = e.getMessage();
         return new ResponseEntity<>(msg, HttpStatus.NOT_FOUND);

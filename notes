@@ -130,3 +130,18 @@ M TV Movie
 M Thriller
 War
 Western
+
+######################################################################################################################################################
+Issues to fix/work on :
+
+Watched values are only considered of first user in the table
+Deleting serive of independent user
+Watched toggle using AJAX
+Genre dropdown to have 3 states of selecting [none, select, unselect]
+To add criteria builder for multiple filters
+Reduce the size of the servieService by making it more modular
+UI of Homepage
+UI of Servie page
+UI of Season page
+UI of episode page
+Add cast and crew

@@ -1,0 +1,36 @@
+Getting normal home page of :
+
+select
+servie.childtype,
+servie.tmdb_d,
+servie.backdrop_path,
+(CASE WHEN EXISTS (SELECT * FROM user*servie_data AS usd WHERE usd.tmdb_id = servie.tmdb_id AND usd.movie_watched = 1) THEN 1 ELSE (SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = servie.tmdb_id AND ued.watched = 1) = (SELECT s.number_of_episodes FROM series s WHERE s.tmdb_id = servie.tmdb_id) THEN 1 ELSE 0 END) END),
+servie.imdb_id,
+servie.original_language,
+servie.overview,
+servie.poster_path,
+servie.status,
+servie.tagline,
+servie.title,
+
+movie.collection_backdrop_path,
+movie.id,
+movie.collection_name,
+movie.collection_poster_path,
+movie.collection_id,
+movie.release_date,
+movie.runtime,
+
+(SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tv.tmdb_id AND ued.watched = 1),
+tv.first_air_date,
+tv.last_air_date,
+tv.number_of_episodes,
+tv.number_of_seasons,
+(SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tv.tmdb_id AND ued.watched = 1) = tv.number_of_episodes THEN 1 ELSE 0 END)
+
+from servie servie
+left join movie movie on servie.childtype=movie.childtype and servie.tmdb_id=movie.tmdb_id
+left join series tv on servie.childtype=tv.childtype and servie.tmdb_id=tv.tmdb_id
+join user_servie_data u1_0 on servie.childtype=u1_0.childtype and servie.tmdb_id=u1_0.tmdb_id
+where u1_0.user_id=?
+order by servie.title asc limit ?,?

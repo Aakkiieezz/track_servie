@@ -17,8 +17,8 @@ public class Episode
     @Column(name = "name")
     private String name;
     // ---------------------------------------------------------------
-    @Column(name = "watched", nullable = false)
-    private Boolean watched = false;
+    // @Column(name = "watched", nullable = false)
+    // private Boolean watched = false;
     // ---------------------------------------------------------------
     @JsonProperty("episode_number")
     @Column(name = "episode_number")

@@ -25,6 +25,10 @@ INSERT INTO genre (id, name) VALUES (23, 'Thriller');
 INSERT INTO genre (id, name) VALUES (24, 'War');
 INSERT INTO genre (id, name) VALUES (25, 'Western');
 
+-- Insert users ---------> JUST FOR TESTING
+INSERT INTO user (id, email, name, password) VALUES (1, 'kadoleakash96@gmail.com', 'Akash', 'password1');
+INSERT INTO user (id, email, name, password) VALUES (2, 'divyapotkule@gmail.com', 'Divya', 'password2');
+
 -- Insert all roles
 INSERT INTO role (id, name) VALUES (1, 'Admin');
 INSERT INTO role (id, name) VALUES (2, 'User');

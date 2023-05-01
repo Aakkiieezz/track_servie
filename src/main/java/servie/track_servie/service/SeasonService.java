@@ -15,11 +15,11 @@ import servie.track_servie.payload.dtos.operationsImage.SeasonPageDtos.SeasonPos
 import servie.track_servie.payload.dtos.operationsSearch.SeasonPageDtos.EpisodeDtoSearchSeasonPage;
 import servie.track_servie.payload.dtos.operationsSearch.SeasonPageDtos.SeasonDtoSearchSeasonPage;
 import servie.track_servie.payload.dtos.operationsSeasonPageDtos.SeasonDtoSeasonPage;
-import servie.track_servie.entities.Episode;
 import servie.track_servie.entities.Season;
+import servie.track_servie.entities.UserEpisodeData;
 import servie.track_servie.payload.dtos.EntityDtoConversion;
-import servie.track_servie.repository.EpisodeRepository;
 import servie.track_servie.repository.SeasonRepository;
+import servie.track_servie.repository.UserEpisodeDataRepository;
 
 @Service
 public class SeasonService
@@ -27,7 +27,7 @@ public class SeasonService
     @Autowired
     private SeasonRepository seasonRepository;
     @Autowired
-    private EpisodeRepository episodeRepository;
+    private UserEpisodeDataRepository userEpisodeDataRepository;
     @Autowired
     private EntityDtoConversion converter;
     @Autowired
@@ -44,12 +44,17 @@ public class SeasonService
     }
 
     // Toggles the watch value of a Season (after toggling watch value of all related Episodes)
-    public void toggleSeasonWatch(Integer tmdbId, Integer seasonNumber)
+    public void toggleSeasonWatch(Integer userId, Integer tmdbId, Integer seasonNumber)
     {
         Season season = seasonRepository.findByTmdbIdAndSeasonNumber(tmdbId, seasonNumber);
-        List<Episode> episodes = episodeRepository.findByTmdbIdAndSeasonNumberAndWatched(tmdbId, seasonNumber, season.getWatched());
-        for(Episode episode : episodes)
-            episode.setWatched(!season.getWatched());
+        // without user
+        // List<Episode> episodes = episodeRepository.findByTmdbIdAndSeasonNumberAndWatched(tmdbId, seasonNumber, season.getWatched());
+        // for(Episode episode : episodes)
+        //     episode.setWatched(!season.getWatched());
+        // with user
+        List<UserEpisodeData> userEpisodeDatas = userEpisodeDataRepository.findByUserIdAndTmdbIdAndSeasonNumberAndWatched(userId, tmdbId, seasonNumber, season.getWatched());
+        for(UserEpisodeData userEpisodeData : userEpisodeDatas)
+            userEpisodeData.setWatched(!season.getWatched());
         season.setWatched(!season.getWatched());
         seasonRepository.save(season);
     }

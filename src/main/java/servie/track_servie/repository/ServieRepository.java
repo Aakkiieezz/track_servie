@@ -29,4 +29,7 @@ public interface ServieRepository extends JpaRepository<Servie, ServieKey>
     Page<Servie> findByCompletedAndGenres(@Param("watched") Boolean watched, @Param("genreList") List<Genre> genres, @Param("genreListSize") long genreListSize, Pageable pageable);
 
     Servie findByImdbId(String servieId);
+
+    @Query(value = "SELECT s FROM Servie AS s INNER JOIN UserServieData AS usd ON s.childtype = usd.childtype AND s.tmdbId = usd.tmdbId WHERE usd.userId=:userId")
+    Page<Servie> findAllMoviesByUserId(@Param("userId") Integer userId, Pageable pageable);
 }

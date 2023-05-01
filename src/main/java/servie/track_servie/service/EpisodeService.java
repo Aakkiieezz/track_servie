@@ -15,14 +15,18 @@ import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsImage.EpisodePageDtos.EpisodeStillsDto;
 import servie.track_servie.payload.dtos.operationsSearch.EpisodePageDtos.EpisodeDtoSearchEpisodePage;
 import servie.track_servie.entities.Episode;
+import servie.track_servie.entities.UserEpisodeData;
 import servie.track_servie.payload.dtos.EntityDtoConversion;
 import servie.track_servie.repository.EpisodeRepository;
+import servie.track_servie.repository.UserEpisodeDataRepository;
 
 @Service
 public class EpisodeService
 {
     @Autowired
     private EpisodeRepository episodeRepository;
+    @Autowired
+    private UserEpisodeDataRepository userEpisodeDataRepository;
     @Autowired
     private EntityDtoConversion converter;
     @Autowired
@@ -39,11 +43,16 @@ public class EpisodeService
     }
 
     // Toggles the watch value of an Episode
-    public void toggleEpisodeWatch(Integer tmdbId, Integer seasonNumber, Integer episodeNumber)
+    public void toggleEpisodeWatch(Integer userId, Integer tmdbId, Integer seasonNumber, Integer episodeNumber)
     {
-        Episode episode = episodeRepository.findByTmdbIdAndSeasonNumberAndEpisodeNumber(tmdbId, seasonNumber, episodeNumber);
-        episode.setWatched(!episode.getWatched());
-        episodeRepository.save(episode);
+        // without user
+        // Episode episode = episodeRepository.findByTmdbIdAndSeasonNumberAndEpisodeNumber(tmdbId, seasonNumber, episodeNumber);
+        // episode.setWatched(!episode.getWatched());
+        // episodeRepository.save(episode);
+        // with user
+        UserEpisodeData userEpisodeData = userEpisodeDataRepository.findByUserIdAndTmdbIdAndSeasonNumberAndEpisodeNumber(userId, tmdbId, seasonNumber, episodeNumber);
+        userEpisodeData.setWatched(!userEpisodeData.getWatched());
+        userEpisodeDataRepository.save(userEpisodeData);
     }
 
     // Returns data of specific Episode from the 3rd party api

@@ -29,10 +29,18 @@ public class Season
     private Integer episodeCount;
     // ---------------------------------------------------------------
     // ??? Once try SQL's IF statement
-    @Formula(value = "(SELECT CASE WHEN (SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.season_number = season_number AND e.watched = 1) = episode_count THEN true ELSE false END)")
+    // Replacing
+    // (SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.season_number = season_number AND e.watched = 1)
+    // with
+    // (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tmdb_id AND ued.season_number = season_number AND ued.watched = 1)
+    @Formula(value = "(SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tmdb_id AND ued.season_number = season_number AND ued.watched = 1) = episode_count THEN true ELSE false END)")
     private Boolean watched = false;
     // ---------------------------------------------------------------
-    @Formula(value = "(SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.season_number = season_number AND e.watched=1)")
+    // Replacing
+    // (SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.season_number = season_number AND e.watched=1)
+    // with
+    // (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tmdb_id AND ued.season_number = season_number AND ued.watched=1)
+    @Formula(value = "(SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tmdb_id AND ued.season_number = season_number AND ued.watched=1)")
     private Integer episodesWatched;
     // ---------------------------------------------------------------
     @Column(name = "overview", length = 10000)

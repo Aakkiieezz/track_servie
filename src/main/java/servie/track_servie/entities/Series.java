@@ -32,11 +32,19 @@ public class Series extends Servie
     @Column(name = "number_of_episodes")
     private Integer numberOfEpisodes;
     // ---------------------------------------------------------------
-    @Formula(value = "(SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.watched = 1)")
+    // replacing
+    // (SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.watched = 1)
+    // with
+    // (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tmdb_id AND ued.watched = 1)
+    @Formula(value = "(SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tmdb_id AND ued.watched = 1)")
     private Integer episodesWatched;
     // ---------------------------------------------------------------
     // ??? Once try SQL's IF statement
-    @Formula(value = "(SELECT CASE WHEN (SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.watched = 1) = number_of_episodes THEN true ELSE false END)")
+    // replacing
+    // (SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.watched = 1)
+    // with
+    // (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tmdb_id AND ued.watched = 1)
+    @Formula(value = "(SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tmdb_id AND ued.watched = 1) = number_of_episodes THEN true ELSE false END)")
     private Boolean watched = false;
     // ---------------------------------------------------------------
     @JsonProperty("first_air_date")

@@ -46,7 +46,16 @@ public class Servie
     private String title;
     // ---------------------------------------------------------------
     // ??? does not work when the field name is kept same as the child's field name "watched", don't know why ? (also remember to make changes in repo and service)
-    @Formula("(CASE WHEN EXISTS (SELECT * FROM movie m WHERE m.tmdb_id = tmdb_id AND m.watched = true) THEN true ELSE (SELECT CASE WHEN (SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.watched = 1) = (SELECT s.number_of_episodes FROM series s WHERE s.tmdb_id = tmdb_id) THEN true ELSE false END) END)")
+    // replacing
+    // (SELECT * FROM movie m WHERE m.tmdb_id = tmdb_id AND m.watched = true)
+    // with
+    // (SELECT * FROM user_servie_data AS usd WHERE usd.tmdb_id = tmdb_id AND usd.movie_watched = true)
+    // 
+    // replacing
+    // (SELECT COUNT(*) FROM episode e WHERE e.tmdb_id = tmdb_id AND e.watched = 1)
+    // with
+    // (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tmdb_id AND ued.watched = 1)
+    @Formula("(CASE WHEN EXISTS (SELECT * FROM user_servie_data AS usd WHERE usd.tmdb_id = tmdb_id AND usd.movie_watched = true) THEN true ELSE (SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = tmdb_id AND ued.watched = 1) = (SELECT s.number_of_episodes FROM series s WHERE s.tmdb_id = tmdb_id) THEN true ELSE false END) END)")
     private Boolean completed = false;
     // ---------------------------------------------------------------
     @JsonProperty("original_language")
