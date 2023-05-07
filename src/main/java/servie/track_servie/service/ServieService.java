@@ -18,6 +18,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ResponseDtoHomePage;
+import servie.track_servie.payload.dtos.operationsHomePageDtos.ServieDtoHomePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsImage.SeriesPageDtos.SeriesBackdropsDto;
 import servie.track_servie.payload.dtos.operationsImage.SeriesPageDtos.SeriesPostersDto;
@@ -266,18 +267,23 @@ public class ServieService
             Genre genre = genreRepository.findById(genreId).orElseThrow(() -> new ResourceNotFoundException("Genre", "Id", genreId.toString()));
             genres.add(genre);
         }
-        Page<Servie> page;
+        Page<ServieDtoHomePage> page;
         // ??? Need a way to manage both parameters (regardless empty or not) in a single query
-        if((genreIds!=null && !genreIds.isEmpty()) && watched!=null) // genreIds != null, watched != null
-            page = servieRepository.findByCompletedAndGenres(watched, genres, genres.size(), pageable);
-        else if((genreIds!=null && !genreIds.isEmpty()) && watched==null) // genreIds != null, watched == null
-            page = servieRepository.findByGenres(genres, genres.size(), pageable);
-        else if((genreIds==null || genreIds.isEmpty()) && watched!=null) // genreIds == null, watched != null
-            page = servieRepository.findByCompleted(watched, pageable);
-        else // genreIds == null, watched == null
-             // page = servieRepository.findAll(pageable);
-            page = servieRepository.findAllMoviesByUserId(userId, pageable);
-        List<Servie> servies = page.getContent();
+        // if((genreIds!=null && !genreIds.isEmpty()) && watched!=null) // genreIds != null, watched != null
+        //     page = servieRepository.findByCompletedAndGenres(watched, genres, genres.size(), pageable);
+        // else if((genreIds!=null && !genreIds.isEmpty()) && watched==null) // genreIds != null, watched == null
+        //     page = servieRepository.findByGenres(genres, genres.size(), pageable);
+        // else if((genreIds==null || genreIds.isEmpty()) && watched!=null) // genreIds == null, watched != null
+        //     page = servieRepository.findByCompleted(userId, watched, pageable);
+        // else // genreIds == null, watched == null
+        // page = servieRepository.findAll(pageable);
+        // page = servieRepository.findAllMoviesByUserId(userId, pageable);
+        // List<Servie> realserviess = servieRepository.findAllMoviesByUserId(userId);
+        // List<ServieDtoHomePage> servies2 = servieRepository.findAllMoviesByUserId2();
+        page = servieRepository.findAllServiesByUserId(userId, pageable);
+        // page = servieRepository.findAllMoviesByUserId2(pageable);
+        // page = servieRepository.findAll(pageable);
+        List<ServieDtoHomePage> servies = page.getContent();
         ResponseDtoHomePage responseDto = new ResponseDtoHomePage();
         responseDto.setServies(servies);
         responseDto.setPageNumber(page.getNumber());

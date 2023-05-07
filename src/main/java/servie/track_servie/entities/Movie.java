@@ -22,9 +22,6 @@ import lombok.EqualsAndHashCode;
 @Table(name = "movie")
 public class Movie extends Servie
 {
-    // @Column(name = "watched", nullable = false)
-    // private Boolean watched = false;
-    // ---------------------------------------------------------------
     @JsonProperty("release_date")
     @Column(name = "release_date")
     private String releaseDate;
@@ -38,6 +35,5 @@ public class Movie extends Servie
     // ---------------------------------------------------------------
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "collection_id")
-    // @Column(name = "collection_id")
     private MovieCollection collection;
 }

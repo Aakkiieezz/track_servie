@@ -195,7 +195,8 @@
     <div class="row center">
       <div class="col-xxl-1 col-sm-2 col-3 image-container poster" th:each="servie : ${response.servies}"
         th:id="'servie-' + ${servie.imdbId}">
-        <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}">
+        <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}"> -->
+        <div th:if="${servie.childtype == 'movie'}">
           <a th:href="@{'/api/servies/'+${servie.tmdbId}+'?type=movie'}">
             <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
               alt="Poster Unavailable" />
@@ -234,7 +235,8 @@
 
           </div>
         </div>
-        <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}">
+        <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}" -->
+        <div th:if="${servie.childtype == 'tv'}">
           <a th:href="@{'/api/servies/'+${servie.tmdbId}+'?type=tv'}">
             <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}" />
           </a>

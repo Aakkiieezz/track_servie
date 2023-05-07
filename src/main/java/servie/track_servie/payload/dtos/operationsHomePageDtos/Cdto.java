@@ -1,10 +1,6 @@
 package servie.track_servie.payload.dtos.operationsHomePageDtos;
 
-// import lombok.Data;
-// import lombok.EqualsAndHashCode;
-// @Data
-// @EqualsAndHashCode(callSuper = false)
-public class SeriesDtoHomePage
+public class Cdto extends BdtoOrCdto
 {
     // private Integer numberOfEpisodes;
     // private Integer episodesWatched;
@@ -14,7 +10,7 @@ public class SeriesDtoHomePage
     // //     numberOfEpisodes = numberOfEpisodes2;
     // //     episodesWatched = episodesWatched2;
     // // }
-    // public SeriesDtoHomePage(Integer numberOfEpisodes, Integer episodesWatched)
+    // public Cdto(Integer numberOfEpisodes, Integer episodesWatched)
     // {
     //     this.numberOfEpisodes = numberOfEpisodes;
     //     this.episodesWatched = episodesWatched;

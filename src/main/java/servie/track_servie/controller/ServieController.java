@@ -16,12 +16,10 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
-import servie.track_servie.payload.dtos.operationsHomePageDtos.GenreDtoHomePage;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ResponseDtoHomePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SearchResultDtoSearchPage;
 import servie.track_servie.entities.Servie;
-import servie.track_servie.service.GenreService;
 import servie.track_servie.service.ServieService;
 
 @Controller
@@ -30,8 +28,6 @@ public class ServieController
 {
     @Autowired
     private ServieService servieService;
-    @Autowired
-    private GenreService genreService;
     @Value("${userId}")
     private Integer userId;
 
@@ -46,8 +42,8 @@ public class ServieController
     public String getServiesByFilter(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "24") int pageSize, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, @RequestParam(value = "genreIds", defaultValue = "") List<Integer> genreIds, @RequestParam(value = "watched", defaultValue = "") Boolean watched, Model model)
     {
         ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, pageNumber, pageSize, sortBy, sortDir, genreIds, watched);
-        List<GenreDtoHomePage> genres = genreService.getGenres();
-        model.addAttribute("genres", genres);
+        // List<GenreDtoHomePage> genres = genreService.getGenres();
+        // model.addAttribute("genres", genres);
         model.addAttribute("response", response);
         return "HomePage";
     }
