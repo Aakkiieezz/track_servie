@@ -11,7 +11,7 @@ import servie.track_servie.entities.User;
 import servie.track_servie.service.UserService;
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/track-servie/users")
 public class UserController
 {
     @Autowired

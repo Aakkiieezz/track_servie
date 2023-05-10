@@ -32,7 +32,7 @@ public class ApiSecurity
     {
         http.csrf().disable().authorizeHttpRequests(auth ->
         {
-            auth.requestMatchers("/api/**").permitAll();
+            auth.requestMatchers("/track-servie/**").permitAll();
             auth.anyRequest().authenticated();
         }).sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authenticationProvider(authenticationProvider).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();

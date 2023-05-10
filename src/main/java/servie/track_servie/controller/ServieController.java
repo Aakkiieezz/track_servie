@@ -23,7 +23,7 @@ import servie.track_servie.payload.dtos.operationsSeriesPageDtos.SeriesDtoSeries
 import servie.track_servie.service.ServieService;
 
 @Controller
-@RequestMapping("/api/servies")
+@RequestMapping("/track-servie/servies")
 public class ServieController
 {
     @Autowired
@@ -39,11 +39,9 @@ public class ServieController
 
     // Returns HomePage containing all Servies from the database which matches the filter
     @GetMapping("")
-    public String getServiesByFilter(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", defaultValue = "") Boolean watched, @RequestParam(value = "genreIds", defaultValue = "") List<Integer> genreIds, @RequestParam(value = "languages", defaultValue = "") List<String> languages, @RequestParam(value = "statuses", defaultValue = "") List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "60") int pageSize, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, Model model)
+    public String getServiesByFilter(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", defaultValue = "") Boolean watched, @RequestParam(value = "genreIds", defaultValue = "") List<Integer> genreIds, @RequestParam(value = "languages", defaultValue = "") List<String> languages, @RequestParam(value = "statuses", defaultValue = "") List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "36") int pageSize, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, Model model)
     {
         ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, watched, genreIds, languages, statuses, startYear, endYear, pageNumber, pageSize, sortBy, sortDir);
-        // List<GenreDtoHomePage> genres = genreService.getGenres();
-        // model.addAttribute("genres", genres);
         model.addAttribute("response", response);
         return "HomePage";
     }
@@ -92,7 +90,7 @@ public class ServieController
     {
         servieService.addServie(userId, type, tmdbId);
         session.setAttribute("msg", "Item Added Successfully...!");
-        return "redirect:/api/servies";
+        return "redirect:/track-servie/servies";
     }
 
     // Returns SeriesPage containing selected Series from HomePage
@@ -132,7 +130,7 @@ public class ServieController
     public String toggleSeriesWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type)
     {
         servieService.toggleServieWatch(userId, type, tmdbId);
-        return "redirect:/api/servies";
+        return "redirect:/track-servie/servies";
     }
 
     // Toggle 2 - Javascript/AJAX
@@ -151,7 +149,7 @@ public class ServieController
     public String toggleSerWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type)
     {
         servieService.toggleServieWatch(userId, type, tmdbId);
-        return "redirect:/api/servies/"+tmdbId+"?type="+type;
+        return "redirect:/track-servie/servies/"+tmdbId+"?type="+type;
     }
 
     @GetMapping("{tmdbId}/backdrops")
@@ -169,7 +167,7 @@ public class ServieController
     public String changeBackdrop(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
     {
         servieService.changeBackdrop(type, tmdbId, filePath);
-        return "redirect:/api/servies/"+tmdbId+"?type="+type;
+        return "redirect:/track-servie/servies/"+tmdbId+"?type="+type;
     }
 
     // Returns ImageSearchSeriesPage containing list of Posters(for specific Series)
@@ -188,6 +186,6 @@ public class ServieController
     public String changePoster(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
     {
         servieService.changePoster(type, tmdbId, filePath);
-        return "redirect:/api/servies"; // ??? why can't we return the HomePage directly instead
+        return "redirect:/track-servie/servies"; // ??? why can't we return the HomePage directly instead
     }
 }

@@ -27,7 +27,7 @@
     function toggleWatch(tmdbId, childtype, watched) {
       $.ajax({
         type: "POST",
-        url: "/api/servies/js_toggleback",
+        url: "/track-servie/servies/js_toggleback",
         data: JSON.stringify({ tmdbId: tmdbId, childtype: childtype, watched: watched }),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
@@ -52,7 +52,7 @@
     function removeServie(imdbId) {
       $.ajax({
         type: "POST",
-        url: "/api/servies/remove",
+        url: "/track-servie/servies/remove",
         data: JSON.stringify({ imdbId: imdbId }),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
@@ -97,7 +97,7 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-9">
-        <form th:action="@{/api/servies}">
+        <form th:action="@{/track-servie/servies}">
           <i class="bi bi-arrow-down-up"></i>
           <select name="type" id="type">
             <option value="">Servies</option>
@@ -217,7 +217,7 @@
         </form>
       </div>
       <div class="col-3 justify-content-end">
-        <form th:action=" @{/api/servies/search}">
+        <form th:action=" @{/track-servie/servies/search}">
           <input type="text" id="query" name="query">
           &nbsp;
           &nbsp;
@@ -238,7 +238,7 @@
         th:id="'servie-' + ${servie.tmdbId}">
         <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}"> -->
         <div th:if="${servie.childtype == 'movie'}">
-          <a th:href="@{'/api/servies/'+${servie.tmdbId}+'?type=movie'}">
+          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=movie'}">
             <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
               alt="Poster Unavailable" />
           </a>
@@ -247,7 +247,7 @@
             <br>
             <span th:if="${servie.releaseDate != null}" th:text="${#temporals.year(servie.releaseDate)}"></span>
             <!-- hyperlink -->
-            <a th:href="@{'/api/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
+            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
               <div th:if="${servie.completed}">
                 <i class="bi bi-eye-slash-fill"></i>
               </div>
@@ -266,7 +266,7 @@
               <i class="bi bi-eye-fill"></i>
             </a>
 
-            <a th:href="@{'/api/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
+            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
               <i class="bi bi-file-image"></i>
             </a>
 
@@ -278,7 +278,7 @@
         </div>
         <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}" -->
         <div th:if="${servie.childtype == 'tv'}">
-          <a th:href="@{'/api/servies/'+${servie.tmdbId}+'?type=tv'}">
+          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=tv'}">
             <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}" />
           </a>
           <div class="buttons-container">
@@ -289,7 +289,7 @@
             </span>
             <br />
             <span th:text="${servie.episodesWatched}+'/'+${servie.numberOfEpisodes}"></span>
-            <a th:href="@{'/api/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
+            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
               <div th:if="${servie.completed}">
                 <i class="bi bi-eye-slash-fill"></i>
               </div>
@@ -297,7 +297,7 @@
                 <i class="bi bi-eye-fill"></i>
               </div>
             </a>
-            <a th:href="@{'/api/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
+            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
               <i class="bi bi-file-image"></i>
             </a>
             <a href="#" th:imdbId="${servie.imdbId}" onclick="removeServie(this.getAttribute('imdbId'))">
@@ -320,14 +320,14 @@
   <nav th:if="${response.totalPages > 1}">
     <ul class="pagination">
       <li class="page-item" th:classappend="${response.pageNumber == 0} ? disabled">
-        <a class="page-link" th:href="@{'/api/servies?pageNumber='+${response.pageNumber-1}}">Previous</a>
+        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber-1}}">Previous</a>
       </li>
       <li class="page-item" th:each="i: ${#numbers.sequence(1,response.totalPages)}"
         th:classappend="${response.pageNumber == i-1} ? disabled">
-        <a class="page-link" th:href="@{'/api/servies?pageNumber='+${i-1}}">[[${i}]]</a>
+        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber='+${i-1}}">[[${i}]]</a>
       </li>
       <li class="page-item" th:classappend="${response.lastPage == true} ? disabled">
-        <a class="page-link" th:href="@{'/api/servies?pageNumber='+${response.pageNumber+1}}">Next</a>
+        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber+1}}">Next</a>
       </li>
     </ul>
   </nav>

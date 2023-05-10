@@ -37,18 +37,18 @@
         <tr th:each="image : ${images}">
             <td>
                 <a
-                    th:href="@{'/api/series/'+${tmdbId}+'/Season/'+${seasonNumber}+'/Episode/'+${episodeNumber}+'/stillChange?filePath='+${image.filePath}}">
+                    th:href="@{'/track-servie/series/'+${tmdbId}+'/Season/'+${seasonNumber}+'/Episode/'+${episodeNumber}+'/stillChange?filePath='+${image.filePath}}">
                     <img th:src="'https://www.themoviedb.org/t/p/original'+${image.filePath}"
                         style="width: 20%; height: 20%" />
                 </a>
             </td>
             <!-- <td th:text="${series.id}"></td>
             <td>
-                <a th:href="@{'/api/series/'+${series.id}}" th:text="${series.name}"></a>
+                <a th:href="@{'/track-servie/series/'+${series.id}}" th:text="${series.name}"></a>
             </td>
 
             <td>
-                <a th:href="@{'/api/series/'+${series.id}+'/toggleback'}">
+                <a th:href="@{'/track-servie/series/'+${series.id}+'/toggleback'}">
 
                     <div th:if="${series.watched}">
                         <span class="material-icons">visibility</span>
@@ -59,7 +59,7 @@
                 </a>
             </td>
             <td>
-                <a th:href="@{'/api/series/remove?id='+${series.id}}">
+                <a th:href="@{'/track-servie/series/remove?id='+${series.id}}">
                     <span class="material-icons">delete</span>
                 </a>
             </td> -->

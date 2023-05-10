@@ -29,7 +29,8 @@
     <div class="row center">
         <div class="col-xxl-1 col-sm-2 col-3 rounded image-container poster" th:each="image : ${posters}"
             th:if="${image.iso_639_1 == null or image.iso_639_1 == 'en'}">
-            <a th:href="@{'/api/servies/'+${tmdbId}+'/posterChange?type='+${type}+'&filePath='+${image.filePath}}">
+            <a
+                th:href="@{'/track-servie/servies/'+${tmdbId}+'/posterChange?type='+${type}+'&filePath='+${image.filePath}}">
                 <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${image.filePath}" />
             </a>
         </div>

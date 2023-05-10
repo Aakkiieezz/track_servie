@@ -15,7 +15,7 @@ import servie.track_servie.payload.dtos.operationsSearch.EpisodePageDtos.Episode
 import servie.track_servie.service.EpisodeService;
 
 @Controller
-@RequestMapping("/api/series/{tmdbId}/Season/{seasonNumber}/Episode/{episodeNumber}")
+@RequestMapping("/track-servie/series/{tmdbId}/Season/{seasonNumber}/Episode/{episodeNumber}")
 public class EpisodeController
 {
     @Autowired
@@ -46,7 +46,7 @@ public class EpisodeController
     public String toggleEpisodeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber)
     {
         episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNumber, episodeNumber);
-        return "redirect:/api/series/"+tmdbId+"/Season/"+seasonNumber;
+        return "redirect:/track-servie/series/"+tmdbId+"/Season/"+seasonNumber;
     }
 
     // Toggles the watch button of Episode located on EpisodePage
@@ -54,7 +54,7 @@ public class EpisodeController
     public String toggleEpWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber)
     {
         episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNumber, episodeNumber);
-        return "redirect:/api/series/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
+        return "redirect:/track-servie/series/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
     }
 
     // Returns ImageSearchEpisodePage containing list of Stills(for Episode)
@@ -74,6 +74,6 @@ public class EpisodeController
     public String changeImage(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
     {
         episodeService.changeImage(tmdbId, seasonNumber, episodeNumber, filePath);
-        return "redirect:/api/series/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
+        return "redirect:/track-servie/series/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
     }
 }

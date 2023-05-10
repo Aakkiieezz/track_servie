@@ -25,7 +25,7 @@
 </head>
 
 <body>
-  <form th:action=" @{/api/servies/search}">
+  <form th:action=" @{/track-servie/servies/search}">
     <input type="text" id="query" name="query">
     &nbsp;
     &nbsp;
@@ -41,11 +41,11 @@
 
   <div class="row">
     <div class="col-xxl-1 col-sm-2 col-3 rounded image-container poster" th:each="series : ${response.results}">
-      <a th:href="@{'/api/series/'+${series.id}+'/search'}">
+      <a th:href="@{'/track-servie/series/'+${series.id}+'/search'}">
         <img th:src="'https://www.themoviedb.org/t/p/original'+${series.posterPath}" />
       </a>
       <div class="buttons-container">
-        <a th:href="@{'/api/servies/add?type='+${type}+'&id='+${series.id}}">
+        <a th:href="@{'/track-servie/servies/add?type='+${type}+'&id='+${series.id}}">
           <i class="bi bi-plus-circle-fill"></i>
         </a>
       </div>
@@ -57,16 +57,16 @@
     <ul class="pagination">
       <li class="page-item" th:classappend="${response.page == 1} ? disabled">
         <a class="page-link"
-          th:href="@{'/api/servies/search?query='+${query}+'&type='+${type}+'&pageNumber='+${response.page-1}}">Previous</a>
+          th:href="@{'/track-servie/servies/search?query='+${query}+'&type='+${type}+'&pageNumber='+${response.page-1}}">Previous</a>
       </li>
       <li class="page-item" th:each="i: ${#numbers.sequence(1,response.total_pages)}"
         th:classappend="${response.page == i} ? disabled">
         <a class="page-link"
-          th:href="@{'/api/servies/search?query='+${query}+'&type='+${type}+'&pageNumber='+${i}}">[[${i}]]</a>
+          th:href="@{'/track-servie/servies/search?query='+${query}+'&type='+${type}+'&pageNumber='+${i}}">[[${i}]]</a>
       </li>
       <li class="page-item" th:classappend="${response.page == response.total_pages} ? disabled">
         <a class="page-link"
-          th:href="@{'/api/servies/search?query='+${query}+'&type='+${type}+'&pageNumber='+${response.page+1}}">Next</a>
+          th:href="@{'/track-servie/servies/search?query='+${query}+'&type='+${type}+'&pageNumber='+${response.page+1}}">Next</a>
       </li>
     </ul>
   </nav>

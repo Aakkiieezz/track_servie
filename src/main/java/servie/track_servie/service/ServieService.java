@@ -305,7 +305,7 @@ public class ServieService
         responseDto.setServies(servies);
         responseDto.setPageNumber(page.getNumber());
         responseDto.setPageSize(page.getSize());
-        responseDto.setTotalElements(page.getNumberOfElements()); // ??? getting wrong count, since removing common elements later
+        responseDto.setTotalElements(page.getNumberOfElements());
         responseDto.setTotalPages(page.getTotalPages());
         responseDto.setLastPage(page.isLast());
         return responseDto;

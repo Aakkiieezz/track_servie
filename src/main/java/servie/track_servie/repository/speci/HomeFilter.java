@@ -1,13 +1,12 @@
 package servie.track_servie.repository.speci;
 
-import java.util.ArrayList;
-import java.util.List;
-import org.springframework.data.jpa.domain.Specification;
-import jakarta.persistence.criteria.Join;
-import jakarta.persistence.criteria.Predicate;
-import servie.track_servie.entities.Genre;
-import servie.track_servie.entities.Servie;
-
+// import java.util.ArrayList;
+// import java.util.List;
+// import org.springframework.data.jpa.domain.Specification;
+// import jakarta.persistence.criteria.Join;
+// import jakarta.persistence.criteria.Predicate;
+// import servie.track_servie.entities.Genre;
+// import servie.track_servie.entities.Servie;
 public class HomeFilter
 {
     // public static Specification<Servie> withWatched(Boolean watched)

@@ -1,7 +1,6 @@
 package servie.track_servie.payload.dtos;
 
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
@@ -12,7 +11,6 @@ import servie.track_servie.payload.dtos.operationsSeasonPageDtos.EpisodeDtoSeaso
 import servie.track_servie.payload.dtos.operationsSeasonPageDtos.SeasonDtoSeasonPage;
 import servie.track_servie.payload.dtos.operationsSeriesPageDtos.GenreDtoSeriesPage;
 import servie.track_servie.payload.dtos.operationsSeriesPageDtos.SeasonDtoSeriesPage;
-import servie.track_servie.payload.dtos.operationsSeriesPageDtos.SeriesDtoSeriesPage;
 import servie.track_servie.entities.Episode;
 import servie.track_servie.entities.Genre;
 import servie.track_servie.entities.Season;

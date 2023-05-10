@@ -15,7 +15,7 @@ import servie.track_servie.payload.dtos.operationsSeasonPageDtos.SeasonDtoSeason
 import servie.track_servie.service.SeasonService;
 
 @Controller
-@RequestMapping("/api/series/{tmdbId}/Season/{seasonNumber}")
+@RequestMapping("/track-servie/series/{tmdbId}/Season/{seasonNumber}")
 public class SeasonController
 {
     @Autowired
@@ -46,7 +46,7 @@ public class SeasonController
     public String toggleSeasonWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber)
     {
         seasonService.toggleSeasonWatch(userId, tmdbId, seasonNumber);
-        return "redirect:/api/servies/"+tmdbId+"?type=tv";
+        return "redirect:/track-servie/servies/"+tmdbId+"?type=tv";
     }
 
     // Toggles the watch button of Season located on SeasonPage
@@ -54,7 +54,7 @@ public class SeasonController
     public String toggleSeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber)
     {
         seasonService.toggleSeasonWatch(userId, tmdbId, seasonNumber);
-        return "redirect:/api/series/"+tmdbId+"/Season/"+seasonNumber;
+        return "redirect:/track-servie/series/"+tmdbId+"/Season/"+seasonNumber;
     }
 
     // Returns ImageSearchSeasonPage containing list of Posters(for specific Season)
@@ -73,6 +73,6 @@ public class SeasonController
     public String changeImage(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
     {
         seasonService.changeImage(tmdbId, seasonNumber, filePath);
-        return "redirect:/api/series/"+tmdbId;
+        return "redirect:/track-servie/series/"+tmdbId;
     }
 }

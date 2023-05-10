@@ -32,7 +32,7 @@ import servie.track_servie.payload.dtos.Response;
 import servie.track_servie.utils.jwt.JwtUtils;
 
 @Controller
-@RequestMapping("/api/auth")
+@RequestMapping("/track-servie/auth")
 public class AuthController
 {
     @Autowired
@@ -60,7 +60,7 @@ public class AuthController
         {
             // return new ResponseEntity<>(new Response("Invalid credentials."),
             // HttpStatus.FORBIDDEN);
-            return "redirect:/api/auth/login";
+            return "redirect:/track-servie/auth/login";
         }
         SecurityContextHolder.getContext().setAuthentication(authentication);
         String jwtToken = jwtUtils.generateJwtToken(authentication);
@@ -80,9 +80,9 @@ public class AuthController
         // redirectAttributes.addFlashAttribute("requestWrapper", requestWrapper);
         // redirectAttributes.addAttribute("type", "tv");
         // redirectAttributes.addAttribute("query", "breaking bad");
-        // return "redirect:/api/servies/search";
+        // return "redirect:/track-servie/servies/search";
         model.addAttribute("jwtToken", jwtToken);
-        return "redirect:/api/servies";
+        return "redirect:/track-servie/servies";
     }
 }
 // HttpHeaders headers = new HttpHeaders();
