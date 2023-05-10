@@ -23,6 +23,8 @@ import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsImage.SeriesPageDtos.SeriesBackdropsDto;
 import servie.track_servie.payload.dtos.operationsImage.SeriesPageDtos.SeriesPostersDto;
 import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SearchResultDtoSearchPage;
+import servie.track_servie.payload.dtos.operationsSeriesPageDtos.GenreDtoSeriesPage;
+import servie.track_servie.payload.dtos.operationsSeriesPageDtos.SeriesDtoSeriesPage;
 import servie.track_servie.payload.primaryKeys.ServieKey;
 import servie.track_servie.entities.Episode;
 import servie.track_servie.entities.Genre;
@@ -226,6 +228,7 @@ public class ServieService
                 else
                 {
                     userServieData.setTmdbId(movieCheck.get().getTmdbId());
+                    // movieCheck.get().getReleaseDate().getYear()
                     userServieData.setChildtype(movieCheck.get().getChildtype());
                     userServieData.setUserId(userId);
                     userServieDataRepository.save(userServieData);
@@ -235,9 +238,12 @@ public class ServieService
     }
 
     // Returns specific Series from the database which matches the criteria
-    public Servie getServie(String type, Integer tmdbId)
+    public SeriesDtoSeriesPage getServie(Integer userId, String type, Integer tmdbId)
     {
-        Servie servie = servieRepository.findById(new ServieKey(tmdbId, type)).orElseThrow(() -> new ResourceNotFoundException("Series", "Id", tmdbId.toString()));
+        // Servie servie = servieRepository.findById(new ServieKey(tmdbId, type)).orElseThrow(() -> new ResourceNotFoundException("Series", "Id", tmdbId.toString()));
+        SeriesDtoSeriesPage servie = servieRepository.findServieByUserId(userId, type, tmdbId);
+        Set<GenreDtoSeriesPage> genreDtos = servieRepository.getGenresFromServie(servie.getImdbId());
+        servie.setGenres(genreDtos);
         // SeriesDtoSeriesPage seriesDto = converter.seriesToDto(series);
         return servie;
     }
@@ -253,7 +259,7 @@ public class ServieService
     }
 
     // Returns all Servies from the database which matches the filter
-    public ResponseDtoHomePage getServiesByFilter(Integer userId, String type, int pageNumber, int pageSize, String sortBy, String sortDir, List<Integer> genreIds, Boolean watched)
+    public ResponseDtoHomePage getServiesByFilter(Integer userId, String type, Boolean watched, List<Integer> genreIds, List<String> languages, List<String> statuses, Integer startYear, Integer endYear, int pageNumber, int pageSize, String sortBy, String sortDir)
     {
         Sort sort = null;
         if(sortDir.equals("asc"))
@@ -267,22 +273,33 @@ public class ServieService
             Genre genre = genreRepository.findById(genreId).orElseThrow(() -> new ResourceNotFoundException("Genre", "Id", genreId.toString()));
             genres.add(genre);
         }
+        // Filter 1 = type      [Null, Movies/Series]
+        // Filter 2 = watched   [Null, watched/unwatched]
+        // Filter 3 = genre     [Null, list[Action, Drama, ...]->OR/AND]
+        // Filter 4 = language  [Null, list[Eng, Jap, Hin, ...]->OR]
+        // Filter 5 = status    [Null, list[In Production, Cancelled, Released, ...]->OR]
+        // Filter 6 = date      [Null, After StartYear]
+        // Filter 7 = date      [Null, Before EndYear]
         Page<ServieDtoHomePage> page;
         // ??? Need a way to manage both parameters (regardless empty or not) in a single query
-        // if((genreIds!=null && !genreIds.isEmpty()) && watched!=null) // genreIds != null, watched != null
-        //     page = servieRepository.findByCompletedAndGenres(watched, genres, genres.size(), pageable);
-        // else if((genreIds!=null && !genreIds.isEmpty()) && watched==null) // genreIds != null, watched == null
-        //     page = servieRepository.findByGenres(genres, genres.size(), pageable);
-        // else if((genreIds==null || genreIds.isEmpty()) && watched!=null) // genreIds == null, watched != null
-        //     page = servieRepository.findByCompleted(userId, watched, pageable);
-        // else // genreIds == null, watched == null
-        // page = servieRepository.findAll(pageable);
-        // page = servieRepository.findAllMoviesByUserId(userId, pageable);
-        // List<Servie> realserviess = servieRepository.findAllMoviesByUserId(userId);
-        // List<ServieDtoHomePage> servies2 = servieRepository.findAllMoviesByUserId2();
-        page = servieRepository.findAllServiesByUserId(userId, pageable);
-        // page = servieRepository.findAllMoviesByUserId2(pageable);
-        // page = servieRepository.findAll(pageable);
+        if((genreIds!=null && !genreIds.isEmpty()) && watched!=null) // genreIds != null, watched != null
+            page = servieRepository.findByCompletedAndGenres(userId, watched, genres, genres.size(), pageable);
+        else if((genreIds!=null && !genreIds.isEmpty()) && watched==null) // genreIds != null, watched == null
+            page = servieRepository.findByGenres(userId, genres, genres.size(), pageable);
+        else if((genreIds==null || genreIds.isEmpty()) && watched!=null) // genreIds == null, watched != null
+            page = servieRepository.findByCompleted(userId, watched, pageable);
+        else // genreIds == null, watched == null
+            page = servieRepository.findAllServiesByUserId(userId, pageable);
+        // 
+        // WORKING
+        // page = servieRepository.findByType(userId, type, pageable);
+        // page = servieRepository.findByLanguages(userId, languages, pageable);
+        // page = servieRepository.findByStatus(userId, statuses, pageable);
+        // 
+        // PARTIALLY WORKING
+        // page = servieRepository.findServiesAfterYear(userId, startYear, pageable);
+        // page = servieRepository.findServiesBeforeYear(userId, endYear, pageable);
+        // page = servieRepository.findServiesBetweenStartYearAndEndYear(userId, startYear, endYear, pageable);
         List<ServieDtoHomePage> servies = page.getContent();
         ResponseDtoHomePage responseDto = new ResponseDtoHomePage();
         responseDto.setServies(servies);

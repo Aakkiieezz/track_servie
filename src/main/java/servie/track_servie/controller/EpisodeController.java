@@ -20,7 +20,7 @@ public class EpisodeController
 {
     @Autowired
     EpisodeService episodeService;
-    @Value("${userId}")
+    @Value("${user-id}")
     private Integer userId;
 
     // Returns EpisodePage containing selected Episode from SeasonPage

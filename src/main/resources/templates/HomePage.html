@@ -27,7 +27,7 @@
     function toggleWatch(tmdbId, childtype, watched) {
       $.ajax({
         type: "POST",
-        url: "/api/servies/tog",
+        url: "/api/servies/js_toggleback",
         data: JSON.stringify({ tmdbId: tmdbId, childtype: childtype, watched: watched }),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
@@ -120,9 +120,9 @@
           </select>
           &nbsp;
           &nbsp;
-          Genre :
+          Genres :
           <select name="genreIds" id="genreIds" multiple="multiple">
-            <option value="">Select Genres</option>
+            <option value="">Any Genre</option>
             <!-- <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}"></option> -->
             <option value="1">Action</option>
             <option value="2">Adventure</option>
@@ -153,10 +153,51 @@
           &nbsp;
           &nbsp;
           Languages :
-          <!-- <select th:field="*{languages}" multiple="multiple">
-            <option value="">Select Languages</option>
-            <option th:each="lang : ${languages}" th:value="${lang.getCode()}" th:text="${lang.getFullName()}"></option>
-          </select> -->
+          <select name="languages" multiple="multiple">
+            <option value="">Any Language</option>
+            <option value="zh">Chinese(Mandarin)</option>
+            <option value="en">English</option>
+            <option value="fr">French</option>
+            <option value="de">German</option>
+            <option value="hi">Hindi</option>
+            <option value="it">Italian</option>
+            <option value="ja">Japanese</option>
+            <option value="ko">Korean</option>
+            <option value="mr">Marathi</option>
+            <option value="ru">Russian</option>
+            <option value="es">Spanish</option>
+            <option value="ta">Tamil</option>
+            <option value="te">Telugu</option>
+          </select>
+          &nbsp;
+          &nbsp;
+          Status :
+          <select name="statuses" multiple="multiple">
+            <option value="">Any Status</option>
+            <option value="Rumored">Rumored</option>
+            <option value="Planned">Planned</option>
+            <option value="Pilot">Pilot</option>
+            <option value="In Production">In Production</option>
+            <option value="Post Production">Post Production</option>
+            <option value="Cancelled">Cancelled</option>
+            <option value="Returning Series">Airing</option>
+            <option value="Released">Released</option>
+            <option value="Ended">Ended</option>
+          </select>
+          &nbsp;
+          &nbsp;
+          From :
+          <select name="startYear">
+            <option value="">Year</option>
+            <option th:value="${year}" th:text="${year}" th:each="year : ${#numbers.sequence(2023, 1950, -1)}"></option>
+          </select>
+          &nbsp;
+          &nbsp;
+          To :
+          <select name="endYear">
+            <option value="">Year</option>
+            <option th:value="${year}" th:text="${year}" th:each="year : ${#numbers.sequence(2023, 1950, -1)}"></option>
+          </select>
           &nbsp;
           &nbsp;
           <i class="bi bi-eye-fill"></i>
@@ -194,7 +235,7 @@
     </div>
     <div class="row center">
       <div class="col-xxl-1 col-sm-2 col-3 image-container poster" th:each="servie : ${response.servies}"
-        th:id="'servie-' + ${servie.imdbId}">
+        th:id="'servie-' + ${servie.tmdbId}">
         <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}"> -->
         <div th:if="${servie.childtype == 'movie'}">
           <a th:href="@{'/api/servies/'+${servie.tmdbId}+'?type=movie'}">
@@ -204,9 +245,8 @@
           <div class="buttons-container">
             <strong th:text="${servie.title}"></strong>
             <br>
-            <span th:unless="${#strings.isEmpty(servie.releaseDate)}"
-              th:text="${servie.releaseDate.substring(0,4)}"></span>
-            <!-- hyperlink way -->
+            <span th:if="${servie.releaseDate != null}" th:text="${#temporals.year(servie.releaseDate)}"></span>
+            <!-- hyperlink -->
             <a th:href="@{'/api/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
               <div th:if="${servie.completed}">
                 <i class="bi bi-eye-slash-fill"></i>
@@ -216,6 +256,7 @@
               </div>
             </a>
             <!-- javascript+ajax+jquery -->
+            <!-- able to toggle value in backend, but not able to change the class of icon -->
             <a href="#" th:if="${servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
               onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), false)">
               <i class="bi bi-eye-slash-fill"></i>
@@ -244,7 +285,8 @@
             <strong th:text="${servie.title}"></strong>
             <br>
             <span
-              th:text="${servie.firstAirDate.substring(0,4)} + ' - ' + (${servie.firstAirDate.substring(0,4)} == '2022' ? 'present' : ${servie.firstAirDate.substring(0,2)})"></span>
+              th:text="${#temporals.year(servie.firstAirDate)} + ' - ' + (${#temporals.year(servie.lastAirDate)} == '2023' ? 'present' : ${#temporals.format(servie.lastAirDate,'yy')})">
+            </span>
             <br />
             <span th:text="${servie.episodesWatched}+'/'+${servie.numberOfEpisodes}"></span>
             <a th:href="@{'/api/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">

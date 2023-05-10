@@ -19,7 +19,7 @@ import jakarta.servlet.http.HttpSession;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ResponseDtoHomePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SearchResultDtoSearchPage;
-import servie.track_servie.entities.Servie;
+import servie.track_servie.payload.dtos.operationsSeriesPageDtos.SeriesDtoSeriesPage;
 import servie.track_servie.service.ServieService;
 
 @Controller
@@ -28,7 +28,7 @@ public class ServieController
 {
     @Autowired
     private ServieService servieService;
-    @Value("${userId}")
+    @Value("${user-id}")
     private Integer userId;
 
     @GetMapping("login")
@@ -39,9 +39,9 @@ public class ServieController
 
     // Returns HomePage containing all Servies from the database which matches the filter
     @GetMapping("")
-    public String getServiesByFilter(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "24") int pageSize, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, @RequestParam(value = "genreIds", defaultValue = "") List<Integer> genreIds, @RequestParam(value = "watched", defaultValue = "") Boolean watched, Model model)
+    public String getServiesByFilter(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", defaultValue = "") Boolean watched, @RequestParam(value = "genreIds", defaultValue = "") List<Integer> genreIds, @RequestParam(value = "languages", defaultValue = "") List<String> languages, @RequestParam(value = "statuses", defaultValue = "") List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "pageSize", defaultValue = "60") int pageSize, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, Model model)
     {
-        ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, pageNumber, pageSize, sortBy, sortDir, genreIds, watched);
+        ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, watched, genreIds, languages, statuses, startYear, endYear, pageNumber, pageSize, sortBy, sortDir);
         // List<GenreDtoHomePage> genres = genreService.getGenres();
         // model.addAttribute("genres", genres);
         model.addAttribute("response", response);
@@ -99,7 +99,7 @@ public class ServieController
     @GetMapping("{tmdbId}")
     public String getServie(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, Model model)
     {
-        Servie servie = servieService.getServie(type, tmdbId);
+        SeriesDtoSeriesPage servie = servieService.getServie(userId, type, tmdbId);
         model.addAttribute("servie", servie);
         return "ServiePage";
     }
@@ -126,6 +126,7 @@ public class ServieController
         return Collections.singletonMap("success", true);
     }
 
+    // Toggle 1 - Hyperlink
     // Toggles the watch button of Series located on HomePage
     @GetMapping("{tmdbId}/toggleback")
     public String toggleSeriesWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type)
@@ -134,8 +135,8 @@ public class ServieController
         return "redirect:/api/servies";
     }
 
-    // trial - to delete
-    @PostMapping("tog")
+    // Toggle 2 - Javascript/AJAX
+    @PostMapping("js_toggleback")
     @ResponseBody
     public Map<String, Object> updateWatched(@RequestBody Map<String, Object> payload)
     {

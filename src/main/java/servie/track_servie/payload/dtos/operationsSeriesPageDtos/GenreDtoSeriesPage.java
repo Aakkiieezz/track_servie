@@ -7,4 +7,10 @@ public class GenreDtoSeriesPage
 {
     private Integer id;
     private String name;
+
+    public GenreDtoSeriesPage(Integer id, String name)
+    {
+        this.id = id;
+        this.name = name;
+    }
 }

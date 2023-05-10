@@ -20,7 +20,7 @@ public class SeasonController
 {
     @Autowired
     SeasonService seasonService;
-    @Value("${userId}")
+    @Value("${user-id}")
     private Integer userId;
 
     // Returns SeasonPage containing selected Season from SeriesPage

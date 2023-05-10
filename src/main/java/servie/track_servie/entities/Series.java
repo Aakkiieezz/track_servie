@@ -1,5 +1,6 @@
 package servie.track_servie.entities;
 
+import java.time.LocalDate;
 import java.util.List;
 import org.hibernate.annotations.Formula;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -37,11 +38,11 @@ public class Series extends Servie
     // ---------------------------------------------------------------
     @JsonProperty("first_air_date")
     @Column(name = "first_air_date")
-    private String firstAirDate;
+    private LocalDate firstAirDate;
     // ---------------------------------------------------------------
     @JsonProperty("last_air_date")
     @Column(name = "last_air_date")
-    private String lastAirDate;
+    private LocalDate lastAirDate;
     // ---------------------------------------------------------------
     @OneToMany(cascade = CascadeType.ALL)
     @JoinTable(name = "series_seasons", joinColumns = @JoinColumn(name = "tmdb_id", referencedColumnName = "tmdb_id"), inverseJoinColumns = @JoinColumn(name = "seasons_id"))

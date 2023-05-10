@@ -1,5 +1,6 @@
 package servie.track_servie.entities;
 
+import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
 import jakarta.persistence.DiscriminatorValue;
@@ -24,7 +25,7 @@ public class Movie extends Servie
 {
     @JsonProperty("release_date")
     @Column(name = "release_date")
-    private String releaseDate;
+    private LocalDate releaseDate;
     // ---------------------------------------------------------------
     @Column(name = "runtime")
     private Integer runtime;

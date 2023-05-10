@@ -1,0 +1,24 @@
+{
+  "properties": [
+    {
+      "name": "tmdb.api.key",
+      "type": "java.lang.String",
+      "description": "TMDB api's user token"
+    },
+    {
+      "name": "app.jwt-secret",
+      "type": "java.lang.String",
+      "description": "For creating JWT token"
+    },
+    {
+      "name": "user-id",
+      "type": "java.lang.String",
+      "description": "Temporary user id"
+    },
+    {
+      "name": "spring.thymeleaf.servlet.enabled",
+      "type": "java.lang.String",
+      "description": "A description for 'spring.thymeleaf.servlet.enabled'"
+    }
+  ]
+}

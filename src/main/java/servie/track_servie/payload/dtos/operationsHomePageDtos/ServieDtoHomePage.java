@@ -1,5 +1,6 @@
 package servie.track_servie.payload.dtos.operationsHomePageDtos;
 
+import java.time.LocalDate;
 import lombok.Data;
 
 @Data
@@ -12,19 +13,18 @@ public class ServieDtoHomePage
     private String posterPath;
     // 
     // movie fields
-    private String releaseDate;
+    private LocalDate releaseDate;
     // 
     // series fields
     private Integer numberOfEpisodes;
-    private String firstAirDate;
-    private String lastAirDate;
+    private LocalDate firstAirDate;
+    private LocalDate lastAirDate;
     // 
     // userServieData fields
-    private Boolean movieWatched;
     private Integer episodesWatched;
     private Boolean completed;
 
-    public ServieDtoHomePage(String imdbId, Integer tmdbId, String childtype, String title, String posterPath, String releaseDate, Integer numberOfEpisodes, String firstAirDate, String lastAirDate, Boolean movieWatched, Integer episodesWatched, Boolean completed)
+    public ServieDtoHomePage(String imdbId, Integer tmdbId, String childtype, String title, String posterPath, LocalDate releaseDate, Integer numberOfEpisodes, LocalDate firstAirDate, LocalDate lastAirDate, Integer episodesWatched, Boolean completed)
     {
         this.imdbId = imdbId;
         this.tmdbId = tmdbId;
@@ -35,7 +35,6 @@ public class ServieDtoHomePage
         this.numberOfEpisodes = numberOfEpisodes;
         this.firstAirDate = firstAirDate;
         this.lastAirDate = lastAirDate;
-        this.movieWatched = movieWatched;
         this.episodesWatched = episodesWatched;
         this.completed = completed;
     }

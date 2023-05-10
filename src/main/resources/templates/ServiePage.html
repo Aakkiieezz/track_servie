@@ -16,9 +16,6 @@
   <!-- CSS -->
   <link rel="stylesheet" href="/src/main/resources/static/css/mystyles.css" th:href="@{/css/mystyles.css}">
 
-  <!-- Google Material Icons -->
-  <!-- <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons"> -->
-
   <!-- Favicon -->
   <!-- <link rel="icon" href="path/to/favicon.ico" type="image/x-icon"> -->
   <link rel="icon" type="image/svg+xml"
@@ -46,10 +43,10 @@
     <div class="container">
       <h1 th:text="${servie.title}"></h1>
       <a th:href="@{'/api/servies/'+${servie.tmdbId}+'/toggle?type='+${servie.childtype}}">
-        <div th:if="${servie.watched}">
+        <div th:if="${servie.completed}">
           <i class="bi bi-eye-slash-fill"></i>
         </div>
-        <div th:unless="${servie.watched}">
+        <div th:unless="${servie.completed}">
           <i class="bi bi-eye-fill"></i>
         </div>
       </a>
@@ -65,13 +62,15 @@
         <h5 th:text="${servie.tagline}"></h5>
         <p th:text="${servie.overview}"></p>
       </div>
-      <div th:if="${servie instanceof T(servie.track_servie.entities.Movie) and servie.collection != null}">
+      <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie) and servie.collection != null}"> -->
+      <div th:if="${servie.childtype == 'movie' and servie.collection != null}">
         <h4>Collection</h4>
         <h5 th:text="${servie.belongsToCollection.collectionName}"></h5>
         <img th:src="'https://www.themoviedb.org/t/p/original'+${servie.belongsToCollection.posterPath}" />
         <img th:src="'https://www.themoviedb.org/t/p/original'+${servie.belongsToCollection.collectionBackdropPath}" />
       </div>
-      <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}">
+      <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}"> -->
+      <div th:if="${servie.childtype == 'tv'}">
         Total Episodes Watched :
         <span th:text="${servie.episodesWatched}+'/'+${servie.numberOfEpisodes}"></span>
         <h3><span th:text="${servie.numberOfSeasons}"></span> Seasons</h3>

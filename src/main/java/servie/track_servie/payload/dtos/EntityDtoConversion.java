@@ -42,19 +42,18 @@ public class EntityDtoConversion
     {
         return mapper.map(genre, GenreDtoHomePage.class);
     }
-
     // Series Page conversions
-    public SeriesDtoSeriesPage seriesToDto(Series series)
-    {
-        SeriesDtoSeriesPage seriesDto = mapper.map(series, SeriesDtoSeriesPage.class);
-        List<Season> seasons = series.getSeasons();
-        List<SeasonDtoSeriesPage> seasonDtos = seasons.stream().map(season -> this.seasonToDtoSeriesPage(season)).collect(Collectors.toList());
-        seriesDto.setSeasons(seasonDtos);
-        Set<Genre> genres = series.getGenres();
-        Set<GenreDtoSeriesPage> genreDtosSeriesPage = genres.stream().map(genre -> this.genreToDtoSeriesPage(genre)).collect(Collectors.toSet());
-        seriesDto.setGenres(genreDtosSeriesPage);
-        return seriesDto;
-    }
+    // public SeriesDtoSeriesPage seriesToDto(Series series)
+    // {
+    //     SeriesDtoSeriesPage seriesDto = mapper.map(series, SeriesDtoSeriesPage.class);
+    //     List<Season> seasons = series.getSeasons();
+    //     List<SeasonDtoSeriesPage> seasonDtos = seasons.stream().map(season -> this.seasonToDtoSeriesPage(season)).collect(Collectors.toList());
+    //     seriesDto.setSeasons(seasonDtos);
+    //     Set<Genre> genres = series.getGenres();
+    //     Set<GenreDtoSeriesPage> genreDtosSeriesPage = genres.stream().map(genre -> this.genreToDtoSeriesPage(genre)).collect(Collectors.toSet());
+    //     seriesDto.setGenres(genreDtosSeriesPage);
+    //     return seriesDto;
+    // }
 
     public SeasonDtoSeriesPage seasonToDtoSeriesPage(Season season)
     {

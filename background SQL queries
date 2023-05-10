@@ -64,3 +64,40 @@ left join series s1_2 on s1_0.childtype=s1_2.childtype and s1_0.tmdb_id=s1_2.tmd
 join user_servie_data u1_0 on s1_0.childtype=u1_0.childtype and s1_0.tmdb_id=u1_0.tmdb_id
 where u1_0.user_id=? and (CASE WHEN EXISTS (SELECT * FROM user_servie_data AS usd WHERE usd.tmdb_id = s1_0.tmdb_id AND usd.movie_watched = 1) THEN 1 ELSE (SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data ued WHERE ued.tmdb_id = s1_0.tmdb_id AND ued.watched = 1) = (SELECT s.number_of_episodes FROM series s WHERE s.tmdb_id = s1_0.tmdb_id) THEN 1 ELSE 0 END) END)=?
 order by s1_0.title asc limit ?,?
+
+
+
+
+
+
+
+
+
+
+
+select
+s1_0.childtype,
+s1_0.tmdb_id,
+s1_0.backdrop_path,
+s1_0.imdb_id,
+s1_0.original_language,
+s1_0.overview,
+s1_0.poster_path,
+s1_0.status,
+s1_0.tagline,
+s1_0.title,
+s1_1.collection_backdrop_path,
+s1_1.id,
+s1_1.collection_name,
+s1_1.collection_poster_path,
+s1_1.collection_id,
+s1_1.release_date,
+s1_1.runtime,
+s1_2.first_air_date,
+s1_2.last_air_date,
+s1_2.number_of_episodes,
+s1_2.number_of_seasons,
+(SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data AS ued WHERE ued.tmdb_id = s1_2.tmdb_id AND ued.watched = 1) = s1_2.number_of_episodes THEN 1 ELSE 0 END) from servie s1_0
+left join movie s1_1 on s1_0.childtype=s1_1.childtype and s1_0.tmdb_id=s1_1.tmdb_id
+left join series s1_2 on s1_0.childtype=s1_2.childtype and s1_0.tmdb_id=s1_2.tmdb_id
+where (s1_0.childtype=? and s1_0.tmdb_id=?)
