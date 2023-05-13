@@ -19,6 +19,11 @@
       "name": "spring.thymeleaf.servlet.enabled",
       "type": "java.lang.String",
       "description": "A description for 'spring.thymeleaf.servlet.enabled'"
+    },
+    {
+      "name": "home-page.page.size",
+      "type": "java.lang.String",
+      "description": "A description for 'home-page.page.size'"
     }
   ]
 }

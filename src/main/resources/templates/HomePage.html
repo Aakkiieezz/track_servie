@@ -122,7 +122,8 @@
           &nbsp;
           Genres :
           <select name="genreIds" id="genreIds" multiple="multiple">
-            <option value="">Any Genre</option>
+            <!-- should unselect all the selected genres -->
+            <!-- <option value="">Any Genre</option> -->
             <!-- <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}"></option> -->
             <option value="1">Action</option>
             <option value="2">Adventure</option>
@@ -154,7 +155,8 @@
           &nbsp;
           Languages :
           <select name="languages" multiple="multiple">
-            <option value="">Any Language</option>
+            <!-- should unselect all the selected languages -->
+            <!-- <option value="">Any Language</option> -->
             <option value="zh">Chinese(Mandarin)</option>
             <option value="en">English</option>
             <option value="fr">French</option>
@@ -173,7 +175,8 @@
           &nbsp;
           Status :
           <select name="statuses" multiple="multiple">
-            <option value="">Any Status</option>
+            <!-- should unselect all the selected statuses -->
+            <!-- <option value="">Any Status</option> -->
             <option value="Rumored">Rumored</option>
             <option value="Planned">Planned</option>
             <option value="Pilot">Pilot</option>

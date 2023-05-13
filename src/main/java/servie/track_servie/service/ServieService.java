@@ -72,6 +72,8 @@ public class ServieService
     private GenreUtils genreUtils;
     @Value("${tmdb.api.key}")
     private String apiKey;
+    @Value("${home-page.page.size}")
+    private int pageSize;
 
     // Adds a specific Servie (along with all its Seasons,Episodes,...) to the database, from the 3rd party api
     // Break it into multiple methods
@@ -259,7 +261,7 @@ public class ServieService
     }
 
     // Returns all Servies from the database which matches the filter
-    public ResponseDtoHomePage getServiesByFilter(Integer userId, String type, Boolean watched, List<Integer> genreIds, List<String> languages, List<String> statuses, Integer startYear, Integer endYear, int pageNumber, int pageSize, String sortBy, String sortDir)
+    public ResponseDtoHomePage getServiesByFilter(Integer userId, String type, Boolean watched, List<Integer> genreIds, List<String> languages, List<String> statuses, Integer startYear, Integer endYear, int pageNumber, String sortBy, String sortDir)
     {
         Sort sort = null;
         if(sortDir.equals("asc"))
@@ -278,18 +280,18 @@ public class ServieService
         // Filter 3 = genre     [Null, list[Action, Drama, ...]->OR/AND]
         // Filter 4 = language  [Null, list[Eng, Jap, Hin, ...]->OR]
         // Filter 5 = status    [Null, list[In Production, Cancelled, Released, ...]->OR]
-        // Filter 6 = date      [Null, After StartYear]
-        // Filter 7 = date      [Null, Before EndYear]
+        // Filter 6 = startDate      [Null, After StartYear]
+        // Filter 7 = endDate      [Null, Before EndYear]
         Page<ServieDtoHomePage> page;
         // ??? Need a way to manage both parameters (regardless empty or not) in a single query
-        if((genreIds!=null && !genreIds.isEmpty()) && watched!=null) // genreIds != null, watched != null
-            page = servieRepository.findByCompletedAndGenres(userId, watched, genres, genres.size(), pageable);
-        else if((genreIds!=null && !genreIds.isEmpty()) && watched==null) // genreIds != null, watched == null
-            page = servieRepository.findByGenres(userId, genres, genres.size(), pageable);
-        else if((genreIds==null || genreIds.isEmpty()) && watched!=null) // genreIds == null, watched != null
-            page = servieRepository.findByCompleted(userId, watched, pageable);
-        else // genreIds == null, watched == null
-            page = servieRepository.findAllServiesByUserId(userId, pageable);
+        // if((genreIds!=null && !genreIds.isEmpty()) && watched!=null) // genreIds != null, watched != null
+        //     page = servieRepository.findByCompletedAndGenres(userId, watched, genres, genres.size(), pageable);
+        // else if((genreIds!=null && !genreIds.isEmpty()) && watched==null) // genreIds != null, watched == null
+        //     page = servieRepository.findByGenres(userId, genres, genres.size(), pageable);
+        // else if((genreIds==null || genreIds.isEmpty()) && watched!=null) // genreIds == null, watched != null
+        //     page = servieRepository.findByCompleted(userId, watched, pageable);
+        // else // genreIds == null, watched == null
+        //     page = servieRepository.findAllServiesByUserId(userId, pageable);
         // 
         // WORKING
         // page = servieRepository.findByType(userId, type, pageable);
@@ -300,6 +302,9 @@ public class ServieService
         // page = servieRepository.findServiesAfterYear(userId, startYear, pageable);
         // page = servieRepository.findServiesBeforeYear(userId, endYear, pageable);
         // page = servieRepository.findServiesBetweenStartYearAndEndYear(userId, startYear, endYear, pageable);
+        // 
+        // By All filters together
+        page = servieRepository.findByAllFilters(userId, type, watched, /* genres, genres.size(), */ languages, statuses, startYear, endYear, pageable);
         List<ServieDtoHomePage> servies = page.getContent();
         ResponseDtoHomePage responseDto = new ResponseDtoHomePage();
         responseDto.setServies(servies);
