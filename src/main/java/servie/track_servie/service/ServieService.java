@@ -14,6 +14,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
@@ -23,20 +24,25 @@ import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsImage.SeriesPageDtos.SeriesBackdropsDto;
 import servie.track_servie.payload.dtos.operationsImage.SeriesPageDtos.SeriesPostersDto;
 import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SearchResultDtoSearchPage;
-import servie.track_servie.payload.dtos.operationsSeriesPageDtos.GenreDtoSeriesPage;
-import servie.track_servie.payload.dtos.operationsSeriesPageDtos.SeriesDtoSeriesPage;
+import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SeriesDtoSearchPage;
+import servie.track_servie.payload.dtos.operationsServiePageDtos.GenreDtoServiePage;
+import servie.track_servie.payload.dtos.operationsServiePageDtos.SeasonDtoServiePage;
+import servie.track_servie.payload.dtos.operationsServiePageDtos.ServieDtoServiePage;
 import servie.track_servie.payload.primaryKeys.ServieKey;
-import servie.track_servie.entities.Episode;
-import servie.track_servie.entities.Genre;
-import servie.track_servie.entities.Movie;
-import servie.track_servie.entities.MovieCollection;
-import servie.track_servie.entities.Season;
-import servie.track_servie.entities.Series;
-import servie.track_servie.entities.Servie;
-import servie.track_servie.entities.UserEpisodeData;
-import servie.track_servie.entities.UserServieData;
+import servie.track_servie.payload.primaryKeys.UserServieDataKey;
+import servie.track_servie.entity.Cast;
+import servie.track_servie.entity.Episode;
+import servie.track_servie.entity.Genre;
+import servie.track_servie.entity.Movie;
+import servie.track_servie.entity.MovieCollection;
+import servie.track_servie.entity.Season;
+import servie.track_servie.entity.Series;
+import servie.track_servie.entity.Servie;
+import servie.track_servie.entity.User;
+import servie.track_servie.entity.UserEpisodeData;
+import servie.track_servie.entity.UserSeasonData;
+import servie.track_servie.entity.UserServieData;
 import servie.track_servie.exceptions.ResourceNotFoundException;
-import servie.track_servie.payload.dtos.ExternalIdsDto;
 import servie.track_servie.repository.GenreRepository;
 import servie.track_servie.repository.MovieCollectionRepository;
 import servie.track_servie.repository.MovieRepository;
@@ -44,12 +50,15 @@ import servie.track_servie.repository.SeriesRepository;
 import servie.track_servie.repository.ServieRepository;
 import servie.track_servie.repository.UserEpisodeDataRepository;
 import servie.track_servie.repository.UserRepository;
+import servie.track_servie.repository.UserSeasonDataRepository;
 import servie.track_servie.repository.UserServieDataRepository;
 import servie.track_servie.utils.GenreUtils;
 
 @Service
 public class ServieService
 {
+    @Autowired
+    private CastService castService;
     @Autowired
     private ServieRepository servieRepository;
     @Autowired
@@ -67,6 +76,8 @@ public class ServieService
     @Autowired
     private UserEpisodeDataRepository userEpisodeDataRepository;
     @Autowired
+    private UserSeasonDataRepository userSeasonDataRepository;
+    @Autowired
     private UserRepository userRepository;
     @Autowired
     private GenreUtils genreUtils;
@@ -74,195 +85,244 @@ public class ServieService
     private String apiKey;
     @Value("${home-page.page.size}")
     private int pageSize;
+    private HttpHeaders headers = new HttpHeaders();
+    private HttpEntity<?> httpEntity = new HttpEntity<>(headers);
 
-    // Adds a specific Servie (along with all its Seasons,Episodes,...) to the database, from the 3rd party api
-    // Break it into multiple methods
-    public void addServie(Integer userId, String type, Integer tmdbId)
+    public void collectServie(Integer userId, String type, Integer tmdbId)
     {
         UserServieData userServieData = new UserServieData();
-        UserEpisodeData userEpisodeData = new UserEpisodeData();
-        userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<?> httpEntity = new HttpEntity<>(headers);
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
+        Optional<Servie> optionalServie = servieRepository.findById(new ServieKey(tmdbId, type));
+        Servie servie = optionalServie.orElseGet(() -> addServie(type, tmdbId));
+        userServieData.setUser(user);
+        userServieData.setServie(servie);
         if(type.equals("tv"))
         {
-            ResponseEntity<Series> seriesResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Series.class);
-            Series series = seriesResponse.getBody();
-            if(series!=null)
+            Series series = (Series) servie;
+            List<UserSeasonData> userSeasonDatas = new ArrayList<>();
+            for(Season season : series.getSeasons())
             {
-                Optional<Series> seriesCheck = seriesRepository.findByTmdbId(series.getTmdbId());
-                if(seriesCheck.isEmpty())
+                UserSeasonData userSeasonData = new UserSeasonData();
+                List<UserEpisodeData> userEpisodeDatas = new ArrayList<>();
+                for(Episode episode : season.getEpisodes())
                 {
-                    List<Season> seasons = new ArrayList<>();
-                    int totalSeasons = series.getNumberOfSeasons();
-                    int i = 1;
-                    int j = series.getSeasons().get(0).getSeasonNumber();
-                    while(i<=totalSeasons)
-                    {
-                        ResponseEntity<Season> response = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+tmdbId+"/season/"+i+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Season.class);
-                        Season season = response.getBody();
-                        if(season!=null)
-                        {
-                            season.setEpisodeCount(series.getSeasons().get(i-j).getEpisodeCount());
-                            season.setTmdbId(tmdbId);
-                            season.setId(series.getTmdbId().toString()+"-s"+String.format("%02d", season.getSeasonNumber()));
-                            for(Episode episode : season.getEpisodes())
-                            {
-                                episode.setId(season.getId()+"-e"+String.format("%02d", episode.getEpisodeNumber()));
-                                userEpisodeData.setEpisodeId(episode.getId());
-                                userEpisodeData.setEpisodeNumber(episode.getEpisodeNumber());
-                                userEpisodeData.setSeasonNumber(episode.getSeasonNumber());
-                                userEpisodeData.setTmdbId(tmdbId);
-                                userEpisodeData.setUserId(userId);
-                                userEpisodeDataRepository.save(userEpisodeData);
-                            }
-                            seasons.add(season);
-                        }
-                        i++;
-                    }
-                    series.setSeasons(seasons);
-                    ResponseEntity<ExternalIdsDto> response = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+tmdbId+"/external_ids?api_key="+apiKey, HttpMethod.GET, httpEntity, ExternalIdsDto.class);
-                    ExternalIdsDto imdb = response.getBody();
-                    if(imdb!=null)
-                        series.setImdbId(imdb.getImdb_id());
-                    series.setChildtype("tv");
-                    series.setGenres(genreUtils.mapMovieGenresFromTmdbDBToAkashDB(series.getGenres()));
-                    servieRepository.save(series);
-                    userServieData.setTmdbId(series.getTmdbId());
-                    userServieData.setChildtype(series.getChildtype());
-                    userServieData.setUserId(userId);
-                    userServieDataRepository.save(userServieData);
+                    UserEpisodeData userEpisodeData = new UserEpisodeData();
+                    userEpisodeData.setEpisodeNumber(episode.getEpisodeNumber());
+                    userEpisodeData.setUserSeasonData(userSeasonData);
+                    userEpisodeDatas.add(userEpisodeData);
                 }
-                else
-                {
-                    for(Season season : seriesCheck.get().getSeasons())
-                    {
-                        for(Episode episode : season.getEpisodes())
-                        {
-                            userEpisodeData.setEpisodeId(episode.getId());
-                            userEpisodeData.setEpisodeNumber(episode.getEpisodeNumber());
-                            userEpisodeData.setSeasonNumber(episode.getSeasonNumber());
-                            userEpisodeData.setTmdbId(tmdbId);
-                            userEpisodeData.setUserId(userId);
-                            userEpisodeDataRepository.save(userEpisodeData);
-                        }
-                    }
-                    userServieData.setTmdbId(seriesCheck.get().getTmdbId());
-                    userServieData.setChildtype(seriesCheck.get().getChildtype());
-                    userServieData.setUserId(userId);
-                    userServieDataRepository.save(userServieData);
-                }
+                userSeasonData.setEpisodes(userEpisodeDatas);
+                userSeasonData.setEpisodeCount(season.getEpisodeCount());
+                userSeasonData.setSeasonNumber(season.getSeasonNumber());
+                userSeasonData.setUserServieData(userServieData);
+                userSeasonDatas.add(userSeasonData);
             }
+            userServieData.setSeasons(userSeasonDatas);
         }
+        userServieDataRepository.save(userServieData);
+    }
+
+    private Servie addServie(String type, Integer tmdbId)
+    {
+        Servie servie = new Servie();
+        if(type.equals("tv"))
+            servie = addSeries(tmdbId);
         else
+            servie = addMovie(tmdbId);
+        return servie;
+    }
+
+    private Movie addMovie(Integer tmdbId)
+    {
+        Movie movie = new Movie();
+        ResponseEntity<Movie> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"movie"+"/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
+        if(movieResponse.getStatusCode()==HttpStatus.OK)
         {
-            ResponseEntity<Movie> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
-            Movie movie = movieResponse.getBody();
+            movie = movieResponse.getBody();
             if(movie!=null)
             {
-                Optional<Movie> movieCheck = movieRepository.findByTmdbId(movie.getTmdbId());
-                if(movieCheck.isEmpty())
+                if(movie.getBelongsToCollection()!=null)
                 {
-                    if(movie.getBelongsToCollection()!=null)
+                    addMovieCollection(movie.getBelongsToCollection().getCollectionId());
+                    movie.setChildtype("movie");
+                    return movie;
+                }
+                List<Cast> casts = castService.saveCastMembers(tmdbId, "movie");
+                movie.setCasts(casts);
+                movie.setChildtype("movie");
+                movie.setGenres(genreUtils.convertTmdbGenresToTrackServieGenres(movie.getGenres()));
+            }
+        }
+        return movieRepository.save(movie);
+    }
+
+    private void addMovieCollection(Integer collectionId)
+    {
+        MovieCollection movieCollection = new MovieCollection();
+        ResponseEntity<MovieCollection> movieCollectionResponse = restTemplate.exchange("https://api.themoviedb.org/3/collection/"+collectionId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, MovieCollection.class);
+        if(movieCollectionResponse.getStatusCode()==HttpStatus.OK)
+        {
+            movieCollection = movieCollectionResponse.getBody();
+            if(movieCollection!=null)
+            {
+                Set<Genre> newGenresFromCollection = new HashSet<>();
+                List<Movie> finalMovies = new ArrayList<Movie>();
+                // each movie has no [ImdbId, collection(Id,name,poster,backdrop), runtime, tagline, status] , no genres only genreIds
+                for(Movie movie : movieCollection.getMovies())
+                {
+                    ResponseEntity<Movie> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"movie"+"/"+movie.getTmdbId()+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
+                    if(movieResponse.getStatusCode()==HttpStatus.OK)
                     {
-                        int collectionId = movie.getBelongsToCollection().getCollectionId();
-                        ResponseEntity<MovieCollection> movieCollectionResponse = restTemplate.exchange("https://api.themoviedb.org/3/collection/"+collectionId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, MovieCollection.class);
-                        MovieCollection movieCollection = movieCollectionResponse.getBody();
-                        if(movieCollection!=null)
+                        movie = movieResponse.getBody();
+                        if(movie!=null)
                         {
-                            // each movie has no [ImdbId, collection(Id,name,poster,backdrop), runtime, tagline, status] , no genres only genreIds
-                            Set<Genre> newGenresFromCollection = new HashSet<>();
-                            List<Movie> finalMovies = new ArrayList<Movie>();
-                            for(Movie moviePart : movieCollection.getMovies())
+                            movie.setChildtype("movie");
+                            movie.setCollection(movieCollection);
+                            Set<Genre> finalGenres = new HashSet<>();
+                            Set<Genre> updatedGenres = genreUtils.convertTmdbGenresToTrackServieGenres(movie.getGenres());
+                            for(Genre genre : updatedGenres)
                             {
-                                ResponseEntity<Movie> movieResponse2 = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+moviePart.getTmdbId()+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
-                                moviePart = movieResponse2.getBody();
-                                moviePart.setChildtype("movie");
-                                if(moviePart.getImdbId()==null)
-                                    moviePart.setImdbId("?"+moviePart.getChildtype()+moviePart.getTmdbId());
-                                moviePart.setCollection(movieCollection);
-                                Set<Genre> finalGenres = new HashSet<>();
-                                Set<Genre> updatedGenres = genreUtils.mapMovieGenresFromTmdbDBToAkashDB(moviePart.getGenres());
-                                for(Genre genre : updatedGenres)
+                                Optional<Genre> repoGenre = genreRepository.findById(genre.getId());
+                                if(repoGenre.isPresent())
+                                    finalGenres.add(repoGenre.get());
+                                else
                                 {
-                                    Optional<Genre> repoGenre = genreRepository.findById(genre.getId());
-                                    if(repoGenre.isPresent())
-                                        finalGenres.add(repoGenre.get());
-                                    else
-                                    {
-                                        Boolean isPresent = false;
-                                        for(Genre newGenre : newGenresFromCollection)
-                                            if(newGenre.getId().equals(genre.getId()) && newGenre.getName().equals(genre.getName()))
-                                            {
-                                                isPresent = true;
-                                                finalGenres.add(newGenre);
-                                                break;
-                                            }
-                                        if(!isPresent)
+                                    Boolean isPresent = false;
+                                    for(Genre newGenre : newGenresFromCollection)
+                                        if(newGenre.getId().equals(genre.getId()) && newGenre.getName().equals(genre.getName()))
                                         {
-                                            newGenresFromCollection.add(genre);
-                                            finalGenres.add(genre);
+                                            isPresent = true;
+                                            finalGenres.add(newGenre);
+                                            break;
                                         }
+                                    if(!isPresent)
+                                    {
+                                        newGenresFromCollection.add(genre);
+                                        finalGenres.add(genre);
                                     }
                                 }
-                                moviePart.setGenres(finalGenres);
-                                finalMovies.add(moviePart);
-                                userServieData.setTmdbId(moviePart.getTmdbId());
-                                userServieData.setChildtype(moviePart.getChildtype());
-                                userServieData.setUserId(userId);
-                                userServieDataRepository.save(userServieData);
                             }
-                            movieCollection.setMovies(finalMovies);
-                            movieCollectionRepository.save(movieCollection);
-                            return;
+                            movie.setGenres(finalGenres);
+                            List<Cast> casts = castService.saveCastMembers(movie.getTmdbId(), "movie");
+                            movie.setCasts(casts);
+                            finalMovies.add(movie);
                         }
                     }
-                    movie.setChildtype("movie");
-                    movie.setGenres(genreUtils.mapMovieGenresFromTmdbDBToAkashDB(movie.getGenres()));
-                    if(movie.getImdbId()==null)
-                        movie.setImdbId("?"+movie.getChildtype()+movie.getTmdbId());
-                    servieRepository.save(movie);
-                    userServieData.setTmdbId(movie.getTmdbId());
-                    userServieData.setChildtype(movie.getChildtype());
-                    userServieData.setUserId(userId);
-                    userServieDataRepository.save(userServieData);
                 }
-                else
-                {
-                    userServieData.setTmdbId(movieCheck.get().getTmdbId());
-                    // movieCheck.get().getReleaseDate().getYear()
-                    userServieData.setChildtype(movieCheck.get().getChildtype());
-                    userServieData.setUserId(userId);
-                    userServieDataRepository.save(userServieData);
-                }
+                movieCollection.setMovies(finalMovies);
+                movieCollectionRepository.save(movieCollection);
             }
         }
     }
 
-    // Returns specific Series from the database which matches the criteria
-    public SeriesDtoSeriesPage getServie(Integer userId, String type, Integer tmdbId)
+    private Series addSeries(Integer tmdbId)
     {
-        // Servie servie = servieRepository.findById(new ServieKey(tmdbId, type)).orElseThrow(() -> new ResourceNotFoundException("Series", "Id", tmdbId.toString()));
-        SeriesDtoSeriesPage servie = servieRepository.findServieByUserId(userId, type, tmdbId);
-        Set<GenreDtoSeriesPage> genreDtos = servieRepository.getGenresFromServie(servie.getImdbId());
+        Series series = new Series();
+        ResponseEntity<Series> seriesResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Series.class);
+        if(seriesResponse.getStatusCode()==HttpStatus.OK)
+        {
+            series = seriesResponse.getBody();
+            if(series!=null)
+            {
+                List<Season> seasons = new ArrayList<>();
+                int totalSeasons = series.getNumberOfSeasons();
+                int i = 1;
+                int j = series.getSeasons().get(0).getSeasonNumber();
+                while(i<=totalSeasons)
+                {
+                    ResponseEntity<Season> response = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"/season/"+i+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Season.class);
+                    Season season = response.getBody();
+                    if(season!=null)
+                    {
+                        season.setSeries(series);
+                        season.setEpisodeCount(series.getSeasons().get(i-j).getEpisodeCount());
+                        // season.setTmdbId(tmdbId);
+                        for(Episode episode : season.getEpisodes())
+                            episode.setSeason(season);
+                        seasons.add(season);
+                    }
+                    i++;
+                }
+                series.setSeasons(seasons);
+                series.setChildtype("tv");
+                List<Cast> casts = castService.saveCastMembers(tmdbId, "tv");
+                series.setCasts(casts);
+                series.setGenres(genreUtils.convertTmdbGenresToTrackServieGenres(series.getGenres()));
+                servieRepository.save(series);
+            }
+        }
+        return series;
+    }
+
+    // Returns specific Series from the database which matches the criteria
+    public ServieDtoServiePage getServie(Integer userId, String type, Integer tmdbId)
+    {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
+        ServieDtoServiePage servie = servieRepository.getServieForServiePage(user, type, tmdbId);
+        Set<GenreDtoServiePage> genreDtos = genreRepository.getGenresForServiePage(tmdbId, type);
+        // List<SeasonDtoServiePage> seasonDtos = servieRepository.getSeasonsFromServie()
         servie.setGenres(genreDtos);
-        // SeriesDtoSeriesPage seriesDto = converter.seriesToDto(series);
         return servie;
     }
 
     // Returns a list of search related Series from the 3rd party api
-    public SearchResultDtoSearchPage searchServies(String type, String servieName, int pageNumber)
+    public SearchResultDtoSearchPage searchServies(Integer userId, String childtype, String servieName, int pageNumber)
     {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
         HttpHeaders headers = new HttpHeaders();
         HttpEntity<?> httpEntity = new HttpEntity<>(headers);
-        ResponseEntity<SearchResultDtoSearchPage> response = restTemplate.exchange("https://api.themoviedb.org/3/search/"+type+"?api_key="+apiKey+"&query="+servieName+"&page="+pageNumber, HttpMethod.GET, httpEntity, SearchResultDtoSearchPage.class);
+        ResponseEntity<SearchResultDtoSearchPage> response = restTemplate.exchange("https://api.themoviedb.org/3/search/"+childtype+"?api_key="+apiKey+"&query="+servieName+"&page="+pageNumber, HttpMethod.GET, httpEntity, SearchResultDtoSearchPage.class);
         SearchResultDtoSearchPage searchResult = response.getBody();
+        if(searchResult!=null)
+        {
+            List<SeriesDtoSearchPage> results = searchResult.getResults();
+            List<Integer> tmdbIds = new ArrayList<>();
+            for(SeriesDtoSearchPage s : results)
+            {
+                tmdbIds.add(s.getTmdbId());
+                s.setCompleted(false);
+                s.setChildtype(childtype);
+            }
+            List<UserServieData> usds = userServieDataRepository.findByUserIdAndChildtypeAndTmdbIdIn(user, childtype, tmdbIds);
+            if(!usds.isEmpty())
+            {
+                for(UserServieData usd : usds)
+                {
+                    Optional<Servie> servie = servieRepository.findById(new ServieKey(usd.getServie().getTmdbId(), usd.getServie().getChildtype()));
+                    if(servie.isPresent())
+                    {
+                        Servie servieObj = servie.get();
+                        Series series = new Series();
+                        Integer tmdbId = servieObj.getTmdbId();
+                        for(SeriesDtoSearchPage s : results)
+                        {
+                            if(s.getTmdbId().equals(tmdbId))
+                            {
+                                s.setFound(true);
+                                s.setCompleted(usd.getCompleted());
+                                if(servieObj instanceof Series)
+                                {
+                                    series = (Series) servieObj;
+                                    s.setNumberOfEpisodes(series.getNumberOfEpisodes());
+                                    s.setEpisodesWatched(usd.getEpisodesWatched());
+                                }
+                            }
+                            else
+                            {
+                                s.setFound(false);
+                            }
+                        }
+                    }
+                }
+            }
+        }
         return searchResult;
     }
 
     // Returns all Servies from the database which matches the filter
     public ResponseDtoHomePage getServiesByFilter(Integer userId, String type, Boolean watched, List<Integer> genreIds, List<String> languages, List<String> statuses, Integer startYear, Integer endYear, int pageNumber, String sortBy, String sortDir)
     {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
         Sort sort = null;
         if(sortDir.equals("asc"))
             sort = Sort.by(sortBy).ascending();
@@ -280,8 +340,9 @@ public class ServieService
         // Filter 3 = genre     [Null, list[Action, Drama, ...]->OR/AND]
         // Filter 4 = language  [Null, list[Eng, Jap, Hin, ...]->OR]
         // Filter 5 = status    [Null, list[In Production, Cancelled, Released, ...]->OR]
-        // Filter 6 = startDate      [Null, After StartYear]
-        // Filter 7 = endDate      [Null, Before EndYear]
+        // Filter 6 = startDate [Null, After StartYear]
+        // Filter 7 = endDate   [Null, Before EndYear]
+        // Filter 8 = 6 + 7
         Page<ServieDtoHomePage> page;
         // ??? Need a way to manage both parameters (regardless empty or not) in a single query
         // if((genreIds!=null && !genreIds.isEmpty()) && watched!=null) // genreIds != null, watched != null
@@ -304,7 +365,7 @@ public class ServieService
         // page = servieRepository.findServiesBetweenStartYearAndEndYear(userId, startYear, endYear, pageable);
         // 
         // By All filters together
-        page = servieRepository.findByAllFilters(userId, type, watched, /* genres, genres.size(), */ languages, statuses, startYear, endYear, pageable);
+        page = servieRepository.getServiesByHomePageFilter(user, type, watched, languages, statuses, startYear, endYear, pageable);
         List<ServieDtoHomePage> servies = page.getContent();
         ResponseDtoHomePage responseDto = new ResponseDtoHomePage();
         responseDto.setServies(servies);
@@ -317,9 +378,9 @@ public class ServieService
     }
 
     // Removes a specific Series from the database
-    public void removeServie(String imdbId)
+    public void removeServie(Integer tmdbId, String childtype)
     {
-        Servie servie = servieRepository.findByImdbId(imdbId);//.orElseThrow(() -> new ImdbIdNotFoundException("Servie", "Id", servieId));
+        Servie servie = servieRepository.findById(new ServieKey(tmdbId, childtype)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(tmdbId, childtype).toString()));
         servieRepository.delete(servie);
     }
 
@@ -337,11 +398,11 @@ public class ServieService
     }
 
     // Changes img-Backdrop of a Series
-    public void changeBackdrop(String type, Integer tmdbId, String filePath)
+    public void changeBackdrop(String childtype, Integer tmdbId, String filePath)
     {
-        Servie series = servieRepository.findById(new ServieKey(tmdbId, type)).orElseThrow(() -> new ResourceNotFoundException("Series", "Id", tmdbId.toString()));
-        series.setBackdropPath(filePath);
-        servieRepository.save(series);
+        Servie servie = servieRepository.findById(new ServieKey(tmdbId, childtype)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(tmdbId, childtype).toString()));
+        servie.setBackdropPath(filePath);
+        servieRepository.save(servie);
     }
 
     // Returns list of img-Posters(for Series) from the 3rd party api
@@ -358,40 +419,56 @@ public class ServieService
     }
 
     // Changes img-Poster of a Series
-    public void changePoster(String type, Integer tmdbId, String filePath)
+    public void changePoster(String childtype, Integer tmdbId, String filePath)
     {
-        Servie series = servieRepository.findById(new ServieKey(tmdbId, type)).orElseThrow(() -> new ResourceNotFoundException("Series", "Id", tmdbId.toString()));
-        series.setPosterPath(filePath);
-        servieRepository.save(series);
+        Servie servie = servieRepository.findById(new ServieKey(tmdbId, childtype)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(tmdbId, childtype).toString()));
+        servie.setPosterPath(filePath);
+        servieRepository.save(servie);
     }
 
     // Toggles the watch value of a Series (after toggling watch value of all related Episodes)
     public void toggleServieWatch(Integer userId, String type, Integer tmdbId)
     {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
+        // Servie servie = servieRepository.findById(new ServieKey(tmdbId, "tv")).get();
         if(type.equals("tv"))
         {
             Series series = seriesRepository.findById(new ServieKey(tmdbId, type)).orElseThrow(() -> new ResourceNotFoundException("Series", "Id", tmdbId.toString()));
+            UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, series)).get();
             // without user
             // List<Episode> episodes = episodeRepository.findByTmdbIdAndWatched(tmdbId, series.getWatched());
             // for(Episode episode : episodes)
             //     episode.setWatched(!series.getWatched());
             // 
             // with user
-            List<UserEpisodeData> userEpisodeDatas = userEpisodeDataRepository.findByUserIdAndTmdbIdAndWatched(userId, tmdbId, series.getWatched());
+            // UserSeasonData userSeasonData = new UserSeasonData();
+            //  userServieData = new UserServieData();
+            // Servie servie = servieRepository.findById(new ServieKey(tmdbId, "tv")).get();
+            // userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNumber)).get();
+            // List<UserEpisodeData> userEpisodeDatas = userEpisodeDataRepository.findByUserServieDataAndWatched(userServieData, series.getWatched());
+            List<UserEpisodeData> userEpisodeDatas = userEpisodeDataRepository.findByUserServieDataAndWatched(userServieData, userServieData.getCompleted());
             for(UserEpisodeData userEpisodeData : userEpisodeDatas)
-                userEpisodeData.setWatched(!series.getWatched());
+                userEpisodeData.setWatched(!userServieData.getCompleted());
             // 
             // series.setWatched(!series.getWatched()); Not needed
             seriesRepository.save(series);
         }
         else
         {
-            movieRepository.findById(new ServieKey(tmdbId, type)).orElseThrow(() -> new ResourceNotFoundException("Movie", "Id", tmdbId.toString()));
-            UserServieData userServieData = userServieDataRepository.findByUserIdAndTmdbIdAndChildtype(userId, tmdbId, type);
-            userServieData.setMovieWatched(!userServieData.getMovieWatched());
+            // Movie movie = movieRepository.findById(new ServieKey(tmdbId, type)).orElseThrow(() -> new ResourceNotFoundException("Movie", "Id", tmdbId.toString()));
+            Servie servie = servieRepository.findById(new ServieKey(tmdbId, type)).orElseGet(() -> addServie(type, tmdbId));// .orElseThrow(() -> new ResourceNotFoundException("Movie", "Id", tmdbId.toString()));
+            UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElse(new UserServieData(user, servie));
+            // UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, movie)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "Id", new UserServieDataKey(user, movie).toString()));
+            userServieData.setMovieWatched(!userServieData.getCompleted());
             userServieDataRepository.save(userServieData);
             // movie.setWatched(!movie.getWatched());
             // movieRepository.save(movie);
         }
+    }
+
+    public List<SeasonDtoServiePage> getSeasonsForSerivePage(Integer userId, String type, Integer tmdbId)
+    {
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
+        return userSeasonDataRepository.getSeasons(user, type, tmdbId);
     }
 }

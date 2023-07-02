@@ -26,8 +26,8 @@ INSERT INTO genre (id, name) VALUES (24, 'War');
 INSERT INTO genre (id, name) VALUES (25, 'Western');
 
 -- Insert users ---------> JUST FOR TESTING
-INSERT INTO user (id, email, name, password) VALUES (1, 'kadoleakash96@gmail.com', 'Akash', 'password1');
-INSERT INTO user (id, email, name, password) VALUES (2, 'divyapotkule@gmail.com', 'Divya', 'password2');
+INSERT INTO user (id, email, name, password) VALUES (1, 'kadoleakash96@gmail.com', 'Akash Kadole', 'password');
+INSERT INTO user (id, email, name, password) VALUES (2, 'aryankadole95@gmail.com', 'Aryan Kadole', 'password');
 
 -- Insert all roles
 INSERT INTO role (id, name) VALUES (1, 'Admin');
@@ -41,17 +41,15 @@ INSERT INTO permission (id, name) VALUES (3, 'Change Servie Poster');
 INSERT INTO permission (id, name) VALUES (4, 'Change Servie Backdrop');
 
 -- Insert all role-permission mappings
-INSERT INTO role_permissions (role_id, permission_id) VALUES (1, 1);
-INSERT INTO role_permissions (role_id, permission_id) VALUES (1, 2);
-INSERT INTO role_permissions (role_id, permission_id) VALUES (1, 3);
-INSERT INTO role_permissions (role_id, permission_id) VALUES (1, 4);
+INSERT INTO role_permissions (role_id, permissions_id) VALUES (1, 1);
+INSERT INTO role_permissions (role_id, permissions_id) VALUES (1, 2);
+INSERT INTO role_permissions (role_id, permissions_id) VALUES (1, 3);
+INSERT INTO role_permissions (role_id, permissions_id) VALUES (1, 4);
+INSERT INTO role_permissions (role_id, permissions_id) VALUES (2, 2);
+INSERT INTO role_permissions (role_id, permissions_id) VALUES (3, 3);
+INSERT INTO role_permissions (role_id, permissions_id) VALUES (3, 4);
 
-INSERT INTO role_permissions (role_id, permission_id) VALUES (2, 2);
-
-INSERT INTO role_permissions (role_id, permission_id) VALUES (3, 3);
-INSERT INTO role_permissions (role_id, permission_id) VALUES (3, 4);
-
-
-
-
+-- Insert all user-role mappings
+INSERT INTO user_roles (roles_id, user_id) VALUES (1, 1);
+INSERT INTO user_roles (roles_id, user_id) VALUES (2, 2);
 

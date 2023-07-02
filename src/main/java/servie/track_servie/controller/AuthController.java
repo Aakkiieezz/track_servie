@@ -26,7 +26,7 @@ import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
 import jakarta.servlet.http.HttpServletResponse;
-import servie.track_servie.entities.AuthUser;
+import servie.track_servie.entity.AuthUser;
 import servie.track_servie.payload.dtos.LoginRequest;
 import servie.track_servie.payload.dtos.Response;
 import servie.track_servie.utils.jwt.JwtUtils;

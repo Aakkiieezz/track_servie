@@ -5,15 +5,15 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Set;
 import org.springframework.stereotype.Component;
-import servie.track_servie.entities.Genre;
+import servie.track_servie.entity.Genre;
 
 @Component
 public class GenreUtils
 {
-    public Set<Genre> mapMovieGenresFromTmdbDBToAkashDB(Set<Genre> genres)
+    public Set<Genre> convertTmdbGenresToTrackServieGenres(Set<Genre> tmdbGenres)
     {
-        Set<Genre> updatedGenres = new HashSet<>();
-        for(Genre genre : genres)
+        Set<Genre> trackServieGenres = new HashSet<>();
+        for(Genre genre : tmdbGenres)
         {
             Integer genreId = genre.getId();
             int updatedId = genre.getId();
@@ -67,21 +67,21 @@ public class GenreUtils
                 updatedId = 25;
             else if(genreId==10759)
             {
-                updatedGenres.addAll(new ArrayList<>(Arrays.asList(new Genre(1, "Action"), new Genre(2, "Adventure"))));
+                trackServieGenres.addAll(new ArrayList<>(Arrays.asList(new Genre(1, "Action"), new Genre(2, "Adventure"))));
                 continue;
             }
             else if(genreId==10765)
             {
-                updatedGenres.addAll(new ArrayList<>(Arrays.asList(new Genre(19, "Science Fiction"), new Genre(9, "Fantasy"))));
+                trackServieGenres.addAll(new ArrayList<>(Arrays.asList(new Genre(19, "Science Fiction"), new Genre(9, "Fantasy"))));
                 continue;
             }
             else if(genreId==10768)
             {
-                updatedGenres.addAll(new ArrayList<>(Arrays.asList(new Genre(16, "Politics"), new Genre(24, "War"))));
+                trackServieGenres.addAll(new ArrayList<>(Arrays.asList(new Genre(16, "Politics"), new Genre(24, "War"))));
                 continue;
             }
-            updatedGenres.add(new Genre(updatedId, genre.getName()));
+            trackServieGenres.add(new Genre(updatedId, genre.getName()));
         }
-        return updatedGenres;
+        return trackServieGenres;
     }
 }

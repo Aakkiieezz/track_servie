@@ -33,7 +33,7 @@
         dataType: "json",
         success: function (data) {
           if (data.success) {
-            var movieDiv = $("#servie-" + tmdbId);
+            var movieDiv = $('#' + childtype + tmdbId);
             if (watched) {
               movieDiv.find(".bi-eye-fill").removeClass("bi-eye-fill").addClass("bi-eye-slash-fill");
             } else {
@@ -49,15 +49,15 @@
       });
     }
 
-    function removeServie(imdbId) {
+    function removeServie(tmdbId, childtype) {
       $.ajax({
         type: "POST",
         url: "/track-servie/servies/remove",
-        data: JSON.stringify({ imdbId: imdbId }),
+        data: JSON.stringify({ tmdbId: tmdbId, childtype: childtype }),
         contentType: "application/json; charset=utf-8",
         dataType: "json",
         success: function (data) {
-          $('#servie-' + imdbId).remove();
+          $('#' + childtype + tmdbId).remove();
         },
         error: function () {
           alert("Failed to remove servie");
@@ -238,7 +238,7 @@
     </div>
     <div class="row center">
       <div class="col-xxl-1 col-sm-2 col-3 image-container poster" th:each="servie : ${response.servies}"
-        th:id="'servie-' + ${servie.tmdbId}">
+        th:id="${servie.childtype + servie.tmdbId}">
         <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}"> -->
         <div th:if="${servie.childtype == 'movie'}">
           <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=movie'}">
@@ -273,7 +273,8 @@
               <i class="bi bi-file-image"></i>
             </a>
 
-            <a href="#" th:imdbId="${servie.imdbId}" onclick="removeServie(this.getAttribute('imdbId'))">
+            <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+              onclick="removeServie(this.getAttribute('tmdbId'), this.getAttribute('childtype'))">
               <i class="bi bi-x-circle-fill"></i>
             </a>
 
@@ -303,9 +304,12 @@
             <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
               <i class="bi bi-file-image"></i>
             </a>
-            <a href="#" th:imdbId="${servie.imdbId}" onclick="removeServie(this.getAttribute('imdbId'))">
+
+            <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+              onclick="removeServie(this.getAttribute('tmdbId'), this.getAttribute('childtype'))">
               <i class="bi bi-x-circle-fill"></i>
             </a>
+
             <div class="progress-bar">
               <div class="progress" th:with="progress=((${servie.episodesWatched}/${servie.numberOfEpisodes})*100)"
                 th:text="${#numbers.formatDecimal(progress, 1, 'DEFAULT', 0, 'DEFAULT')}+' %'"

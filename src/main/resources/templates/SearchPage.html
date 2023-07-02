@@ -40,14 +40,85 @@
   </form>
 
   <div class="row">
-    <div class="col-xxl-1 col-sm-2 col-3 rounded image-container poster" th:each="series : ${response.results}">
-      <a th:href="@{'/track-servie/series/'+${series.id}+'/search'}">
-        <img th:src="'https://www.themoviedb.org/t/p/original'+${series.posterPath}" />
-      </a>
-      <div class="buttons-container">
-        <a th:href="@{'/track-servie/servies/add?type='+${type}+'&id='+${series.id}}">
-          <i class="bi bi-plus-circle-fill"></i>
+    <div class="col-xxl-1 col-sm-2 col-3 image-container poster" th:each="servie : ${response.results}"
+      th:id="${servie.childtype + servie.tmdbId}">
+      <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}"> -->
+      <div th:if="${servie.childtype == 'movie'}">
+        <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=movie'}">
+          <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
+            alt="Poster Unavailable" />
         </a>
+        <div class="buttons-container">
+          <strong th:text="${servie.title}"></strong>
+          <br>
+          <!-- <span th:if="${servie.releaseDate != null}" th:text="${#temporals.year(servie.releaseDate)}"></span> -->
+          <!-- hyperlink -->
+          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
+            <div th:if="${servie.completed}">
+              <i class="bi bi-eye-slash-fill"></i>
+            </div>
+            <div th:unless="${servie.completed}">
+              <i class="bi bi-eye-fill"></i>
+            </div>
+          </a>
+          <!-- javascript+ajax+jquery -->
+          <!-- able to toggle value in backend, but not able to change the class of icon -->
+          <a href="#" th:if="${servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+            onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), false)">
+            <i class="bi bi-eye-slash-fill"></i>
+          </a>
+          <a href="#" th:if="${not servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+            onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), true)">
+            <i class="bi bi-eye-fill"></i>
+          </a>
+
+          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
+            <i class="bi bi-file-image"></i>
+          </a>
+
+          <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+            onclick="removeServie(this.getAttribute('tmdbId'), this.getAttribute('childtype'))">
+            <i class="bi bi-x-circle-fill"></i>
+          </a>
+
+        </div>
+      </div>
+      <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}" -->
+      <div th:if="${servie.childtype == 'tv'}">
+        <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=tv'}">
+          <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}" />
+        </a>
+        <div th:if="${servie.found}" class="buttons-container">
+          <strong th:text="${servie.title}"></strong>
+          <br>
+          <!-- <span
+            th:text="${#temporals.year(servie.firstAirDate)} + ' - ' + (${#temporals.year(servie.lastAirDate)} == '2023' ? 'present' : ${#temporals.format(servie.lastAirDate,'yy')})">
+          </span> -->
+          <br />
+          <span th:text="${servie.episodesWatched}+'/'+${servie.numberOfEpisodes}"></span>
+          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
+            <div th:if="${servie.completed}">
+              <i class="bi bi-eye-slash-fill"></i>
+            </div>
+            <div th:unless="${servie.completed}">
+              <i class="bi bi-eye-fill"></i>
+            </div>
+          </a>
+          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
+            <i class="bi bi-file-image"></i>
+          </a>
+
+          <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+            onclick="removeServie(this.getAttribute('tmdbId'), this.getAttribute('childtype'))">
+            <i class="bi bi-x-circle-fill"></i>
+          </a>
+
+          <div class="progress-bar">
+            <div class="progress" th:with="progress=((${servie.episodesWatched}/${servie.numberOfEpisodes})*100)"
+              th:text="${#numbers.formatDecimal(progress, 1, 'DEFAULT', 0, 'DEFAULT')}+' %'"
+              th:style="'width:' + ${progress} + '%;'"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>

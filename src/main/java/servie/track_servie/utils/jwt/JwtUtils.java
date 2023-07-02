@@ -3,7 +3,7 @@ package servie.track_servie.utils.jwt;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.io.Decoders;
 import io.jsonwebtoken.security.Keys;
-import servie.track_servie.entities.AuthUser;
+import servie.track_servie.entity.AuthUser;
 // import org.slf4j.Logger;
 // import org.slf4j.LoggerFactory;
 // import org.springframework.beans.factory.annotation.Value;

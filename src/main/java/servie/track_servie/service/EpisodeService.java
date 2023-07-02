@@ -14,11 +14,24 @@ import servie.track_servie.payload.dtos.operationsEpisodePageDtos.EpisodeDtoEpis
 import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsImage.EpisodePageDtos.EpisodeStillsDto;
 import servie.track_servie.payload.dtos.operationsSearch.EpisodePageDtos.EpisodeDtoSearchEpisodePage;
-import servie.track_servie.entities.Episode;
-import servie.track_servie.entities.UserEpisodeData;
+import servie.track_servie.payload.primaryKeys.ServieKey;
+import servie.track_servie.payload.primaryKeys.UserEpisodeDataKey;
+import servie.track_servie.payload.primaryKeys.UserSeasonDataKey;
+import servie.track_servie.payload.primaryKeys.UserServieDataKey;
+import servie.track_servie.entity.Episode;
+import servie.track_servie.entity.Servie;
+import servie.track_servie.entity.User;
+import servie.track_servie.entity.UserEpisodeData;
+import servie.track_servie.entity.UserSeasonData;
+import servie.track_servie.entity.UserServieData;
+import servie.track_servie.exceptions.ResourceNotFoundException;
 import servie.track_servie.payload.dtos.EntityDtoConversion;
 import servie.track_servie.repository.EpisodeRepository;
+import servie.track_servie.repository.ServieRepository;
 import servie.track_servie.repository.UserEpisodeDataRepository;
+import servie.track_servie.repository.UserRepository;
+import servie.track_servie.repository.UserSeasonDataRepository;
+import servie.track_servie.repository.UserServieDataRepository;
 
 @Service
 public class EpisodeService
@@ -27,6 +40,14 @@ public class EpisodeService
     private EpisodeRepository episodeRepository;
     @Autowired
     private UserEpisodeDataRepository userEpisodeDataRepository;
+    @Autowired
+    private UserSeasonDataRepository userSeasonDataRepository;
+    @Autowired
+    private UserServieDataRepository userServieDataRepository;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private ServieRepository servieRepository;
     @Autowired
     private EntityDtoConversion converter;
     @Autowired
@@ -50,7 +71,13 @@ public class EpisodeService
         // episode.setWatched(!episode.getWatched());
         // episodeRepository.save(episode);
         // with user
-        UserEpisodeData userEpisodeData = userEpisodeDataRepository.findByUserIdAndTmdbIdAndSeasonNumberAndEpisodeNumber(userId, tmdbId, seasonNumber, episodeNumber);
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
+        UserSeasonData userSeasonData = new UserSeasonData();
+        UserServieData userServieData = new UserServieData();
+        Servie servie = servieRepository.findById(new ServieKey(tmdbId, "tv")).get();
+        userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).get();
+        userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNumber)).get();
+        UserEpisodeData userEpisodeData = userEpisodeDataRepository.findById(new UserEpisodeDataKey(userSeasonData, episodeNumber)).get();
         userEpisodeData.setWatched(!userEpisodeData.getWatched());
         userEpisodeDataRepository.save(userEpisodeData);
     }

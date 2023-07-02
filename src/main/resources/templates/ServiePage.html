@@ -28,7 +28,8 @@
   <div>
     <div class="container-fluid backdrop">
       <img th:src="'https://www.themoviedb.org/t/p/original'+${servie.backdropPath}" alt="Backdrop Unavailable" />
-      <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}">
+      <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}"> -->
+      <div th:if="${servie.childtype == 'tv'}">
         <div class="progress-bar">
           <div class="progress" th:with="progress=((${servie.episodesWatched}/${servie.numberOfEpisodes})*100)"
             th:text="${#numbers.formatDecimal(progress, 1, 'DEFAULT', 0, 'DEFAULT')}+' %'"
@@ -80,7 +81,7 @@
               <p th:text="${season.name}+' Coming soon'"></p>
             </div>
             <div th:if="${season.episodeCount != 0}">
-              <a th:href="@{'/track-servie/series/'+${season.tmdbId}+'/Season/'+${season.seasonNumber}}">
+              <a th:href="@{'/track-servie/series/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}}">
                 <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${season.posterPath}"
                   alt="No poster available" />
               </a>
@@ -88,7 +89,7 @@
                 <td th:text="${season.episodesWatched}+'/'+${season.episodeCount}"></td>
 
                 <a
-                  th:href="@{'/track-servie/series/'+${season.tmdbId}+'/Season/'+${season.seasonNumber}+'/toggleback'}">
+                  th:href="@{'/track-servie/series/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}+'/toggleback'}">
                   <div th:if="${season.watched}">
                     <i class="bi bi-eye-slash-fill"></i>
                   </div>
@@ -98,7 +99,7 @@
                 </a>
 
                 <div th:if="${season.posterPath != null}">
-                  <a th:href="@{'/track-servie/series/'+${season.tmdbId}+'/Season/'+${season.seasonNumber}+'/posters'}">
+                  <a th:href="@{'/track-servie/series/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}+'/posters'}">
                     <i class="bi bi-file-image"></i>
                   </a>
                 </div>
@@ -116,9 +117,6 @@
             </div>
           </div>
         </div>
-      </div>
-      <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}">
-
       </div>
     </div>
   </div>

@@ -4,17 +4,15 @@ import java.util.List;
 import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
+import servie.track_servie.entity.Episode;
+import servie.track_servie.entity.Genre;
+import servie.track_servie.entity.Season;
 import servie.track_servie.payload.dtos.operationsEpisodePageDtos.EpisodeDtoEpisodePage;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.GenreDtoHomePage;
-import servie.track_servie.payload.dtos.operationsHomePageDtos.SeriesDtoHomePage;
+// import servie.track_servie.payload.dtos.operationsHomePageDtos.SeriesDtoHomePage;
 import servie.track_servie.payload.dtos.operationsSeasonPageDtos.EpisodeDtoSeasonPage;
 import servie.track_servie.payload.dtos.operationsSeasonPageDtos.SeasonDtoSeasonPage;
-import servie.track_servie.payload.dtos.operationsSeriesPageDtos.GenreDtoSeriesPage;
-import servie.track_servie.payload.dtos.operationsSeriesPageDtos.SeasonDtoSeriesPage;
-import servie.track_servie.entities.Episode;
-import servie.track_servie.entities.Genre;
-import servie.track_servie.entities.Season;
-import servie.track_servie.entities.Series;
+import servie.track_servie.payload.dtos.operationsServiePageDtos.GenreDtoServiePage;
 
 @Component
 public class EntityDtoConversion
@@ -29,12 +27,11 @@ public class EntityDtoConversion
     //   {
     //     return null;
     //   }
-
     // Home Page conversions
-    public SeriesDtoHomePage seriesToDtoHomePage(Series series)
-    {
-        return mapper.map(series, SeriesDtoHomePage.class);
-    }
+    // public SeriesDtoHomePage seriesToDtoHomePage(Series series)
+    // {
+    //     return mapper.map(series, SeriesDtoHomePage.class);
+    // }
 
     public GenreDtoHomePage genreToDtoDropdown(Genre genre)
     {
@@ -52,15 +49,14 @@ public class EntityDtoConversion
     //     seriesDto.setGenres(genreDtosSeriesPage);
     //     return seriesDto;
     // }
+    // public SeasonDtoSeriesPage seasonToDtoSeriesPage(Season season)
+    // {
+    //     return mapper.map(season, SeasonDtoSeriesPage.class);
+    // }
 
-    public SeasonDtoSeriesPage seasonToDtoSeriesPage(Season season)
+    public GenreDtoServiePage genreToDtoSeriesPage(Genre genre)
     {
-        return mapper.map(season, SeasonDtoSeriesPage.class);
-    }
-
-    public GenreDtoSeriesPage genreToDtoSeriesPage(Genre genre)
-    {
-        return mapper.map(genre, GenreDtoSeriesPage.class);
+        return mapper.map(genre, GenreDtoServiePage.class);
     }
 
     // Season Page conversions

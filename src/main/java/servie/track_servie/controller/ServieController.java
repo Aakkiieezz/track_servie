@@ -19,7 +19,8 @@ import jakarta.servlet.http.HttpSession;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ResponseDtoHomePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SearchResultDtoSearchPage;
-import servie.track_servie.payload.dtos.operationsSeriesPageDtos.SeriesDtoSeriesPage;
+import servie.track_servie.payload.dtos.operationsServiePageDtos.SeasonDtoServiePage;
+import servie.track_servie.payload.dtos.operationsServiePageDtos.ServieDtoServiePage;
 import servie.track_servie.service.ServieService;
 
 @Controller
@@ -60,7 +61,7 @@ public class ServieController
         // System.out.println(authorizationHeader);
         // checking if token exists in header
         // System.out.println(request.getHeader("Authorization"));
-        SearchResultDtoSearchPage response = servieService.searchServies(type, servieName, pageNumber);
+        SearchResultDtoSearchPage response = servieService.searchServies(userId, type, servieName, pageNumber);
         model.addAttribute("response", response);
         // should the type be inside the model attribute "searchList" ?
         model.addAttribute("query", servieName);
@@ -88,7 +89,7 @@ public class ServieController
     @GetMapping("add")
     public String addServie(@RequestParam(value = "type", required = true) String type, @RequestParam(value = "id", required = true) Integer tmdbId, HttpSession session)
     {
-        servieService.addServie(userId, type, tmdbId);
+        servieService.collectServie(userId, type, tmdbId);
         session.setAttribute("msg", "Item Added Successfully...!");
         return "redirect:/track-servie/servies";
     }
@@ -97,7 +98,9 @@ public class ServieController
     @GetMapping("{tmdbId}")
     public String getServie(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, Model model)
     {
-        SeriesDtoSeriesPage servie = servieService.getServie(userId, type, tmdbId);
+        ServieDtoServiePage servie = servieService.getServie(userId, type, tmdbId);
+        List<SeasonDtoServiePage> seasons = servieService.getSeasonsForSerivePage(userId, type, tmdbId);
+        servie.setSeasons(seasons);
         model.addAttribute("servie", servie);
         return "ServiePage";
     }
@@ -119,8 +122,9 @@ public class ServieController
     @ResponseBody
     public Map<String, Object> removeServie(@RequestBody Map<String, Object> payload)
     {
-        String imdbId = (String) payload.get("imdbId");
-        servieService.removeServie(imdbId);
+        Integer tmdbId = Integer.parseInt((String) payload.get("tmdbId"));
+        String childtype = (String) payload.get("childtype");
+        servieService.removeServie(tmdbId, childtype);
         return Collections.singletonMap("success", true);
     }
 

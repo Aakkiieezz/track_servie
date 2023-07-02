@@ -5,7 +5,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.GenreDtoHomePage;
-import servie.track_servie.entities.Genre;
+import servie.track_servie.entity.Genre;
 import servie.track_servie.payload.dtos.EntityDtoConversion;
 import servie.track_servie.repository.GenreRepository;
 

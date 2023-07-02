@@ -4,7 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import servie.track_servie.entities.AuthUser;
+import servie.track_servie.entity.AuthUser;
 import servie.track_servie.service.JwtUserDetailsService;
 import servie.track_servie.utils.jwt.JwtUtils;
 import org.slf4j.Logger;

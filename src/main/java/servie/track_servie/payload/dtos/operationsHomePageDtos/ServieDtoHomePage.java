@@ -6,6 +6,7 @@ import lombok.Data;
 @Data
 public class ServieDtoHomePage
 {
+    // servie fields
     private String imdbId;
     private Integer tmdbId;
     private String childtype;

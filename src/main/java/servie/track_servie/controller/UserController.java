@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-import servie.track_servie.entities.User;
+import servie.track_servie.entity.User;
 import servie.track_servie.service.UserService;
 
 @RestController

@@ -1,0 +1,26 @@
+package servie.track_servie.entity;
+
+import java.util.Set;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import lombok.Data;
+
+@Data
+@Entity
+public class Role
+{
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "id")
+    private Integer id;
+    // ---------------------------------------------------------------
+    @Column(name = "name")
+    private String name;
+    // ---------------------------------------------------------------
+    @ManyToMany
+    private Set<Permission> permissions;
+}

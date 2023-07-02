@@ -10,7 +10,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
-import servie.track_servie.entities.Language;
+import servie.track_servie.entity.Language;
 
 @Service
 public class LanguageService
