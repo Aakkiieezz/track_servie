@@ -46,9 +46,7 @@ import servie.track_servie.exceptions.ResourceNotFoundException;
 import servie.track_servie.repository.GenreRepository;
 import servie.track_servie.repository.MovieCollectionRepository;
 import servie.track_servie.repository.MovieRepository;
-import servie.track_servie.repository.SeriesRepository;
 import servie.track_servie.repository.ServieRepository;
-import servie.track_servie.repository.UserEpisodeDataRepository;
 import servie.track_servie.repository.UserRepository;
 import servie.track_servie.repository.UserSeasonDataRepository;
 import servie.track_servie.repository.UserServieDataRepository;
@@ -66,15 +64,11 @@ public class ServieService
     @Autowired
     private RestTemplate restTemplate;
     @Autowired
-    private SeriesRepository seriesRepository;
-    @Autowired
     private MovieRepository movieRepository;
     @Autowired
     private MovieCollectionRepository movieCollectionRepository;
     @Autowired
     private UserServieDataRepository userServieDataRepository;
-    @Autowired
-    private UserEpisodeDataRepository userEpisodeDataRepository;
     @Autowired
     private UserSeasonDataRepository userSeasonDataRepository;
     @Autowired
@@ -430,39 +424,37 @@ public class ServieService
     public void toggleServieWatch(Integer userId, String type, Integer tmdbId)
     {
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
-        // Servie servie = servieRepository.findById(new ServieKey(tmdbId, "tv")).get();
+        Servie servie = servieRepository.findById(new ServieKey(tmdbId, type)).orElseGet(() -> addServie(type, tmdbId));
+        UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElse(new UserServieData(user, servie));
         if(type.equals("tv"))
         {
-            Series series = seriesRepository.findById(new ServieKey(tmdbId, type)).orElseThrow(() -> new ResourceNotFoundException("Series", "Id", tmdbId.toString()));
-            UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, series)).get();
-            // without user
-            // List<Episode> episodes = episodeRepository.findByTmdbIdAndWatched(tmdbId, series.getWatched());
-            // for(Episode episode : episodes)
-            //     episode.setWatched(!series.getWatched());
-            // 
-            // with user
-            // UserSeasonData userSeasonData = new UserSeasonData();
-            //  userServieData = new UserServieData();
-            // Servie servie = servieRepository.findById(new ServieKey(tmdbId, "tv")).get();
-            // userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNumber)).get();
-            // List<UserEpisodeData> userEpisodeDatas = userEpisodeDataRepository.findByUserServieDataAndWatched(userServieData, series.getWatched());
-            List<UserEpisodeData> userEpisodeDatas = userEpisodeDataRepository.findByUserServieDataAndWatched(userServieData, userServieData.getCompleted());
-            for(UserEpisodeData userEpisodeData : userEpisodeDatas)
-                userEpisodeData.setWatched(!userServieData.getCompleted());
-            // 
-            // series.setWatched(!series.getWatched()); Not needed
-            seriesRepository.save(series);
+            Series series = (Series) servie;
+            List<UserSeasonData> userSeasonDatas = new ArrayList<>();
+            for(Season season : series.getSeasons())
+            {
+                UserSeasonData userSeasonData = new UserSeasonData();
+                List<UserEpisodeData> userEpisodeDatas = new ArrayList<>();
+                for(Episode episode : season.getEpisodes())
+                {
+                    UserEpisodeData userEpisodeData = new UserEpisodeData();
+                    userEpisodeData.setEpisodeNumber(episode.getEpisodeNumber());
+                    userEpisodeData.setUserSeasonData(userSeasonData);
+                    userEpisodeData.setWatched(!userServieData.getCompleted());
+                    userEpisodeDatas.add(userEpisodeData);
+                }
+                userSeasonData.setEpisodes(userEpisodeDatas);
+                userSeasonData.setEpisodeCount(season.getEpisodeCount());
+                userSeasonData.setSeasonNumber(season.getSeasonNumber());
+                userSeasonData.setUserServieData(userServieData);
+                userSeasonDatas.add(userSeasonData);
+            }
+            userServieData.setSeasons(userSeasonDatas);
+            userServieDataRepository.save(userServieData);
         }
         else
         {
-            // Movie movie = movieRepository.findById(new ServieKey(tmdbId, type)).orElseThrow(() -> new ResourceNotFoundException("Movie", "Id", tmdbId.toString()));
-            Servie servie = servieRepository.findById(new ServieKey(tmdbId, type)).orElseGet(() -> addServie(type, tmdbId));// .orElseThrow(() -> new ResourceNotFoundException("Movie", "Id", tmdbId.toString()));
-            UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElse(new UserServieData(user, servie));
-            // UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, movie)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "Id", new UserServieDataKey(user, movie).toString()));
             userServieData.setMovieWatched(!userServieData.getCompleted());
             userServieDataRepository.save(userServieData);
-            // movie.setWatched(!movie.getWatched());
-            // movieRepository.save(movie);
         }
     }
 
