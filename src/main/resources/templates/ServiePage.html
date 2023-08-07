@@ -51,7 +51,6 @@
           <i class="bi bi-eye-fill"></i>
         </div>
       </a>
-
       <h4>Genres</h4>
       <div class="row row-cols-auto left">
         <div class="col rounded genre" th:each="genre : ${servie.genres}">
@@ -64,12 +63,14 @@
         <p th:text="${servie.overview}"></p>
       </div>
       <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie) and servie.collection != null}"> -->
+
+      <!-- ToDo - add logic for showing collection
       <div th:if="${servie.childtype == 'movie' and servie.collection != null}">
         <h4>Collection</h4>
         <h5 th:text="${servie.belongsToCollection.collectionName}"></h5>
         <img th:src="'https://www.themoviedb.org/t/p/original'+${servie.belongsToCollection.posterPath}" />
         <img th:src="'https://www.themoviedb.org/t/p/original'+${servie.belongsToCollection.collectionBackdropPath}" />
-      </div>
+      </div> -->
       <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}"> -->
       <div th:if="${servie.childtype == 'tv'}">
         Total Episodes Watched :
@@ -81,7 +82,7 @@
               <p th:text="${season.name}+' Coming soon'"></p>
             </div>
             <div th:if="${season.episodeCount != 0}">
-              <a th:href="@{'/track-servie/series/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}}">
+              <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}}">
                 <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${season.posterPath}"
                   alt="No poster available" />
               </a>
@@ -89,7 +90,7 @@
                 <td th:text="${season.episodesWatched}+'/'+${season.episodeCount}"></td>
 
                 <a
-                  th:href="@{'/track-servie/series/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}+'/toggleback'}">
+                  th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}+'/toggleback'}">
                   <div th:if="${season.watched}">
                     <i class="bi bi-eye-slash-fill"></i>
                   </div>
@@ -97,9 +98,9 @@
                     <i class="bi bi-eye-fill"></i>
                   </div>
                 </a>
-
                 <div th:if="${season.posterPath != null}">
-                  <a th:href="@{'/track-servie/series/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}+'/posters'}">
+                  <a
+                    th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}+'/posters'}">
                     <i class="bi bi-file-image"></i>
                   </a>
                 </div>

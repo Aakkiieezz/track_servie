@@ -9,13 +9,14 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.util.UriComponentsBuilder;
 import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsSearch.SeasonPageDtos.SeasonDtoSearchSeasonPage;
 import servie.track_servie.payload.dtos.operationsSeasonPageDtos.SeasonDtoSeasonPage;
 import servie.track_servie.service.SeasonService;
 
 @Controller
-@RequestMapping("/track-servie/series/{tmdbId}/Season/{seasonNumber}")
+@RequestMapping("/track-servie/servies/{tmdbId}/Season/{seasonNumber}")
 public class SeasonController
 {
     @Autowired
@@ -31,15 +32,14 @@ public class SeasonController
         model.addAttribute("season", season);
         return "SeasonPage";
     }
-
-    // Returns SearchSeasonPage containing selected Season from SearchSeriesPage
-    @GetMapping("search")
-    public String searchSeason(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, Model model)
-    {
-        SeasonDtoSearchSeasonPage seasonDto = seasonService.searchSeason(tmdbId, seasonNumber);
-        model.addAttribute("season", seasonDto);
-        return "SearchSeasonPage";
-    }
+    // // Returns SearchSeasonPage containing selected Season from SearchSeriesPage
+    // @GetMapping("search")
+    // public String searchSeason(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, Model model)
+    // {
+    //     SeasonDtoSearchSeasonPage seasonDto = seasonService.searchSeason(tmdbId, seasonNumber);
+    //     model.addAttribute("season", seasonDto);
+    //     return "SearchSeasonPage";
+    // }
 
     // Toggles the watch button of Season located on SeriesPage
     @GetMapping("toggleback")
@@ -54,7 +54,7 @@ public class SeasonController
     public String toggleSeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber)
     {
         seasonService.toggleSeasonWatch(userId, tmdbId, seasonNumber);
-        return "redirect:/track-servie/series/"+tmdbId+"/Season/"+seasonNumber;
+        return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNumber;
     }
 
     // Returns ImageSearchSeasonPage containing list of Posters(for specific Season)
@@ -73,6 +73,9 @@ public class SeasonController
     public String changeImage(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
     {
         seasonService.changeImage(tmdbId, seasonNumber, filePath);
-        return "redirect:/track-servie/series/"+tmdbId;
+        // return "redirect:/track-servie/servies/"+tmdbId;
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("redirect:/track-servie/servies/{tmdbId}")
+                .queryParam("type", "tv");
+        return builder.buildAndExpand(tmdbId).toUriString();
     }
 }

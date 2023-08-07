@@ -22,6 +22,16 @@ import lombok.EqualsAndHashCode;
 @Table(name = "series")
 public class Series extends Servie
 {
+    // // @JsonProperty("id")
+    // // @Column(name = "tmdb_id")
+    // private Integer tmdbId;
+    // // ---------------------------------------------------------------
+    // // @Id
+    // // @Column(name = "childtype", insertable = false, updatable = false)
+    // private String childtype;
+    // // ---------------------------------------------------------------
+    // // ---------------------------------------------------------------
+    // // ---------------------------------------------------------------
     @JsonProperty("number_of_seasons")
     @Column(name = "number_of_seasons")
     private Integer numberOfSeasons;

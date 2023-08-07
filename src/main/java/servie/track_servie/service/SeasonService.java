@@ -16,8 +16,10 @@ import servie.track_servie.payload.dtos.operationsSearch.SeasonPageDtos.EpisodeD
 import servie.track_servie.payload.dtos.operationsSearch.SeasonPageDtos.SeasonDtoSearchSeasonPage;
 import servie.track_servie.payload.dtos.operationsSeasonPageDtos.SeasonDtoSeasonPage;
 import servie.track_servie.payload.primaryKeys.ServieKey;
+import servie.track_servie.payload.primaryKeys.UserEpisodeDataKey;
 import servie.track_servie.payload.primaryKeys.UserSeasonDataKey;
 import servie.track_servie.payload.primaryKeys.UserServieDataKey;
+import servie.track_servie.entity.Episode;
 import servie.track_servie.entity.Season;
 import servie.track_servie.entity.Series;
 import servie.track_servie.entity.Servie;
@@ -55,62 +57,54 @@ public class SeasonService
     @Autowired
     private EntityDtoConversion converter;
     @Autowired
+    private ServieService servieService;
+    @Autowired
     private RestTemplate restTemplate;
     @Value("${tmdb.api.key}")
     private String apiKey;
+    @Value("${user-id}")
+    private Integer userId;
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<?> httpEntity = new HttpEntity<>(headers);
 
-    // Returns specific Season from the database which matches the criteria
     public SeasonDtoSeasonPage getSeason(Integer tmdbId, Integer seasonNumber)
     {
         // Season season = seasonRepository.findByTmdbIdAndSeasonNumber(tmdbId, seasonNumber);
-        Series series = seriesRepository.findById(new ServieKey(tmdbId, "tv")).orElseThrow(() -> new ResourceNotFoundException("Series", "TmdbId", tmdbId.toString()));
+        Series series = seriesRepository.findById(new ServieKey("tv", tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Series", "TmdbId", tmdbId.toString()));
         Season season = seasonRepository.findBySeriesAndSeasonNumber(series, seasonNumber);
         SeasonDtoSeasonPage seasonDto = converter.seasonToDtoSeasonPage(season);
+        seasonDto.setTmdbId(tmdbId);
+        // -------------------------
+        // >>> Very bad code :
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
+        Servie servie = servieRepository.findById(new ServieKey("tv", tmdbId)).orElseGet(() -> servieService.addServie("tv", tmdbId));
+        UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).get();
+        UserSeasonData userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNumber)).get();
+        seasonDto.setEpisodesWatched(userSeasonData.getEpisodesWatched());
+        seasonDto.setWatched(userSeasonData.getWatched());
+        // -------------------------
         return seasonDto;
     }
 
-    // Toggles the watch value of a Season (after toggling watch value of all related Episodes)
+    // @Transactional
+    // Modification Pattern:
+    // * AkashPersistSeparatelyPattern -> Save each entity individually
+    // AkashPersistTogetherPattern -> Save the parent entity along with all the modifications in the child entities
+    //     issues - [fixable] couldn't save another season into a series already having a season
     public void toggleSeasonWatch(Integer userId, Integer tmdbId, Integer seasonNumber)
     {
-        // Season season = seasonRepository.findByTmdbIdAndSeasonNumber(tmdbId, seasonNumber);
-        Series series = seriesRepository.findById(new ServieKey(tmdbId, "tv")).orElseThrow(() -> new ResourceNotFoundException("Series", "TmdbId", tmdbId.toString()));
-        Season season = seasonRepository.findBySeriesAndSeasonNumber(series, seasonNumber);
-        // without user
-        // List<Episode> episodes = episodeRepository.findByTmdbIdAndSeasonNumberAndWatched(tmdbId, seasonNumber, season.getWatched());
-        // for(Episode episode : episodes)
-        //     episode.setWatched(!season.getWatched());
-        // with user
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
-        UserSeasonData userSeasonData = new UserSeasonData();
-        UserServieData userServieData = new UserServieData();
-        Servie servie = servieRepository.findById(new ServieKey(tmdbId, "tv")).get();
-        userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).get();
-        userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNumber)).get();
-        List<UserEpisodeData> userEpisodeDatas = userEpisodeDataRepository.findByUserSeasonDataAndWatched(userSeasonData, userSeasonData.getWatched());
+        Servie servie = servieRepository.findById(new ServieKey("tv", tmdbId)).orElseGet(() -> servieService.addServie("tv", tmdbId));
+        UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElseGet(() -> userServieDataRepository.save(new UserServieData(user, servie)));
+        UserSeasonData userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNumber)).orElseGet(() -> userSeasonDataRepository.save(new UserSeasonData(userServieData, seasonNumber)));
+        List<UserEpisodeData> userEpisodeDatas = userEpisodeDataRepository.getToggledEpisodes(tmdbId, seasonNumber, !userSeasonData.getWatched());
         for(UserEpisodeData userEpisodeData : userEpisodeDatas)
-            userEpisodeData.setWatched(!userSeasonData.getWatched());
-        userSeasonData.setWatched(!userSeasonData.getWatched());
-        seasonRepository.save(season);
+            userEpisodeData.setUserSeasonData(userSeasonData);
+        userEpisodeDataRepository.saveAll(userEpisodeDatas);
     }
 
-    // Returns data of specific Season from the 3rd party api
-    public SeasonDtoSearchSeasonPage searchSeason(Integer tmdbId, Integer seasonNumber)
-    {
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<?> httpEntity = new HttpEntity<>(headers);
-        ResponseEntity<SeasonDtoSearchSeasonPage> response = restTemplate.exchange("https://api.themoviedb.org/3/tv/"+tmdbId+"/season/"+seasonNumber+"?api_key="+apiKey, HttpMethod.GET, httpEntity, SeasonDtoSearchSeasonPage.class);
-        SeasonDtoSearchSeasonPage seasonDto = response.getBody();
-        if(seasonDto!=null)
-            for(EpisodeDtoSearchSeasonPage episodeDto : seasonDto.getEpisodes())
-                episodeDto.setTmdbId(tmdbId);
-        return seasonDto;
-    }
-
-    // Returns list of img-Posters(for Season) from the 3rd party api
     public List<Image> getSeasonImages(Integer tmdbId, Integer seasonNumber)
     {
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<?> httpEntity = new HttpEntity<>(headers);
         ResponseEntity<SeasonPostersDto> response = restTemplate.exchange("https://api.themoviedb.org/3/tv/"+tmdbId+"/season/"+seasonNumber+"/images?api_key="+apiKey, HttpMethod.GET, httpEntity, SeasonPostersDto.class);
         SeasonPostersDto res = response.getBody();
         List<Image> images = new ArrayList<>();
@@ -119,13 +113,14 @@ public class SeasonService
         return images;
     }
 
-    // Changes img-Poster of a Season
     public void changeImage(Integer tmdbId, Integer seasonNumber, String filePath)
     {
-        // Season season = seasonRepository.findByTmdbIdAndSeasonNumber(tmdbId, seasonNumber);
-        Series series = seriesRepository.findById(new ServieKey(tmdbId, "tv")).orElseThrow(() -> new ResourceNotFoundException("Series", "TmdbId", tmdbId.toString()));
-        Season season = seasonRepository.findBySeriesAndSeasonNumber(series, seasonNumber);
-        season.setPosterPath(filePath);
-        seasonRepository.save(season);
+        User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
+        Servie servie = servieRepository.findById(new ServieKey("tv", tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey("tv", tmdbId).toString()));
+        UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).get();
+        // ??? what if user don't have this season
+        UserSeasonData userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNumber)).get();
+        userSeasonData.setPosterPath(filePath);
+        userSeasonDataRepository.save(userSeasonData);
     }
 }

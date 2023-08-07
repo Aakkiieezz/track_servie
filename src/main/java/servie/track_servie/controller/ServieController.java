@@ -15,7 +15,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpSession;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ResponseDtoHomePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SearchResultDtoSearchPage;
@@ -51,7 +50,6 @@ public class ServieController
     // Returns SearchPage containing all searched Servies from 3rd party api
     // ??? what happens when required is true and no default is given
     @GetMapping("search")
-    // @CrossOrigin(origins = "http://localhost:8080")
     public String searchServies(@RequestParam(value = "type", required = true) String type, @RequestParam(value = "query", required = true) String servieName, @RequestParam(value = "pageNumber", defaultValue = "1") int pageNumber, Model model/*
                                                                                                                                                                                                                                                    * , @RequestHeader HttpHeaders headers
                                                                                                                                                                                                                                                    */, HttpServletRequest request)
@@ -73,34 +71,11 @@ public class ServieController
         return "SearchPage";
     }
 
-    // Adds Servie into the database after getting data from 3rd party api
-    // ??? why cannot use @PostMapping, when using 'Post' getting { status: 405, error: "Method Not Allowed", trace: "Request method 'POST' not supported" } in postman
-    /*
-     * In browser - Whitelabel Error Page This application has no explicit mapping
-     * for /error, so you are seeing this as a fallback. There was an unexpected
-     * error (type=Bad Request, status=400) Failed to convert value of type
-     * 'java.lang.String' to required type 'java.lang.Integer'; nested exception is
-     * java.lang.NumberFormatException: For input string: "add"
-     * org.springframework.web.method.annotation.
-     * MethodArgumentTypeMismatchException: Failed to convert value of type
-     * 'java.lang.String' to required type 'java.lang.Integer'; nested exception is
-     * java.lang.NumberFormatException: For input string: "add"}
-     */
-    @GetMapping("add")
-    public String addServie(@RequestParam(value = "type", required = true) String type, @RequestParam(value = "id", required = true) Integer tmdbId, HttpSession session)
-    {
-        servieService.collectServie(userId, type, tmdbId);
-        session.setAttribute("msg", "Item Added Successfully...!");
-        return "redirect:/track-servie/servies";
-    }
-
     // Returns SeriesPage containing selected Series from HomePage
     @GetMapping("{tmdbId}")
     public String getServie(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, Model model)
     {
         ServieDtoServiePage servie = servieService.getServie(userId, type, tmdbId);
-        List<SeasonDtoServiePage> seasons = servieService.getSeasonsForSerivePage(userId, type, tmdbId);
-        servie.setSeasons(seasons);
         model.addAttribute("servie", servie);
         return "ServiePage";
     }
@@ -170,7 +145,7 @@ public class ServieController
     @GetMapping("{tmdbId}/backdropChange")
     public String changeBackdrop(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
     {
-        servieService.changeBackdrop(type, tmdbId, filePath);
+        servieService.changeBackdrop(userId, type, tmdbId, filePath);
         return "redirect:/track-servie/servies/"+tmdbId+"?type="+type;
     }
 
@@ -189,7 +164,7 @@ public class ServieController
     @GetMapping("{tmdbId}/posterChange")
     public String changePoster(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
     {
-        servieService.changePoster(type, tmdbId, filePath);
+        servieService.changePoster(userId, type, tmdbId, filePath);
         return "redirect:/track-servie/servies"; // ??? why can't we return the HomePage directly instead
     }
 }

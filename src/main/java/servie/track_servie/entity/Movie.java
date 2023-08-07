@@ -7,6 +7,7 @@ import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Embedded;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrimaryKeyJoinColumn;
@@ -23,6 +24,16 @@ import lombok.EqualsAndHashCode;
 @Table(name = "movie")
 public class Movie extends Servie
 {
+    // // @JsonProperty("id")
+    // // @Column(name = "tmdb_id")
+    // private Integer tmdbId;
+    // // ---------------------------------------------------------------
+    // // @Id
+    // // @Column(name = "childtype", insertable = false, updatable = false)
+    // private String childtype;
+    // // ---------------------------------------------------------------
+    // // ---------------------------------------------------------------
+    // // ---------------------------------------------------------------
     @JsonProperty("release_date")
     @Column(name = "release_date")
     private LocalDate releaseDate;

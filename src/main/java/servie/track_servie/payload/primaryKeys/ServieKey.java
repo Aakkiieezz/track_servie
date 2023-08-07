@@ -11,8 +11,8 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class ServieKey implements Serializable
 {
-    private Integer tmdbId;
     private String childtype;
+    private Integer tmdbId;
 
     @Override
     public boolean equals(Object o)

@@ -9,7 +9,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "cast")
+@Table(name = "casting")
 public class Cast
 {
     @Id

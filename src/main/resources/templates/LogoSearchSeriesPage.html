@@ -28,7 +28,7 @@
     <h3>Series Logos</h3>
     <div class="row center">
         <div class="col-xxl-3 col-sm-4 col-6 rounded image-container logo" th:each="image : ${logos}">
-            <a th:href="@{'/track-servie/series/'+${tmdbId}+'/logoChange?filePath='+${image.filePath}}">
+            <a th:href="@{'/track-servie/servies/'+${tmdbId}+'/logoChange?filePath='+${image.filePath}}">
                 <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${image.filePath}" />
             </a>
         </div>

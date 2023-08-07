@@ -15,7 +15,7 @@ import servie.track_servie.payload.dtos.operationsSearch.EpisodePageDtos.Episode
 import servie.track_servie.service.EpisodeService;
 
 @Controller
-@RequestMapping("/track-servie/series/{tmdbId}/Season/{seasonNumber}/Episode/{episodeNumber}")
+@RequestMapping("/track-servie/servies/{tmdbId}/Season/{seasonNumber}/Episode/{episodeNumber}")
 public class EpisodeController
 {
     @Autowired
@@ -31,22 +31,21 @@ public class EpisodeController
         model.addAttribute("episode", episode);
         return "EpisodePage";
     }
-
     // Returns SearchEpisodePage containing selected Episode from SearchSeasonPage
-    @GetMapping("search")
-    public String searchEpisode(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber, Model model)
-    {
-        EpisodeDtoSearchEpisodePage episodeDto = episodeService.searchEpisode(tmdbId, seasonNumber, episodeNumber);
-        model.addAttribute("episode", episodeDto);
-        return "SearchEpisodePage";
-    }
+    // @GetMapping("search")
+    // public String searchEpisode(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber, Model model)
+    // {
+    //     EpisodeDtoSearchEpisodePage episodeDto = episodeService.searchEpisode(tmdbId, seasonNumber, episodeNumber);
+    //     model.addAttribute("episode", episodeDto);
+    //     return "SearchEpisodePage";
+    // }
 
     // Toggles the watch button of Episode located on SeasonPage
     @GetMapping("toggleback")
     public String toggleEpisodeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber)
     {
         episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNumber, episodeNumber);
-        return "redirect:/track-servie/series/"+tmdbId+"/Season/"+seasonNumber;
+        return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNumber;
     }
 
     // Toggles the watch button of Episode located on EpisodePage
@@ -54,7 +53,7 @@ public class EpisodeController
     public String toggleEpWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber)
     {
         episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNumber, episodeNumber);
-        return "redirect:/track-servie/series/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
+        return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
     }
 
     // Returns ImageSearchEpisodePage containing list of Stills(for Episode)
@@ -74,6 +73,6 @@ public class EpisodeController
     public String changeImage(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
     {
         episodeService.changeImage(tmdbId, seasonNumber, episodeNumber, filePath);
-        return "redirect:/track-servie/series/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
+        return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
     }
 }

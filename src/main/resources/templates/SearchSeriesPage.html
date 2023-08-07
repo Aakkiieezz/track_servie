@@ -40,7 +40,7 @@
                 <tr th:each="genre : ${series.genres}">
                     <td th:text="${genre.id}"></td>
                     <td>
-                        <a th:href="@{'/track-servie/series?genreIds='+${genre.id}}" th:text="${genre.name}"></a>
+                        <a th:href="@{'/track-servie/servies?genreIds='+${genre.id}}" th:text="${genre.name}"></a>
                     </td>
                 </tr>
             </table>
@@ -57,12 +57,12 @@
                 <tr th:each="season : ${series.seasons}">
                     <td th:text="${season.id}"></td>
                     <td>
-                        <a th:href="@{'/track-servie/series/'+${season.tmdbId}+'/Season/'+${season.seasonNumber}+'/search'}"
+                        <a th:href="@{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNumber}+'/search'}"
                             th:text="${season.name}"></a>
                     </td>
                     <td>
                         <a
-                            th:href="@{'/track-servie/series/'+${season.tmdbId}+'/Season/'+${season.seasonNumber}+'/search'}">
+                            th:href="@{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNumber}+'/search'}">
                             <img th:src="'https://www.themoviedb.org/t/p/original'+${season.posterPath}"
                                 style="width: 5%; height: 5%" />
                         </a>

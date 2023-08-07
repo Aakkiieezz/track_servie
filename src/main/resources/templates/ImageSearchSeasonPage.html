@@ -25,12 +25,12 @@
 </head>
 
 <body>
-    <h3>Season Images</h3>
+    <h3>Season Images - posters</h3>
     <div class="row series">
         <div class="col-xxl-1 col-sm-2 col-3 rounded image-container poster" th:each="image : ${images}"
             th:if="${image.iso_639_1 == null or image.iso_639_1 == 'en'}">
             <a
-                th:href="@{'/track-servie/series/'+${tmdbId}+'/Season/'+${seasonNumber}+'/posterChange?filePath='+${image.filePath}}">
+                th:href="@{'/track-servie/servies/'+${tmdbId}+'/Season/'+${seasonNumber}+'/posterChange?filePath='+${image.filePath}}">
                 <img th:src="'https://www.themoviedb.org/t/p/original'+${image.filePath}" />
             </a>
         </div>

@@ -15,27 +15,34 @@ Since I want to maintain a common database, I will need to add a letter in id an
 Changes to track of each user
 
 Episode
-
 - watched
-- stillPath
+- personal score
+- notes
+- add to list
 
 Season
-
-- watched (not sure, since it can be calculated from episode's watched)
+- watched (marks episodes watched/unwatched)
 - posterPath
+- personal score
+- notes
+- add to list
 
 Series
+- watched (marks episodes watched/unwatched)
+- poster img
+- backdrop img
+- personal score
+- notes
+- add to list
 
-- watched (not sure, since it can be calculated from episode's watched)
 
 Movie
-
 - watched
-
-Servie
-
-- posterPath
-- backdropPath
+- poster img
+- backdrop img
+- personal score
+- notes
+- add to list
 
 UserServie Table
 user_id imdb_id season_number episode_number servie_watched(T) servie_poster servie_backdrop season_poster episode_watched
@@ -66,14 +73,14 @@ Posters
 0.675 1382 x 2048
 0.698 1430 x 2048
 0.701 1435 x 2048
-0.75 1536 x 2048
+0.750 1536 x 2048
 0.674 1554 x 2304
 0.667 2000 x 3000
 0.675 2000 x 2964
 
 Backdrops
 1.778 1280 x 720
-1.78 1367 x 768
+1.780 1367 x 768
 1.778 1636 x 920
 1.778 1920 x 1080
 1.777 1960 x 1103
@@ -105,7 +112,7 @@ Search servie based on its original language
 ######################################################################################################################################################
 TrackServie Genres :
 
-Action      
+Action  
 Adventure
 Animation
 Comedy
@@ -114,20 +121,20 @@ Documentary
 Drama
 Family
 Fantasy
-History           M
-Horror            M
-Kids                  T
-Music             M
+History M
+Horror M
+Kids T
+Music M
 Mystery
-News                  T
-Politics              T
-Reality               T
-Romance           M
-Science Fiction   M   T
-Soap                  T
-Talk                  T
-TV Movie          M
-Thriller          M
+News T
+Politics T
+Reality T
+Romance M
+Science Fiction M T
+Soap T
+Talk T
+TV Movie M
+Thriller M
 War
 Western
 
@@ -325,12 +332,9 @@ yo : Yoruba
 ######################################################################################################################################################
 Issues to fix/work on :
 
-Watched values are only considered of first user in the table
-Deleting serive of independent user
 Watched toggle using AJAX
 Genre dropdown to have 3 states of selecting [none, select, unselect]
 To add criteria builder for multiple filters
-Reduce the size of the servieService by making it more modular
 UI of Homepage
 UI of Servie page
 UI of Season page
@@ -338,20 +342,20 @@ UI of episode page
 Add cast and crew
 
 ######################################################################################################################################################
-TMDB Movie Status Values: 
+TMDB Movie Status Values:
 Rumored
-Planned         - officially announced, However, production may not have started yet
-In Production   - currently being made
+Planned - officially announced, However, production may not have started yet
+In Production - currently being made
 Post Production - almost complete
 Canceled
 Released
 
 TMDB Tv Status Values :
-Planned           - officially announced, However, production may not have started yet
-Pilot             - yet deciding to produce or not based on single episode
-In Production     - currently being made
+Planned - officially announced, However, production may not have started yet
+Pilot - yet deciding to produce or not based on single episode
+In Production - currently being made
 Cancelled
-Returning Series  - next season will come
+Returning Series - next season will come
 Ended
 
 TrackServie Status Values :
@@ -364,3 +368,31 @@ Cancelled
 Returning Series
 Released
 Ended
+
+######################################################################################################################################################
+
+*** get all eps with E.watched != !S.watched
+
+All watched [perfect] [DONE]
+S 1 -> 0
+E 1 1 1 1 1
+
+All watched & missing [perfect] [extras] [DONE]
+S 1 -> 0
+E 1 1 1 - -
+
+Half watched [perfect] [DONE]
+S 0 -> 1
+E 1 1 0 0 0
+
+Half watched & few missing [perfect] [DONE]
+S 0 -> 1
+E 1 1 0 0 -
+
+None watched [perfect] [DONE]
+S 0 -> 1
+E 0 0 0 0 0
+
+None watched & few missing [perfect] [DONE]
+S 0 -> 1
+E 0 0 0 0 -

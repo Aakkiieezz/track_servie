@@ -40,7 +40,7 @@
   </div>
 
   <a
-    th:href="@{'/track-servie/series/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}+'/toggle'}">
+    th:href="@{'/track-servie/servies/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}+'/toggle'}">
 
     <div th:if="${episode.watched}">
       <span class="material-icons">visibility</span>
@@ -51,7 +51,7 @@
   </a>
 
   <a
-    th:href="@{'/track-servie/series/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}+'/stills'}">
+    th:href="@{'/track-servie/servies/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}+'/stills'}">
     <span class="material-icons">image_search</span>
   </a>
 

@@ -1,18 +1,15 @@
 package servie.track_servie.service;
 
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
-import servie.track_servie.entity.Movie;
 import servie.track_servie.entity.Series;
 import servie.track_servie.entity.Servie;
 import servie.track_servie.entity.User;
@@ -20,6 +17,7 @@ import servie.track_servie.entity.UserEpisodeData;
 import servie.track_servie.entity.UserSeasonData;
 import servie.track_servie.entity.UserServieData;
 import servie.track_servie.entity.vault.VaultUserServie;
+import servie.track_servie.enums.ServieType;
 import servie.track_servie.exceptions.ResourceNotFoundException;
 import servie.track_servie.payload.primaryKeys.ServieKey;
 import servie.track_servie.payload.primaryKeys.UserSeasonDataKey;
@@ -62,7 +60,7 @@ public class VaultService
         {
             String[] servieHeader = {"TmdbId", "ChildType", "Movie Watched", "Backdrop Path", "Poster Path"};
             ServieWriter.writeNext(servieHeader);
-            String[] seasonHeader = {"TmdbId", "ChildType", "Season Number", "Total Episodes"};
+            String[] seasonHeader = {"TmdbId", "ChildType", "Season Number"};
             SeasonWriter.writeNext(seasonHeader);
             String[] episodeHeader = {"TmdbId", "ChildType", "Season Number", "Episode Number", "Watched"};
             EpisodeWriter.writeNext(episodeHeader);
@@ -82,7 +80,7 @@ public class VaultService
                             String[] episodeRow = {tmdbId, childtype, seasonNumber, userEpisodeData.getEpisodeNumber().toString(), Boolean.toString(userEpisodeData.getWatched())};
                             EpisodeWriter.writeNext(episodeRow);
                         }
-                        String[] seasonRow = {tmdbId, childtype, seasonNumber, userSeasonData.getEpisodeCount().toString()};
+                        String[] seasonRow = {tmdbId, childtype, seasonNumber};
                         SeasonWriter.writeNext(seasonRow);
                     }
                 }
@@ -141,7 +139,7 @@ public class VaultService
         for(String[] row : rows)
         {
             Integer tmdbId = Integer.parseInt(row[0]);
-            Servie servie = servieRepository.findById(new ServieKey(tmdbId, "movie")).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(tmdbId, "movie").toString()));
+            Servie servie = servieRepository.findById(new ServieKey(ServieType.MOVIE.toString(), tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(ServieType.MOVIE.toString(), tmdbId).toString()));
             UserServieData userServieData = new UserServieData();
             userServieData.setServie(servie);
             userServieData.setUser(user);
@@ -165,7 +163,7 @@ public class VaultService
         {
             Integer tmdbId = Integer.parseInt(row[0]);
             String childtype = row[1];
-            Servie servie = servieRepository.findById(new ServieKey(tmdbId, childtype)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(tmdbId, "movie").toString()));
+            Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(ServieType.MOVIE.toString(), tmdbId).toString()));
             UserServieData userServieData = new UserServieData();
             userServieData.setServie(servie);
             userServieData.setUser(user);
@@ -181,12 +179,12 @@ public class VaultService
         {
             Integer tmdbId = Integer.parseInt(row[0]);
             String childtype = row[1];
-            Servie servie = servieRepository.findById(new ServieKey(tmdbId, childtype)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(tmdbId, "movie").toString()));
+            Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(ServieType.MOVIE.toString(), tmdbId).toString()));
             UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "UserServieDataKey", new UserServieDataKey(user, servie).toString()));
             UserSeasonData userSeasonData = new UserSeasonData();
             userSeasonData.setUserServieData(userServieData);
             userSeasonData.setSeasonNumber(Integer.parseInt(row[2]));
-            userSeasonData.setEpisodeCount(Integer.parseInt(row[3]));
+            // userSeasonData.setEpisodeCount(Integer.parseInt(row[3]));
             userSeasonDatas.add(userSeasonData);
         }
         userSeasonDataRepository.saveAll(userSeasonDatas);
@@ -202,7 +200,7 @@ public class VaultService
             Integer seasonNumber = Integer.parseInt(row[2]);
             Integer episodeNumber = Integer.parseInt(row[3]);
             Boolean watched = Boolean.valueOf(row[4]);
-            Servie servie = servieRepository.findById(new ServieKey(tmdbId, childtype)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(tmdbId, "movie").toString()));
+            Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(ServieType.MOVIE.toString(), tmdbId).toString()));
             UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "UserServieDataKey", new UserServieDataKey(user, servie).toString()));
             UserSeasonData userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNumber)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "UserSeasonDataKey", new UserSeasonDataKey(userServieData, seasonNumber).toString()));
             UserEpisodeData userEpisodeData = new UserEpisodeData();

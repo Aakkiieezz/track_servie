@@ -12,10 +12,12 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import servie.track_servie.payload.primaryKeys.UserSeasonDataKey;
 
 @Data
 @Entity
+@NoArgsConstructor
 @IdClass(UserSeasonDataKey.class)
 public class UserSeasonData
 {
@@ -30,15 +32,24 @@ public class UserSeasonData
     @Column(name = "season_number")
     private Integer seasonNumber;
     // ---------------------------------------------------------------
-    @Column(name = "episode_count")
-    private Integer episodeCount;
+    // @Column(name = "episode_count")
+    // private Integer episodeCount;
     // ---------------------------------------------------------------
-    @Formula(value = "(SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data AS ued WHERE ued.user_id = user_id AND ued.tmdb_id = tmdb_id AND ued.season_number = season_number AND ued.watched = 1) = episode_count THEN true ELSE false END)")
+    @Formula(value = "(SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data AS ued WHERE ued.user_id = user_id AND ued.tmdb_id = tmdb_id AND ued.season_number = season_number AND ued.watched = 1) = (SELECT s.episode_count FROM season AS s WHERE s.series_tmdb_id = tmdb_id AND s.season_number = season_number) THEN true ELSE false END)")
     private Boolean watched = false;
     // ---------------------------------------------------------------
     @Formula(value = "(SELECT COUNT(*) FROM user_episode_data AS ued WHERE ued.user_id = user_id AND ued.tmdb_id = tmdb_id AND ued.season_number = season_number AND ued.watched = 1)")
     private Integer episodesWatched;
     // ---------------------------------------------------------------
+    @Column(name = "poster_path")
+    private String posterPath;
+    // ---------------------------------------------------------------
     @OneToMany(mappedBy = "userSeasonData", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<UserEpisodeData> episodes;
+
+    public UserSeasonData(UserServieData userServieData, Integer seasonNumber)
+    {
+        this.userServieData = userServieData;
+        this.seasonNumber = seasonNumber;
+    }
 }

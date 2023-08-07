@@ -10,7 +10,7 @@ import servie.track_servie.payload.dtos.operationsSearch.SeriesPageDtos.SeriesDt
 import servie.track_servie.service.SeriesService;
 
 @Controller
-@RequestMapping("/track-servie/series")
+@RequestMapping("/track-servie/servies")
 public class SeriesController
 {
     @Autowired

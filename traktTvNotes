@@ -1,0 +1,6 @@
+Lists can contain : episode/season/series/movie
+
+Watch toggling of season 
+    when none episodes watched -> marks it as all watched
+    few episodes watched -> options [watch remaining, remove all, nothing]
+    all eoisodes watched -> options [remove all, nothing]

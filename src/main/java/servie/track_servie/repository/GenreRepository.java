@@ -11,6 +11,9 @@ import servie.track_servie.payload.dtos.operationsServiePageDtos.GenreDtoServieP
 @Repository
 public interface GenreRepository extends JpaRepository<Genre, Integer>
 {
-    @Query(value = "SELECT new servie.track_servie.payload.dtos.operationsServiePageDtos.GenreDtoServiePage(g.id, g.name) FROM Genre g"+" JOIN g.servies s"+" WHERE s.childtype = :childtype AND s.tmdbId = :tmdbId")
+    @Query(value = "SELECT new servie.track_servie.payload.dtos.operationsServiePageDtos.GenreDtoServiePage(g.id, g.name)"
+            +" FROM Genre g"
+            +" JOIN g.servies s"
+            +" WHERE s.childtype = :childtype AND s.tmdbId = :tmdbId")
     Set<GenreDtoServiePage> getGenresForServiePage(@Param("tmdbId") Integer tmdbId, @Param("childtype") String childtype);
 }

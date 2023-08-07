@@ -16,12 +16,11 @@ public class SeriesService
     private RestTemplate restTemplate;
     @Value("${tmdb.api.key}")
     private String apiKey;
+    HttpHeaders headers = new HttpHeaders();
+    HttpEntity<?> httpEntity = new HttpEntity<>(headers);
 
-    // Returns data of specific Series from the 3rd party api
     public SeriesDtoSearchSeriesPage searchSeries(Integer tmdbId)
     {
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<?> httpEntity = new HttpEntity<>(headers);
         ResponseEntity<SeriesDtoSearchSeriesPage> response = restTemplate.exchange("https://api.themoviedb.org/3/tv/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, SeriesDtoSearchSeriesPage.class);
         SeriesDtoSearchSeriesPage seriesDto = response.getBody();
         if(seriesDto!=null)

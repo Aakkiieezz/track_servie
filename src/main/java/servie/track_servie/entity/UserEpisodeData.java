@@ -7,10 +7,12 @@ import jakarta.persistence.IdClass;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import servie.track_servie.payload.primaryKeys.UserEpisodeDataKey;
 
 @Data
 @Entity
+@NoArgsConstructor
 @IdClass(UserEpisodeDataKey.class)
 public class UserEpisodeData
 {
@@ -28,4 +30,20 @@ public class UserEpisodeData
     // ---------------------------------------------------------------
     @Column(name = "watched", nullable = false)
     private Boolean watched = false;
+    @Column(name = "notes")
+    private String notes;
+
+    public UserEpisodeData(UserSeasonData userSeasonData, Integer episodeNumber)
+    {
+        this.userSeasonData = userSeasonData;
+        this.episodeNumber = episodeNumber;
+    }
+
+    public UserEpisodeData(/* UserSeasonData userSeasonData, */Integer episodeNumber, Boolean watched, String notes)
+    {
+        // this.userSeasonData = userSeasonData;
+        this.episodeNumber = episodeNumber;
+        this.watched = watched;
+        this.notes = notes;
+    }
 }

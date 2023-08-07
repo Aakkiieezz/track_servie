@@ -36,7 +36,7 @@
           <h3>Overview : </h3>
           <p th:text="${season.overview}"></p>
         </div>
-        <a th:href="@{'/track-servie/series/'+${season.tmdbId}+'/Season/'+${season.seasonNumber}+'/toggle'}">
+        <a th:href="@{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNumber}+'/toggle'}">
           <div th:if="${season.watched}">
             <i class="bi bi-eye-slash-fill"></i>
           </div>
@@ -46,6 +46,7 @@
         </a>
 
         Total Episodes Watched :
+        <td th:text="${season.episodesWatched}+'/'+${season.episodeCount}"></td>
         <span th:text="${season.episodesWatched}+'/'+${season.episodeCount}"></span>
       </div>
     </div>
@@ -53,12 +54,12 @@
     <div class="row box2" th:each="episode : ${season.episodes}">
       <div class="col-4 image-container still">
         <a
-          th:href="@{'/track-servie/series/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}}">
+          th:href="@{'/track-servie/servies/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}}">
           <img th:src="'https://www.themoviedb.org/t/p/original'+${episode.stillPath}" />
         </a>
       </div>
       <div class="col-8">
-        <a th:href="@{'/track-servie/series/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}}"
+        <a th:href="@{'/track-servie/servies/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}}"
           th:text="${episode.name}"></a>
         <div th:unless="${#strings.isEmpty(episode.overview)}">
           <h3>Overview : </h3>
@@ -66,7 +67,7 @@
         </div>
         <div>
           <a
-            th:href="@{'/track-servie/series/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}+'/toggleback'}">
+            th:href="@{'/track-servie/servies/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}+'/toggleback'}">
             <div th:if="${episode.watched}">
               <i class="bi bi-eye-slash-fill"></i>
             </div>

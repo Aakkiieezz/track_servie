@@ -19,11 +19,11 @@ public class LanguageService
     private RestTemplate restTemplate;
     @Value("${tmdb.api.key}")
     private String apiKey;
+    private HttpHeaders headers = new HttpHeaders();
+    private HttpEntity<?> httpEntity = new HttpEntity<>(headers);
 
     public List<Language> getAll()
     {
-        HttpHeaders headers = new HttpHeaders();
-        HttpEntity<?> httpEntity = new HttpEntity<>(headers);
         ResponseEntity<List<Language>> languagesResponse = restTemplate.exchange("https://api.themoviedb.org/3/configuration/languages?api_key="+apiKey, HttpMethod.GET, httpEntity, new ParameterizedTypeReference<List<Language>>()
         {});
         List<Language> languages = languagesResponse.getBody();
