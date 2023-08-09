@@ -63,9 +63,9 @@ public class EntityDtoConversion
     public SeasonDtoSeasonPage seasonToDtoSeasonPage(Season season)
     {
         SeasonDtoSeasonPage seasonDto = mapper.map(season, SeasonDtoSeasonPage.class);
-        List<Episode> episodes = season.getEpisodes();
-        List<EpisodeDtoSeasonPage> episodeDtos = episodes.stream().map(episode -> this.episodeToDtoSeasonPage(episode)).collect(Collectors.toList());
-        seasonDto.setEpisodes(episodeDtos);
+        // List<Episode> episodes = season.getEpisodes();
+        // List<EpisodeDtoSeasonPage> episodeDtos = episodes.stream().map(episode -> this.episodeToDtoSeasonPage(episode)).collect(Collectors.toList());
+        // seasonDto.setEpisodes(episodeDtos);
         return seasonDto;
     }
 

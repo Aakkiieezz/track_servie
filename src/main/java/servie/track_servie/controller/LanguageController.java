@@ -11,7 +11,7 @@ import servie.track_servie.entity.Language;
 import servie.track_servie.service.LanguageService;
 
 @Controller
-@RequestMapping("track-servie/language")
+@RequestMapping("/track-servie/language")
 public class LanguageController
 {
     @Autowired

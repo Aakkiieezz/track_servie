@@ -2,6 +2,7 @@ package servie.track_servie.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
@@ -14,6 +15,7 @@ import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsImage.SeasonPageDtos.SeasonPostersDto;
 import servie.track_servie.payload.dtos.operationsSearch.SeasonPageDtos.EpisodeDtoSearchSeasonPage;
 import servie.track_servie.payload.dtos.operationsSearch.SeasonPageDtos.SeasonDtoSearchSeasonPage;
+import servie.track_servie.payload.dtos.operationsSeasonPageDtos.EpisodeDtoSeasonPage;
 import servie.track_servie.payload.dtos.operationsSeasonPageDtos.SeasonDtoSeasonPage;
 import servie.track_servie.payload.primaryKeys.ServieKey;
 import servie.track_servie.payload.primaryKeys.UserEpisodeDataKey;
@@ -76,12 +78,24 @@ public class SeasonService
         seasonDto.setTmdbId(tmdbId);
         // -------------------------
         // >>> Very bad code :
+        List<EpisodeDtoSeasonPage> episodesList = userEpisodeDataRepository.getEpisodesForSeasonPage(tmdbId, seasonNumber);
+        seasonDto.setEpisodes(episodesList);
+        // -------------------------
+        // >>> Very bad code :
         User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
         Servie servie = servieRepository.findById(new ServieKey("tv", tmdbId)).orElseGet(() -> servieService.addServie("tv", tmdbId));
-        UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).get();
-        UserSeasonData userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNumber)).get();
-        seasonDto.setEpisodesWatched(userSeasonData.getEpisodesWatched());
-        seasonDto.setWatched(userSeasonData.getWatched());
+        UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElse(new UserServieData(user, servie));
+        Optional<UserSeasonData> userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNumber));
+        if(userSeasonData.isPresent())
+        {
+            seasonDto.setEpisodesWatched(userSeasonData.get().getEpisodesWatched());
+            seasonDto.setWatched(userSeasonData.get().getWatched());
+        }
+        else
+        {
+            seasonDto.setEpisodesWatched(0);
+            seasonDto.setWatched(false);
+        }
         // -------------------------
         return seasonDto;
     }

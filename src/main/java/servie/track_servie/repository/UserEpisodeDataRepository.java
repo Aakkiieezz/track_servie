@@ -9,6 +9,7 @@ import servie.track_servie.entity.User;
 import servie.track_servie.entity.UserEpisodeData;
 import servie.track_servie.entity.UserSeasonData;
 import servie.track_servie.entity.UserServieData;
+import servie.track_servie.payload.dtos.operationsSeasonPageDtos.EpisodeDtoSeasonPage;
 import servie.track_servie.payload.primaryKeys.UserEpisodeDataKey;
 
 @Repository
@@ -40,12 +41,26 @@ public interface UserEpisodeDataRepository extends JpaRepository<UserEpisodeData
         @Query(value = "SELECT new servie.track_servie.entity.UserEpisodeData(episode.episodeNumber, :watched, userEpisodeData.notes)"
                         +" FROM Episode AS episode"
                         +" LEFT JOIN UserEpisodeData AS userEpisodeData"
-                        +" ON userEpisodeData.episodeNumber = episode.episodeNumber"
-                        +"   AND userEpisodeData.userSeasonData.seasonNumber = episode.seasonNumber"
+                        +"   ON userEpisodeData.episodeNumber = episode.episodeNumber"
+                        +"     AND userEpisodeData.userSeasonData.seasonNumber = episode.seasonNumber"
+                        +"     AND userEpisodeData.userSeasonData.userServieData.servie.tmdbId = episode.season.series.tmdbId"
                         // +"   AND (:user IS NULL OR userEpisodeData.userSeasonData.userServieData.user = :user)"
                         +" WHERE episode.season.series.tmdbId = :tmdbId"
                         +"   AND episode.seasonNumber = :seasonNumber"
                         // +"   AND userEpisodeData.userSeasonData.userServieData.user = :user"
-                        +"  AND (userEpisodeData.watched IS NULL OR userEpisodeData.watched <> :watched)")
+                        +"   AND (userEpisodeData.watched IS NULL OR userEpisodeData.watched <> :watched)")
         List<UserEpisodeData> getToggledEpisodes(Integer tmdbId, Integer seasonNumber, Boolean watched);
+
+        @Query(value = "SELECT new servie.track_servie.payload.dtos.operationsSeasonPageDtos.EpisodeDtoSeasonPage(episode.name, episode.episodeNumber, episode.stillPath, episode.overview, userEpisodeData.watched)"
+                        +" FROM Episode AS episode"
+                        +" LEFT JOIN UserEpisodeData AS userEpisodeData"
+                        +"   ON userEpisodeData.episodeNumber = episode.episodeNumber"
+                        +"     AND userEpisodeData.userSeasonData.seasonNumber = episode.seasonNumber"
+                        +"     AND userEpisodeData.userSeasonData.userServieData.servie.tmdbId = episode.season.series.tmdbId"
+                        // +"   AND (:user IS NULL OR userEpisodeData.userSeasonData.userServieData.user = :user)"
+                        +" WHERE episode.season.series.tmdbId = :tmdbId"
+                        +"   AND episode.seasonNumber = :seasonNumber"
+                        // +"   AND userEpisodeData.userSeasonData.userServieData.user = :user"
+                        +"")
+        List<EpisodeDtoSeasonPage> getEpisodesForSeasonPage(Integer tmdbId, Integer seasonNumber);
 }

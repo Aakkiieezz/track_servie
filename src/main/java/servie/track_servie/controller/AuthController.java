@@ -32,7 +32,7 @@ import servie.track_servie.payload.dtos.Response;
 import servie.track_servie.utils.jwt.JwtUtils;
 
 @Controller
-@RequestMapping("/track-servie/auth")
+@RequestMapping("auth")
 public class AuthController
 {
     @Autowired
