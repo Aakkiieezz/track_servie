@@ -1,7 +1,5 @@
 package servie.track_servie.payload.dtos;
 
-import java.util.List;
-import java.util.stream.Collectors;
 import org.modelmapper.ModelMapper;
 import org.springframework.stereotype.Component;
 import servie.track_servie.entity.Episode;
@@ -18,20 +16,6 @@ import servie.track_servie.payload.dtos.operationsServiePageDtos.GenreDtoServieP
 public class EntityDtoConversion
 {
     ModelMapper mapper = new ModelMapper();
-    //     TypeMap<Servie, ServieDtoHomePage> showToDtoTypeMap = mapper.createTypeMap(Servie.class, ServieDtoHomePage.class);
-    //     TypeMap<Movie, MovieDtoHomePage> movieToDtoTypeMap = mapper.createTypeMap(Movie.class, MovieDtoHomePage.class);
-    //     // movieToDtoTypeMap.addMappings(mapping -> mapping.skip(ShowDTO::setTitle));
-    //     TypeMap<Series, SeriesDtoHomePage> seriesToDtoTypeMap = mapper.createTypeMap(Series.class, SeriesDtoHomePage.class);
-    //     // seriesToDtoTypeMap.addMappings(mapping -> mapping.skip(ShowDTO::setTitle));
-    //   public ServieDtoHomePage  servieToDtoHomePage(Servie servie)
-    //   {
-    //     return null;
-    //   }
-    // Home Page conversions
-    // public SeriesDtoHomePage seriesToDtoHomePage(Series series)
-    // {
-    //     return mapper.map(series, SeriesDtoHomePage.class);
-    // }
 
     public GenreDtoHomePage genreToDtoDropdown(Genre genre)
     {

@@ -30,8 +30,8 @@ public class ServieDtoServiePage
     // private String collectionBackdropPath;
     // 
     // series fields
-    private Integer numberOfSeasons;
-    private Integer numberOfEpisodes;
+    private Integer totalSeasons;
+    private Integer totalEpisodes;
     // private LocalDate firstAirDate;
     // private LocalDate lastAirDate;
     private List<SeasonDtoServiePage> seasons;
@@ -40,7 +40,7 @@ public class ServieDtoServiePage
     private Integer episodesWatched;
     private Boolean completed;
 
-    public ServieDtoServiePage(Integer tmdbId, String childtype, String title, String status, String tagline, String overview, String backdropPath, LocalDate releaseDate, Integer runtime, Integer numberOfSeasons, Integer numberOfEpisodes, /* LocalDate firstAirDate, LocalDate lastAirDate, */ Integer episodesWatched, Boolean completed)
+    public ServieDtoServiePage(Integer tmdbId, String childtype, String title, String status, String tagline, String overview, String backdropPath, LocalDate releaseDate, Integer runtime, Integer totalSeasons, Integer totalEpisodes, /* LocalDate firstAirDate, LocalDate lastAirDate, */ Integer episodesWatched, Boolean completed)
     {
         this.tmdbId = tmdbId;
         this.childtype = childtype;
@@ -51,8 +51,8 @@ public class ServieDtoServiePage
         this.backdropPath = backdropPath;
         this.releaseDate = releaseDate;
         this.runtime = runtime;
-        this.numberOfSeasons = numberOfSeasons;
-        this.numberOfEpisodes = numberOfEpisodes;
+        this.totalSeasons = totalSeasons;
+        this.totalEpisodes = totalEpisodes;
         // this.firstAirDate = firstAirDate;
         // this.lastAirDate = lastAirDate;
         this.episodesWatched = episodesWatched;

@@ -1,0 +1,26 @@
+package servie.track_servie.entity;
+
+import java.util.Set;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
+import jakarta.persistence.ManyToMany;
+import lombok.Data;
+
+@Data
+@Entity
+public class OriginCountry
+{
+	@Id
+	@Column(name = "credit_id")
+	@JsonProperty("credit_id")
+	private String creditId;
+	// ---------------------------------------------------------------
+	@Column(name = "name")
+	@JsonProperty("name")
+	private String name;
+	// ---------------------------------------------------------------
+	@ManyToMany(mappedBy = "createdBy")
+	private Set<Series> series;
+}

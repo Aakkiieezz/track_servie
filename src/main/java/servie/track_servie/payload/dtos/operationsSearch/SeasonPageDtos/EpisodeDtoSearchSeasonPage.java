@@ -10,9 +10,9 @@ public class EpisodeDtoSearchSeasonPage
     private String name;
     private Integer tmdbId;
     @JsonProperty("season_number")
-    private Integer seasonNumber;
+    private Integer seasonNo;
     @JsonProperty("episode_number")
-    private Integer episodeNumber;
+    private Integer episodeNo;
     @JsonProperty("still_path")
     private String stillPath;
 }

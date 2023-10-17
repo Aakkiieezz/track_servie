@@ -1,7 +1,10 @@
 package servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos;
 
+import java.time.LocalDate;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateDeserializer;
 import lombok.Data;
 
 @Data
@@ -16,19 +19,23 @@ public class SeriesDtoSearchPage
     @JsonProperty("poster_path")
     private String posterPath;
     // ---------------------------------------------------------------
-    // extra
     private Boolean found;
     private String childtype;
-    private Integer numberOfEpisodes;
+    private Integer totalEpisodes;
     private Integer episodesWatched;
     private Boolean completed;
-    // public SeriesDtoSearchPage(Integer tmdbId, String title, String posterPath, String childtype, Integer numberOfEpisodes, Integer episodesWatched, Boolean completed)
+    @JsonAlias({"release_date", "first_air_date"})
+    @JsonDeserialize(using = LocalDateDeserializer.class)
+    private LocalDate releaseDate;
+    @JsonProperty("original_language")
+    private String language;
+    // public SeriesDtoSearchPage(Integer tmdbId, String title, String posterPath, String childtype, Integer totalEpisodes, Integer episodesWatched, Boolean completed)
     // {
     //     this.tmdbId = tmdbId;
     //     this.title = title;
     //     this.posterPath = posterPath;
     //     this.childtype = childtype;
-    //     this.numberOfEpisodes = numberOfEpisodes;
+    //     this.totalEpisodes = totalEpisodes;
     //     this.episodesWatched = episodesWatched;
     //     this.completed = completed;
     // }

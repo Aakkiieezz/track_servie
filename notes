@@ -100,43 +100,34 @@ Search servie based on watched status
 Search servie based on its type Movie/Series
 Search servie based on its original language
 
-0 0 0
-0 0 1
-0 1 0
-0 1 1
-1 0 0
-1 0 1
-1 1 0
-1 1 1
-
 ######################################################################################################################################################
 TrackServie Genres :
 
-Action  
-Adventure
-Animation
-Comedy
-Crime
-Documentary
-Drama
-Family
-Fantasy
-History M
-Horror M
-Kids T
-Music M
-Mystery
-News T
-Politics T
-Reality T
-Romance M
-Science Fiction M T
-Soap T
-Talk T
-TV Movie M
-Thriller M
-War
-Western
+01 Action
+02 Adventure
+03 Animation
+04 Comedy
+05 Crime
+06 Documentary
+07 Drama
+08 Family
+09 Fantasy
+10 History M
+11 Horror M
+12 Kids T
+13 Music M
+14 Mystery
+15 News T
+16 Politics T
+17 Reality T
+18 Romance M
+19 Science Fiction M T
+20 Soap T
+21 Talk T
+22 TV Movie M
+23 Thriller M
+24 War
+25 Western
 
 ######################################################################################################################################################
 Languages
@@ -330,18 +321,6 @@ be : Belarusian
 yo : Yoruba
 
 ######################################################################################################################################################
-Issues to fix/work on :
-
-Watched toggle using AJAX
-Genre dropdown to have 3 states of selecting [none, select, unselect]
-To add criteria builder for multiple filters
-UI of Homepage
-UI of Servie page
-UI of Season page
-UI of episode page
-Add cast and crew
-
-######################################################################################################################################################
 TMDB Movie Status Values:
 Rumored
 Planned - officially announced, However, production may not have started yet
@@ -396,3 +375,17 @@ E 0 0 0 0 0
 None watched & few missing [perfect] [DONE]
 S 0 -> 1
 E 0 0 0 0 -
+
+######################################################################################################################################################
+Issues to fix/work on :
+
+[IMP] multiple languages couldn't be selected like before when hibernate dialect was different
+Watched toggle using AJAX
+Genre dropdown to have 3 states of selecting [none, select, unselect]
+To add criteria builder for multiple filters
+UI of Homepage
+UI of Servie page
+UI of Season page
+UI of episode page
+Add cast and crew
+

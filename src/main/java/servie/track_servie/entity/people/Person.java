@@ -16,33 +16,31 @@ public class Person
     @Column(name = "id")
     private Integer id;
     // ---------------------------------------------------------------
-    @Column(name = "adult")
-    private Boolean adult;
-    // ---------------------------------------------------------------
-    @Column(name = "gender")
-    private Integer gender;
-    // ---------------------------------------------------------------
     @JsonProperty("imdb_id")
     @Column(name = "imdb_id")
     private Integer imdbId;
+    // ---------------------------------------------------------------
+    @Column(name = "name")
+    @JsonProperty("name")
+    private String name;
     // ---------------------------------------------------------------
     @JsonProperty("known_for_department")
     @Column(name = "knownForDepartment")
     private String knownForDepartment;
     // ---------------------------------------------------------------
-    @Column(name = "name")
-    private String name;
+    @Column(name = "gender")
+    private Integer gender;
+    // ---------------------------------------------------------------
+    @Column(name = "adult")
+    private Boolean adult;
     // ---------------------------------------------------------------
     @Column(name = "popularity")
+    @JsonProperty("popularity")
     private Double popularity;
     // ---------------------------------------------------------------
     @JsonProperty("profile_path")
     @Column(name = "profile_path")
     private String profilePath;
-    // ---------------------------------------------------------------
-    @JsonProperty("order")
-    @Column(name = "position")
-    private Integer position;
     // ---------------------------------------------------------------
     @JsonProperty("birthday")
     @Column(name = "birthday")
@@ -59,4 +57,13 @@ public class Person
     @JsonProperty("place_of_birth")
     @Column(name = "birth_place")
     private String birthPlace;
+    // ---------------------------------------------------------------
+    @JsonProperty("homepage")
+    @Column(name = "homepage")
+    private String homepage;
 }
+// -----------------
+// "also_known_as": [
+//     "full name 1",
+//     "full name 2"
+//   ],

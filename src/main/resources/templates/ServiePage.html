@@ -31,7 +31,7 @@
       <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}"> -->
       <div th:if="${servie.childtype == 'tv'}">
         <div class="progress-bar">
-          <div class="progress" th:with="progress=((${servie.episodesWatched}/${servie.numberOfEpisodes})*100)"
+          <div class="progress" th:with="progress=((${servie.episodesWatched}/${servie.totalEpisodes})*100)"
             th:text="${#numbers.formatDecimal(progress, 1, 'DEFAULT', 0, 'DEFAULT')}+' %'"
             th:style="'width:' + ${progress} + '%;'"></div>
         </div>
@@ -74,23 +74,22 @@
       <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}"> -->
       <div th:if="${servie.childtype == 'tv'}">
         Total Episodes Watched :
-        <span th:text="${servie.episodesWatched}+'/'+${servie.numberOfEpisodes}"></span>
-        <h3><span th:text="${servie.numberOfSeasons}"></span> Seasons</h3>
+        <span th:text="${servie.episodesWatched}+'/'+${servie.totalEpisodes}"></span>
+        <h3><span th:text="${servie.totalSeasons}"></span> Seasons</h3>
         <div class="row left">
           <div class="col-xxl-2 col-sm-3 col-4 image-container poster" th:each="season : ${servie.seasons}">
             <div th:if="${season.episodeCount == 0}">
               <p th:text="${season.name}+' Coming soon'"></p>
             </div>
             <div th:if="${season.episodeCount != 0}">
-              <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}}">
+              <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNo}}">
                 <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${season.posterPath}"
                   alt="No poster available" />
               </a>
               <div class="buttons-container">
                 <td th:text="${season.episodesWatched}+'/'+${season.episodeCount}"></td>
 
-                <a
-                  th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}+'/toggleback'}">
+                <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNo}+'/toggleback'}">
                   <div th:if="${season.watched}">
                     <i class="bi bi-eye-slash-fill"></i>
                   </div>
@@ -99,8 +98,7 @@
                   </div>
                 </a>
                 <div th:if="${season.posterPath != null}">
-                  <a
-                    th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNumber}+'/posters'}">
+                  <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNo}+'/posters'}">
                     <i class="bi bi-file-image"></i>
                   </a>
                 </div>

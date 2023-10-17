@@ -1,0 +1,4 @@
+Issue - MultipleRepresentations
+Multiple representations of the same entity [servie.track_servie.entity.ProductionCompany#437] are being merged.
+Detached: [ProductionCompany(id=437, name=Heyday Films, logoPath=/nu20mtwbEIhUNnQ5NXVhHsNknZj.png, originCountry=GB, servies=null)];
+Detached: [ProductionCompany(id=437, name=Heyday Films, logoPath=/nu20mtwbEIhUNnQ5NXVhHsNknZj.png, originCountry=GB, servies=null)]] with root cause

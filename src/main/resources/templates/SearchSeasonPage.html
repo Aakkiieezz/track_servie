@@ -43,12 +43,12 @@
       <tr th:each="episode : ${season.episodes}">
         <td th:text="${episode.id}"></td>
         <td>
-          <a th:href="@{'/track-servie/servies/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}+'/search'}"
+          <a th:href="@{'/track-servie/servies/'+${episode.tmdbId}+'/Season/'+${episode.seasonNo}+'/Episode/'+${episode.episodeNo}+'/search'}"
             th:text="${episode.name}"></a>
         </td>
         <td>
           <a
-            th:href="@{'/track-servie/servies/'+${episode.tmdbId}+'/Season/'+${episode.seasonNumber}+'/Episode/'+${episode.episodeNumber}+'/search'}">
+            th:href="@{'/track-servie/servies/'+${episode.tmdbId}+'/Season/'+${episode.seasonNo}+'/Episode/'+${episode.episodeNo}+'/search'}">
             <img th:src="'https://www.themoviedb.org/t/p/original'+${episode.stillPath}"
               style="width: 5%; height: 5%" />
           </a>

@@ -9,19 +9,19 @@ import lombok.Data;
 @Embeddable
 public class MovieCollectionInfo
 {
-    @JsonProperty("id")
-    @Column(name = "id")
-    private Integer collectionId;
-    // ---------------------------------------------------------------
-    @JsonProperty("name")
-    @Column(name = "collection_name")
-    private String collectionName;
-    // ---------------------------------------------------------------
-    @JsonProperty("poster_path")
-    @Column(name = "collection_poster_path")
-    private String posterPath;
-    // ---------------------------------------------------------------
-    @JsonProperty("backdrop_path")
-    @Column(name = "collection_backdrop_path")
-    private String collectionBackdropPath;
+	@Column(name = "id")
+	@JsonProperty("id")
+	private Integer collectionId;
+	// ---------------------------------------------------------------
+	@Column(name = "collection_name")
+	@JsonProperty("name")
+	private String collectionName;
+	// ---------------------------------------------------------------
+	@Column(name = "collection_poster_path")
+	@JsonProperty("poster_path")
+	private String posterPath;
+	// ---------------------------------------------------------------
+	@Column(name = "collection_backdrop_path")
+	@JsonProperty("backdrop_path")
+	private String collectionBackdropPath;
 }

@@ -37,7 +37,7 @@
         <tr th:each="image : ${images}">
             <td>
                 <a
-                    th:href="@{'/track-servie/servies/'+${tmdbId}+'/Season/'+${seasonNumber}+'/Episode/'+${episodeNumber}+'/stillChange?filePath='+${image.filePath}}">
+                    th:href="@{'/track-servie/servies/'+${tmdbId}+'/Season/'+${seasonNo}+'/Episode/'+${episodeNo}+'/stillChange?filePath='+${image.filePath}}">
                     <img th:src="'https://www.themoviedb.org/t/p/original'+${image.filePath}"
                         style="width: 20%; height: 20%" />
                 </a>

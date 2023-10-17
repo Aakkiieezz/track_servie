@@ -10,7 +10,7 @@ public class SeasonDtoSearchSeriesPage
     private String name;
     private Integer tmdbId;
     @JsonProperty("season_number")
-    private Integer seasonNumber;
+    private Integer seasonNo;
     @JsonProperty("poster_path")
     private String posterPath;
 }

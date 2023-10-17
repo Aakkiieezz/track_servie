@@ -29,27 +29,27 @@ public class UserSeasonData
     private UserServieData userServieData;
     // ---------------------------------------------------------------
     @Id
-    @Column(name = "season_number")
-    private Integer seasonNumber;
+    @Column(name = "season_no")
+    private Integer seasonNo;
     // ---------------------------------------------------------------
-    // @Column(name = "episode_count")
-    // private Integer episodeCount;
-    // ---------------------------------------------------------------
-    @Formula(value = "(SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data AS ued WHERE ued.user_id = user_id AND ued.tmdb_id = tmdb_id AND ued.season_number = season_number AND ued.watched = 1) = (SELECT s.episode_count FROM season AS s WHERE s.series_tmdb_id = tmdb_id AND s.season_number = season_number) THEN true ELSE false END)")
+    @Formula(value = "(SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data AS ued WHERE ued.user_id = user_id AND ued.tmdb_id = tmdb_id AND ued.season_no = season_no AND ued.watched = 1) = (SELECT s.episode_count FROM season AS s WHERE s.tmdb_id = tmdb_id AND s.season_no = season_no) THEN true ELSE false END)")
     private Boolean watched = false;
     // ---------------------------------------------------------------
-    @Formula(value = "(SELECT COUNT(*) FROM user_episode_data AS ued WHERE ued.user_id = user_id AND ued.tmdb_id = tmdb_id AND ued.season_number = season_number AND ued.watched = 1)")
+    @Formula(value = "(SELECT COUNT(*) FROM user_episode_data AS ued WHERE ued.user_id = user_id AND ued.tmdb_id = tmdb_id AND ued.season_no = season_no AND ued.watched = 1)")
     private Integer episodesWatched;
     // ---------------------------------------------------------------
     @Column(name = "poster_path")
     private String posterPath;
     // ---------------------------------------------------------------
+    @Column(name = "notes")
+    private String notes;
+    // ---------------------------------------------------------------
     @OneToMany(mappedBy = "userSeasonData", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<UserEpisodeData> episodes;
 
-    public UserSeasonData(UserServieData userServieData, Integer seasonNumber)
+    public UserSeasonData(UserServieData userServieData, Integer seasonNo)
     {
         this.userServieData = userServieData;
-        this.seasonNumber = seasonNumber;
+        this.seasonNo = seasonNo;
     }
 }

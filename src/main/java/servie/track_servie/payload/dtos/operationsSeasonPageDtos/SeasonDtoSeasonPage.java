@@ -14,6 +14,6 @@ public class SeasonDtoSeasonPage
     private Boolean watched;
     private String overview;
     private String posterPath;
-    private Integer seasonNumber;
+    private Integer seasonNo;
     private List<EpisodeDtoSeasonPage> episodes;
 }

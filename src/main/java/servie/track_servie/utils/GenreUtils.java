@@ -10,6 +10,69 @@ import servie.track_servie.entity.Genre;
 @Component
 public class GenreUtils
 {
+    public Set<Integer> genreMapper(Set<Integer> tmdbGenreIds)
+    {
+        Set<Integer> trackServieGenreIds = new HashSet<>();
+        for(Integer tmdbGenreId : tmdbGenreIds)
+        {
+            if(tmdbGenreId==28)
+                trackServieGenreIds.add(1);
+            else if(tmdbGenreId==12)
+                trackServieGenreIds.add(2);
+            else if(tmdbGenreId==10759)
+                trackServieGenreIds.addAll(Arrays.asList(Integer.valueOf(1), Integer.valueOf(2)));
+            else if(tmdbGenreId==16)
+                trackServieGenreIds.add(3);
+            else if(tmdbGenreId==35)
+                trackServieGenreIds.add(4);
+            else if(tmdbGenreId==80)
+                trackServieGenreIds.add(5);
+            else if(tmdbGenreId==99)
+                trackServieGenreIds.add(6);
+            else if(tmdbGenreId==18)
+                trackServieGenreIds.add(7);
+            else if(tmdbGenreId==10751)
+                trackServieGenreIds.add(8);
+            else if(tmdbGenreId==14)
+                trackServieGenreIds.add(9);
+            else if(tmdbGenreId==10765)
+                trackServieGenreIds.addAll(Arrays.asList(Integer.valueOf(9), Integer.valueOf(19)));
+            else if(tmdbGenreId==36)
+                trackServieGenreIds.add(10);
+            else if(tmdbGenreId==27)
+                trackServieGenreIds.add(11);
+            else if(tmdbGenreId==10762)
+                trackServieGenreIds.add(12);
+            else if(tmdbGenreId==10402)
+                trackServieGenreIds.add(13);
+            else if(tmdbGenreId==9648)
+                trackServieGenreIds.add(14);
+            else if(tmdbGenreId==10763)
+                trackServieGenreIds.add(15);
+            else if(tmdbGenreId==10768)
+                trackServieGenreIds.addAll(Arrays.asList(Integer.valueOf(16), Integer.valueOf(24)));
+            else if(tmdbGenreId==10764)
+                trackServieGenreIds.add(17);
+            else if(tmdbGenreId==10749)
+                trackServieGenreIds.add(18);
+            else if(tmdbGenreId==878)
+                trackServieGenreIds.add(19);
+            else if(tmdbGenreId==10766)
+                trackServieGenreIds.add(20);
+            else if(tmdbGenreId==10767)
+                trackServieGenreIds.add(21);
+            else if(tmdbGenreId==10770)
+                trackServieGenreIds.add(22);
+            else if(tmdbGenreId==53)
+                trackServieGenreIds.add(23);
+            else if(tmdbGenreId==10752)
+                trackServieGenreIds.add(24);
+            else if(tmdbGenreId==37)
+                trackServieGenreIds.add(25);
+        }
+        return trackServieGenreIds;
+    }
+
     public Set<Genre> convertTmdbGenresToTrackServieGenres(Set<Genre> tmdbGenres)
     {
         Set<Genre> trackServieGenres = new HashSet<>();

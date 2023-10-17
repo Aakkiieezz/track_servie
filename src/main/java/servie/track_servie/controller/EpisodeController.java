@@ -11,11 +11,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import servie.track_servie.payload.dtos.operationsEpisodePageDtos.EpisodeDtoEpisodePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
-import servie.track_servie.payload.dtos.operationsSearch.EpisodePageDtos.EpisodeDtoSearchEpisodePage;
 import servie.track_servie.service.EpisodeService;
 
 @Controller
-@RequestMapping("/track-servie/servies/{tmdbId}/Season/{seasonNumber}/Episode/{episodeNumber}")
+@RequestMapping("/track-servie/servies/{tmdbId}/Season/{seasonNo}/Episode/{episodeNo}")
 public class EpisodeController
 {
     @Autowired
@@ -25,54 +24,54 @@ public class EpisodeController
 
     // Returns EpisodePage containing selected Episode from SeasonPage
     @GetMapping("")
-    public String getEpisode(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber, Model model)
+    public String getEpisode(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @PathVariable Integer episodeNo, Model model)
     {
-        EpisodeDtoEpisodePage episode = episodeService.getEpisode(tmdbId, seasonNumber, episodeNumber);
+        EpisodeDtoEpisodePage episode = episodeService.getEpisode(tmdbId, seasonNo, episodeNo);
         model.addAttribute("episode", episode);
         return "EpisodePage";
     }
     // Returns SearchEpisodePage containing selected Episode from SearchSeasonPage
     // @GetMapping("search")
-    // public String searchEpisode(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber, Model model)
+    // public String searchEpisode(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @PathVariable Integer episodeNo, Model model)
     // {
-    //     EpisodeDtoSearchEpisodePage episodeDto = episodeService.searchEpisode(tmdbId, seasonNumber, episodeNumber);
+    //     EpisodeDtoSearchEpisodePage episodeDto = episodeService.searchEpisode(tmdbId, seasonNo, episodeNo);
     //     model.addAttribute("episode", episodeDto);
     //     return "SearchEpisodePage";
     // }
 
     // Toggles the watch button of Episode located on SeasonPage
     @GetMapping("toggleback")
-    public String toggleEpisodeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber)
+    public String toggleEpisodeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @PathVariable Integer episodeNo)
     {
-        episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNumber, episodeNumber);
-        return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNumber;
+        episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNo, episodeNo);
+        return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNo;
     }
 
     // Toggles the watch button of Episode located on EpisodePage
     @GetMapping("toggle")
-    public String toggleEpWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber)
+    public String toggleEpWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @PathVariable Integer episodeNo)
     {
-        episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNumber, episodeNumber);
-        return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
+        episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNo, episodeNo);
+        return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNo+"/Episode/"+episodeNo;
     }
 
     // Returns ImageSearchEpisodePage containing list of Stills(for Episode)
     @GetMapping("stills")
-    public String getEpisodeImages(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber, Model model)
+    public String getEpisodeImages(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @PathVariable Integer episodeNo, Model model)
     {
-        List<Image> images = episodeService.getEpisodeImages(tmdbId, seasonNumber, episodeNumber);
+        List<Image> images = episodeService.getEpisodeImages(tmdbId, seasonNo, episodeNo);
         model.addAttribute("images", images);
         model.addAttribute("tmdbId", tmdbId);
-        model.addAttribute("seasonNumber", seasonNumber);
-        model.addAttribute("episodeNumber", episodeNumber);
+        model.addAttribute("seasonNo", seasonNo);
+        model.addAttribute("episodeNo", episodeNo);
         return "ImageSearchEpisodePage";
     }
 
     // Redirects to EpisodePage with changed Episode Still
     @GetMapping("stillChange")
-    public String changeImage(@PathVariable Integer tmdbId, @PathVariable Integer seasonNumber, @PathVariable Integer episodeNumber, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
+    public String changeImage(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @PathVariable Integer episodeNo, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
     {
-        episodeService.changeImage(tmdbId, seasonNumber, episodeNumber, filePath);
-        return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNumber+"/Episode/"+episodeNumber;
+        episodeService.changeImage(tmdbId, seasonNo, episodeNo, filePath);
+        return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNo+"/Episode/"+episodeNo;
     }
 }

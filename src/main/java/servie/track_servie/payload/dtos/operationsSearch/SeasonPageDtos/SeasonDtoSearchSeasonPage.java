@@ -14,6 +14,6 @@ public class SeasonDtoSearchSeasonPage
     // private Boolean watched = false;
     // private String overview;
     // private String posterPath;
-    // private Integer seasonNumber;
+    // private Integer seasonNo;
     List<EpisodeDtoSearchSeasonPage> episodes;
 }

@@ -1,45 +1,75 @@
 package servie.track_servie.entity;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import lombok.Data;
+import servie.track_servie.entity.credits.SeasonCast;
 
 @Data
 @Entity
 public class Season
 {
-    @Id
-    @JsonProperty("id")
-    @Column(name = "id")
-    private String id;
-    // ---------------------------------------------------------------
-    @Column(name = "name")
-    private String name;
-    // ---------------------------------------------------------------
-    @JsonProperty("episode_count")
-    @Column(name = "episode_count")
-    private Integer episodeCount;
-    // ---------------------------------------------------------------
-    @ManyToOne
-    private Series series;
-    // ---------------------------------------------------------------
-    @Column(name = "overview", length = 10000)
-    private String overview;
-    // ---------------------------------------------------------------
-    @JsonProperty("poster_path")
-    @Column(name = "poster_path")
-    private String posterPath;
-    // ---------------------------------------------------------------
-    @JsonProperty("season_number")
-    @Column(name = "season_number")
-    private Integer seasonNumber;
-    // ---------------------------------------------------------------
-    @OneToMany(mappedBy = "season", cascade = CascadeType.ALL)
-    List<Episode> episodes;
+	@Id
+	@Column(name = "id")
+	@JsonProperty("id")
+	private String id;
+	// ---------------------------------------------------------------
+	@Column(name = "name")
+	private String name;
+	// ---------------------------------------------------------------
+	@Column(name = "episode_count")
+	@JsonProperty("episode_count")
+	private Integer episodeCount;
+	// ---------------------------------------------------------------
+	@ManyToOne
+	@JoinColumn(name = "tmdb_id", referencedColumnName = "tmdb_id")
+	@JoinColumn(name = "childtype", referencedColumnName = "childtype")
+	private Series series;
+	// ---------------------------------------------------------------
+	@Column(name = "overview", length = 10000)
+	private String overview;
+	// ---------------------------------------------------------------
+	@Column(name = "poster_path")
+	@JsonProperty("poster_path")
+	private String posterPath;
+	// ---------------------------------------------------------------
+	@Column(name = "season_no")
+	@JsonProperty("season_number")
+	private Integer seasonNo;
+	// ---------------------------------------------------------------
+	@OneToMany(mappedBy = "season", cascade = CascadeType.ALL)
+	List<Episode> episodes;
+	// ---------------------------------------------------------------
+	@Column(name = "_id")
+	@JsonProperty("_id")
+	private String id2;
+	// ---------------------------------------------------------------
+	@Column(name = "air_date")
+	@JsonProperty("air_date")
+	private LocalDate airDate;
+	// ---------------------------------------------------------------
+	@Column(name = "vote_average")
+	@JsonProperty("vote_average")
+	private Double voteAverage;
+	// ---------------------------------------------------------------
+	@Column(name = "last_modified", columnDefinition = "DATETIME")
+	private LocalDateTime lastModified;
+	// ---------------------------------------------------------------
+	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+	@JoinTable(	name = "season_cast",
+				joinColumns = @JoinColumn(name = "season_id"),
+				inverseJoinColumns = @JoinColumn(name = "credit_id"))
+	private Set<SeasonCast> seasonCast;
 }

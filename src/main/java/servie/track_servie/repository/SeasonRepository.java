@@ -9,6 +9,6 @@ import servie.track_servie.entity.Series;
 public interface SeasonRepository extends JpaRepository<Season, String>
 {
     // Returns specific Season from the database which matches the criteria
-    // Season findByTmdbIdAndSeasonNumber(Integer tmdbId, Integer seasonNumber);
-    Season findBySeriesAndSeasonNumber(Series series, Integer seasonNumber);
+    // Season findByTmdbIdAndSeasonNo(Integer tmdbId, Integer seasonNo);
+    Season findBySeriesAndSeasonNo(Series series, Integer seasonNo);
 }

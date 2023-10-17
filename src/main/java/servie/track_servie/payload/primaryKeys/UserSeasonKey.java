@@ -12,5 +12,5 @@ public class UserSeasonKey implements Serializable
 {
     private Integer userId;
     private Integer tmdbId;
-    private Integer seasonNumber;
+    private Integer seasonNo;
 }

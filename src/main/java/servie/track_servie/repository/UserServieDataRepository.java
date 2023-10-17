@@ -30,7 +30,7 @@ public interface UserServieDataRepository extends JpaRepository<UserServieData, 
         List<UserServieData> findAllByUser(User user);
 
         // for modifying search results
-        // @Query(value = "SELECT new servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SeriesDtoSearchPage(usd.servie.tmdbId, usd.title, usd.posterPath, usd.childtype, usd.servie.numberOfEpisodes, usd.episodesWatched, usd.completed) FROM UserServieData usd WHERE usd.servie.tmdbId IN :tmdbIds AND usd.user = :user")
+        // @Query(value = "SELECT new servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SeriesDtoSearchPage(usd.servie.tmdbId, usd.title, usd.posterPath, usd.childtype, usd.servie.totalEpisodes, usd.episodesWatched, usd.completed) FROM UserServieData usd WHERE usd.servie.tmdbId IN :tmdbIds AND usd.user = :user")
         @Query(value = "SELECT usd FROM UserServieData AS usd"
                         +" WHERE usd.servie.tmdbId IN :tmdbIds"
                         +" AND usd.servie.childtype = :childtype"

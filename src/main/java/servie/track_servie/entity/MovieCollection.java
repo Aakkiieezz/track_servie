@@ -13,28 +13,28 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "collection")
+@Table(name = "movie_collection")
 public class MovieCollection
 {
-    @Column(name = "id")
-    @Id
-    private Integer id;
-    // ---------------------------------------------------------------
-    @Column(name = "name")
-    private String name;
-    // ---------------------------------------------------------------
-    @Column(name = "overview", length = 10000)
-    private String overview;
-    // ---------------------------------------------------------------
-    @JsonProperty("poster_path")
-    @Column(name = "poster_path")
-    private String posterPath;
-    // ---------------------------------------------------------------
-    @JsonProperty("backdrop_path")
-    @Column(name = "backdrop_path")
-    private String backdropPath;
-    // ---------------------------------------------------------------
-    @JsonProperty("parts")
-    @OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Movie> movies;
+	@Id
+	@Column(name = "id")
+	private Integer id;
+	// ---------------------------------------------------------------
+	@Column(name = "name")
+	private String name;
+	// ---------------------------------------------------------------
+	@Column(name = "overview", length = 10000)
+	private String overview;
+	// ---------------------------------------------------------------
+	@Column(name = "poster_path")
+	@JsonProperty("poster_path")
+	private String posterPath;
+	// ---------------------------------------------------------------
+	@Column(name = "backdrop_path")
+	@JsonProperty("backdrop_path")
+	private String backdropPath;
+	// ---------------------------------------------------------------
+	@OneToMany(mappedBy = "collection", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+	@JsonProperty("parts")
+	private List<Movie> movies;
 }

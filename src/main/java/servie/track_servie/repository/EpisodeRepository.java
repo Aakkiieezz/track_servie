@@ -9,10 +9,10 @@ import servie.track_servie.entity.Episode;
 public interface EpisodeRepository extends JpaRepository<Episode, String>
 {
     // Returns specific Episode from the database which matches the criteria
-    Episode findByTmdbIdAndSeasonNumberAndEpisodeNumber(Integer tmdbId, Integer seasonNumber, Integer episodeNumber);
+    Episode findByTmdbIdAndSeasonNoAndEpisodeNo(Integer tmdbId, Integer seasonNo, Integer episodeNo);
     // 
     // Returns list of Episodes of a specific Season, from the database, which matches the criteria
-    // List<Episode> findByTmdbIdAndSeasonNumberAndWatched(Integer tmdbId, Integer seasonNumber, boolean watched);
+    // List<Episode> findByTmdbIdAndSeasonNoAndWatched(Integer tmdbId, Integer seasonNo, boolean watched);
     // 
     // Returns list of Episodes of a specific Series, from the database, which matches the criteria
     // List<Episode> findByTmdbIdAndWatched(Integer tmdbId, Boolean watched);

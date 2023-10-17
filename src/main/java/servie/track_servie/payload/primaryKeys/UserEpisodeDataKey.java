@@ -12,5 +12,5 @@ import servie.track_servie.entity.UserSeasonData;
 public class UserEpisodeDataKey implements Serializable
 {
     private UserSeasonData userSeasonData;
-    private Integer episodeNumber;
+    private Integer episodeNo;
 }

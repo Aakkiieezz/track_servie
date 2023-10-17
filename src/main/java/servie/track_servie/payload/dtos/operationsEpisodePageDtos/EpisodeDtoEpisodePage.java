@@ -8,8 +8,8 @@ public class EpisodeDtoEpisodePage
     private String id;
     private String name;
     private Boolean watched;
-    private Integer episodeNumber;
-    private Integer seasonNumber;
+    private Integer episodeNo;
+    private Integer seasonNo;
     private String overview;
     private String stillPath;
     private Integer tmdbId;
