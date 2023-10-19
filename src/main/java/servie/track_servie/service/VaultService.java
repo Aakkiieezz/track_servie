@@ -4,9 +4,12 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -60,7 +63,7 @@ public class VaultService
 	@Autowired
 	private MovieCollectionRepository movieCollectionRepository;
 
-	// @Scheduled(fixedRate = 10*60*1000)
+	// @Scheduled(fixedRate = Integer.MAX_VALUE)
 	public void exportMasterData() throws IOException
 	{
 		exportServies();
@@ -249,7 +252,7 @@ public class VaultService
 		log.info("    Finished exporting servie_genre mappings");
 	}
 
-	// @Scheduled(fixedRate = 10*60*1000)
+	// @Scheduled(fixedRate = Integer.MAX_VALUE)
 	public void exportUserRawData() throws IOException
 	{
 		Integer userId = 1;
@@ -328,7 +331,7 @@ public class VaultService
 	//     // TO DO
 	// }
 
-	// @Scheduled(fixedRate = 600000)
+	// @Scheduled(fixedRate = Integer.MAX_VALUE)
 	// NOT SURE OF THIS STYLE
 	public void importAllUserRawData() throws IOException, CsvException
 	{
@@ -391,6 +394,7 @@ public class VaultService
 		}
 		userEpisodeDataRepository.saveAll(userEpisodeDatas);
 	}
+
 	// public void importUserServieData() throws IOException, CsvException
 	// {
 	//     Integer userId = 1;
@@ -411,30 +415,29 @@ public class VaultService
 	//     }
 	//     userServieDataRepository.saveAll(userServieDatas);
 	// }
-	// public void mysqlBkp()
-	// {
-	// 	String username = "your_username";
-	// 	String password = "your_password";
-	// 	String databaseName = "your_database_name";
-	// 	String dumpCommand = "mysqldump -u "+username+" -p"+password+" "+databaseName;
-	// 	try
-	// 	{
-	// 		ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", dumpCommand);
-	// 		processBuilder.redirectOutput(ProcessBuilder.Redirect.to(new File("backup.sql")));
-	// 		Process process = processBuilder.start();
-	// 		int exitCode = process.waitFor();
-	// 		if(exitCode==0)
-	// 		{
-	// 			System.out.println("Backup created successfully.");
-	// 		}
-	// 		else
-	// 		{
-	// 			System.err.println("Error creating backup.");
-	// 		}
-	// 	}
-	// 	catch(IOException | InterruptedException e)
-	// 	{
-	// 		e.printStackTrace();
-	// 	}
-	// }
+	@Scheduled(fixedRate = Integer.MAX_VALUE)
+	public void exportMasterData_mysqldump()
+	{
+		String username = "Akash";
+		String password = "forever21MySQL";
+		String databaseName = "track_servie_stg";
+		String dumpCommand = "mysqldump -u "+username+" -p"+password+" "+databaseName;
+		try
+		{
+			ProcessBuilder processBuilder = new ProcessBuilder("bash", "-c", dumpCommand);
+			DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
+			String bkpFileName = "MasterBkp_"+LocalDateTime.now().format(formatter)+".sql";
+			processBuilder.redirectOutput(ProcessBuilder.Redirect.to(new File(bkpFileName)));
+			Process process = processBuilder.start();
+			int exitCode = process.waitFor();
+			if(exitCode==0)
+				System.out.println("Backup created successfully.");
+			else
+				System.err.println("Error creating backup.");
+		}
+		catch(IOException | InterruptedException e)
+		{
+			e.printStackTrace();
+		}
+	}
 }
