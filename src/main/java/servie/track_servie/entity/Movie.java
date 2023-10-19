@@ -55,7 +55,7 @@ public class Movie extends Servie
 	// ---------------------------------------------------------------
 	@Column(name = "revenue")
 	@JsonProperty("revenue")
-	private Integer revenue;
+	private Long revenue;
 	// ---------------------------------------------------------------
 	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
 	@JoinTable(	name = "movie_cast",

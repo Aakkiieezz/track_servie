@@ -16,72 +16,72 @@ import servie.track_servie.entity.Movie;
 @Table(name = "mcrew")
 public class MovieCrew
 {
-    @Id
-    @Column(name = "credit_id")
-    @JsonProperty("credit_id")
-    private String creditId;
-    // ---------------------------------------------------------------
-    @Column(name = "job")
-    @JsonProperty("job")
-    private String job;
-    // ---------------------------------------------------------------
-    @Column(name = "department")
-    @JsonProperty("department")
-    private String department;
-    // ---------------------------------------------------------------
-    @Column(name = "adult")
-    @JsonProperty("adult")
-    private boolean adult;
-    // ---------------------------------------------------------------
-    @Column(name = "gender")
-    @JsonProperty("gender")
-    private Integer gender;
-    // ---------------------------------------------------------------
-    @Column(name = "person_id")
-    @JsonProperty("id")
-    private Integer personId;
-    // ---------------------------------------------------------------
-    @JsonProperty("known_for_department")
-    @Column(name = "knownForDepartment")
-    private String knownForDepartment;
-    // ---------------------------------------------------------------
-    @Column(name = "name")
-    @JsonProperty("name")
-    private String name;
-    // ---------------------------------------------------------------
-    @Column(name = "original_name")
-    @JsonProperty("original_name")
-    private String originalName;
-    // ---------------------------------------------------------------
-    @Column(name = "popularity")
-    @JsonProperty("popularity")
-    private Double popularity;
-    // ---------------------------------------------------------------
-    @Column(name = "profile_path")
-    @JsonProperty("profile_path")
-    private String profilePath;
-    // ---------------------------------------------------------------
-    @ManyToMany(mappedBy = "crew")
-    private Set<Movie> movies;
+	@Id
+	@Column(name = "credit_id")
+	@JsonProperty("credit_id")
+	private String creditId;
+	// ---------------------------------------------------------------
+	@Column(name = "job")
+	@JsonProperty("job")
+	private String job;
+	// ---------------------------------------------------------------
+	@Column(name = "department")
+	@JsonProperty("department")
+	private String department;
+	// ---------------------------------------------------------------
+	@Column(name = "adult")
+	@JsonProperty("adult")
+	private boolean adult;
+	// ---------------------------------------------------------------
+	@Column(name = "gender")
+	@JsonProperty("gender")
+	private Integer gender;
+	// ---------------------------------------------------------------
+	@Column(name = "person_id")
+	@JsonProperty("id")
+	private Integer personId;
+	// ---------------------------------------------------------------
+	@JsonProperty("known_for_department")
+	@Column(name = "knownForDepartment")
+	private String knownForDepartment;
+	// ---------------------------------------------------------------
+	@Column(name = "name")
+	@JsonProperty("name")
+	private String name;
+	// ---------------------------------------------------------------
+	@Column(name = "original_name")
+	@JsonProperty("original_name")
+	private String originalName;
+	// ---------------------------------------------------------------
+	@Column(name = "popularity")
+	@JsonProperty("popularity")
+	private Double popularity;
+	// ---------------------------------------------------------------
+	@Column(name = "profile_path")
+	@JsonProperty("profile_path")
+	private String profilePath;
+	// ---------------------------------------------------------------
+	@ManyToMany(mappedBy = "crew")
+	private Set<Movie> movies;
 
-    @Override
-    public boolean equals(Object o)
-    {
-        if(this==o)
-        {
-            return true;
-        }
-        if(o==null || getClass()!=o.getClass())
-        {
-            return false;
-        }
-        MovieCrew that = (MovieCrew) o;
-        return Objects.equals(creditId, that.creditId);
-    }
+	@Override
+	public boolean equals(Object o)
+	{
+		if(this==o)
+		{
+			return true;
+		}
+		if(o==null || getClass()!=o.getClass())
+		{
+			return false;
+		}
+		MovieCrew that = (MovieCrew) o;
+		return Objects.equals(creditId, that.creditId);
+	}
 
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(creditId);
-    }
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(creditId);
+	}
 }

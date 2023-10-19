@@ -16,76 +16,76 @@ import servie.track_servie.entity.Movie;
 @Table(name = "mcast")
 public class MovieCast
 {
-    @Id
-    @Column(name = "credit_id")
-    @JsonProperty("credit_id")
-    private String creditId;
-    // ---------------------------------------------------------------
-    @Column(name = "media_character")
-    @JsonProperty("character")
-    private String character;
-    // ---------------------------------------------------------------
-    @Column(name = "priority")
-    @JsonProperty("order")
-    private Integer order;
-    // ---------------------------------------------------------------
-    @Column(name = "gender")
-    @JsonProperty("gender")
-    private Integer gender;
-    // ---------------------------------------------------------------
-    @Column(name = "person_id")
-    @JsonProperty("id")
-    private Integer personId;
-    // ---------------------------------------------------------------
-    @Column(name = "adult")
-    @JsonProperty("adult")
-    private boolean adult;
-    // ---------------------------------------------------------------
-    @JsonProperty("known_for_department")
-    @Column(name = "knownForDepartment")
-    private String knownForDepartment;
-    // ---------------------------------------------------------------
-    @Column(name = "name")
-    @JsonProperty("name")
-    private String name;
-    // ---------------------------------------------------------------
-    @Column(name = "original_name")
-    @JsonProperty("original_name")
-    private String originalName;
-    // ---------------------------------------------------------------
-    @Column(name = "popularity")
-    @JsonProperty("popularity")
-    private Double popularity;
-    // ---------------------------------------------------------------
-    @Column(name = "profile_path")
-    @JsonProperty("profile_path")
-    private String profilePath;
-    // ---------------------------------------------------------------
-    @Column(name = "cast_id")
-    @JsonProperty("cast_id")
-    private Integer castId;
-    // ---------------------------------------------------------------
-    @ManyToMany(mappedBy = "cast")
-    private Set<Movie> cast;
+	@Id
+	@Column(name = "credit_id")
+	@JsonProperty("credit_id")
+	private String creditId;
+	// ---------------------------------------------------------------
+	@Column(name = "media_character", length = 500)
+	@JsonProperty("character")
+	private String character;
+	// ---------------------------------------------------------------
+	@Column(name = "priority")
+	@JsonProperty("order")
+	private Integer order;
+	// ---------------------------------------------------------------
+	@Column(name = "gender")
+	@JsonProperty("gender")
+	private Integer gender;
+	// ---------------------------------------------------------------
+	@Column(name = "person_id")
+	@JsonProperty("id")
+	private Integer personId;
+	// ---------------------------------------------------------------
+	@Column(name = "adult")
+	@JsonProperty("adult")
+	private boolean adult;
+	// ---------------------------------------------------------------
+	@JsonProperty("known_for_department")
+	@Column(name = "knownForDepartment")
+	private String knownForDepartment;
+	// ---------------------------------------------------------------
+	@Column(name = "name")
+	@JsonProperty("name")
+	private String name;
+	// ---------------------------------------------------------------
+	@Column(name = "original_name")
+	@JsonProperty("original_name")
+	private String originalName;
+	// ---------------------------------------------------------------
+	@Column(name = "popularity")
+	@JsonProperty("popularity")
+	private Double popularity;
+	// ---------------------------------------------------------------
+	@Column(name = "profile_path")
+	@JsonProperty("profile_path")
+	private String profilePath;
+	// ---------------------------------------------------------------
+	@Column(name = "cast_id")
+	@JsonProperty("cast_id")
+	private Integer castId;
+	// ---------------------------------------------------------------
+	@ManyToMany(mappedBy = "cast")
+	private Set<Movie> cast;
 
-    @Override
-    public boolean equals(Object o)
-    {
-        if(this==o)
-        {
-            return true;
-        }
-        if(o==null || getClass()!=o.getClass())
-        {
-            return false;
-        }
-        MovieCast that = (MovieCast) o;
-        return Objects.equals(creditId, that.creditId);
-    }
+	@Override
+	public boolean equals(Object o)
+	{
+		if(this==o)
+		{
+			return true;
+		}
+		if(o==null || getClass()!=o.getClass())
+		{
+			return false;
+		}
+		MovieCast that = (MovieCast) o;
+		return Objects.equals(creditId, that.creditId);
+	}
 
-    @Override
-    public int hashCode()
-    {
-        return Objects.hash(creditId);
-    }
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(creditId);
+	}
 }

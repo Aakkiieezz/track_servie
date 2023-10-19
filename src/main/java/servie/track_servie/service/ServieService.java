@@ -19,8 +19,10 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
+import lombok.extern.slf4j.Slf4j;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ResponseDtoHomePage;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ServieDtoHomePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
@@ -38,6 +40,7 @@ import servie.track_servie.entity.Episode;
 import servie.track_servie.entity.Genre;
 import servie.track_servie.entity.Movie;
 import servie.track_servie.entity.MovieCollection;
+import servie.track_servie.entity.ServieBkp;
 import servie.track_servie.entity.ProductionCompany;
 import servie.track_servie.entity.ProductionCountry;
 import servie.track_servie.entity.Season;
@@ -58,6 +61,7 @@ import servie.track_servie.exceptions.ResourceNotFoundException;
 import servie.track_servie.repository.GenreRepository;
 import servie.track_servie.repository.MovieCollectionRepository;
 import servie.track_servie.repository.MovieRepository;
+import servie.track_servie.repository.ServieBkpRepository;
 import servie.track_servie.repository.ServieRepository;
 import servie.track_servie.repository.UserEpisodeDataRepository;
 import servie.track_servie.repository.UserRepository;
@@ -66,10 +70,9 @@ import servie.track_servie.repository.UserServieDataRepository;
 import servie.track_servie.utils.GenreUtils;
 
 @Service
+@Slf4j
 public class ServieService
 {
-	// @Autowired
-	// private CastService castService;
 	@Autowired
 	private ServieRepository servieRepository;
 	@Autowired
@@ -88,8 +91,6 @@ public class ServieService
 	private UserEpisodeDataRepository userEpisodeDataRepository;
 	@Autowired
 	private UserRepository userRepository;
-	// @Autowired
-	// private SeasonService seasonService;
 	@Autowired
 	private GenreUtils genreUtils;
 	@Value("${tmdb.api.key}")
@@ -98,6 +99,22 @@ public class ServieService
 	private int pageSize;
 	private HttpHeaders headers = new HttpHeaders();
 	private HttpEntity<?> httpEntity = new HttpEntity<>(headers);
+	@Autowired
+	private ServieBkpRepository bkpRepo;
+
+	// @Scheduled(fixedRate = Integer.MAX_VALUE)
+	public void abc()
+	{
+		List<ServieBkp> servieBkps = bkpRepo.findAll();
+		for(ServieBkp obj : servieBkps)
+		{
+			boolean exist = servieRepository.existsById(new ServieKey("tv", obj.getTmdbId()));
+			if(exist)
+				log.info("Servie {}{}, already exists", "tv", obj.getTmdbId());
+			else
+				addServie("tv", obj.getTmdbId());
+		}
+	}
 
 	public Servie addServie(String type, Integer tmdbId)
 	{
@@ -111,6 +128,7 @@ public class ServieService
 
 	private Movie addMovie(Integer tmdbId)
 	{
+		log.info("Adding movie {}", tmdbId);
 		Movie movie = new Movie();
 		ResponseEntity<Movie> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+ServieType.MOVIE.toString()+"/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
 		if(movieResponse.getStatusCode()==HttpStatus.OK)
@@ -118,6 +136,14 @@ public class ServieService
 			movie = movieResponse.getBody();
 			if(movie!=null)
 			{
+				movie.setLastModified(LocalDateTime.now());
+				if(movie.getBelongsToCollection()!=null)
+				{
+					log.info("    Movie {}, found out to be in a collection", tmdbId);
+					addMovieCollection(movie.getBelongsToCollection().getCollectionId());
+					movie.setChildtype(ServieType.MOVIE.toString());
+					return movie;
+				}
 				ResponseEntity<MovieCredits> movieCreditsResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"movie"+"/"+tmdbId+"/credits?api_key="+apiKey, HttpMethod.GET, httpEntity, MovieCredits.class);
 				MovieCredits movieCredits = movieCreditsResponse.getBody();
 				if(movieCredits!=null)
@@ -125,22 +151,17 @@ public class ServieService
 					movie.setCast(movieCredits.getCast());
 					movie.setCrew(movieCredits.getCrew());
 				}
-				movie.setLastModified(LocalDateTime.now());
-				if(movie.getBelongsToCollection()!=null)
-				{
-					addMovieCollection(movie.getBelongsToCollection().getCollectionId());
-					movie.setChildtype(ServieType.MOVIE.toString());
-					return movie;
-				}
 				movie.setChildtype(ServieType.MOVIE.toString());
 				movie.setGenres(genreUtils.convertTmdbGenresToTrackServieGenres(movie.getGenres()));
 			}
 		}
+		log.info("    Movie {}, added successfully !!", tmdbId);
 		return movieRepository.save(movie);
 	}
 
 	private void addMovieCollection(Integer collectionId)
 	{
+		log.info("Adding movie collection {}", collectionId);
 		MovieCollection movieCollection = new MovieCollection();
 		ResponseEntity<MovieCollection> movieCollectionResponse = restTemplate.exchange("https://api.themoviedb.org/3/collection/"+collectionId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, MovieCollection.class);
 		if(movieCollectionResponse.getStatusCode()==HttpStatus.OK)
@@ -150,10 +171,18 @@ public class ServieService
 			{
 				List<Genre> allTrackServieGenres = genreRepository.findAll();
 				List<Movie> finalMovies = new ArrayList<Movie>();
-				// each movie has no [ImdbId, collection(Id,name,poster,backdrop), runtime,
-				// tagline, status] , no genres only genreIds
+				Set<ProductionCompany> allProductionCompanies = new HashSet<>();
+				Set<ProductionCountry> allProductionCountries = new HashSet<>();
+				Set<SpokenLanguage> allSpokenLanguages = new HashSet<>();
 				for(Movie movie : movieCollection.getMovies())
 				{
+					boolean exist = servieRepository.existsById(new ServieKey("movie", movie.getTmdbId()));
+					if(exist)
+					{
+						log.error("{} {}, already exists", "movie", movie.getTmdbId());
+						throw new RuntimeException("The movie already exists before saving the movie collection !!!");
+					}
+					log.info("    Adding movie {} as a part of collection", movie.getTmdbId());
 					ResponseEntity<Movie> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+ServieType.MOVIE.toString()+"/"+movie.getTmdbId()+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
 					if(movieResponse.getStatusCode()==HttpStatus.OK)
 					{
@@ -179,48 +208,70 @@ public class ServieService
 									.filter(genre -> trackServieGenreIds.contains(genre.getId()))
 									.collect(Collectors.toSet());
 							movie.setGenres(finalGenres);
+							Set<ProductionCompany> prodCompanies = movie.getProductionCompanies().stream()
+									.map(productionCompany ->
+									{
+										if(allProductionCompanies.contains(productionCompany))
+											return allProductionCompanies.stream()
+													.filter(pc -> pc.equals(productionCompany))
+													.findFirst()
+													.orElse(null);
+										else
+										{
+											allProductionCompanies.add(productionCompany);
+											return productionCompany;
+										}
+									})
+									.collect(Collectors.toSet());
+							movie.setProductionCompanies(prodCompanies);
+							// 
+							Set<ProductionCountry> prodCountries = movie.getProductionCountries().stream()
+									.map(prodCountry ->
+									{
+										if(allProductionCountries.contains(prodCountry))
+											return allProductionCountries.stream()
+													.filter(pc -> pc.equals(prodCountry))
+													.findFirst()
+													.orElse(null);
+										else
+										{
+											allProductionCountries.add(prodCountry);
+											return prodCountry;
+										}
+									})
+									.collect(Collectors.toSet());
+							movie.setProductionCountries(prodCountries);
+							//
+							Set<SpokenLanguage> spokenLanguages = movie.getSpokenLanguages().stream()
+									.map(spokenLanguage ->
+									{
+										if(allSpokenLanguages.contains(spokenLanguage))
+											return allSpokenLanguages.stream()
+													.filter(pc -> pc.equals(spokenLanguage))
+													.findFirst()
+													.orElse(null);
+										else
+										{
+											allSpokenLanguages.add(spokenLanguage);
+											return spokenLanguage;
+										}
+									})
+									.collect(Collectors.toSet());
+							movie.setSpokenLanguages(spokenLanguages);
 							finalMovies.add(movie);
 						}
 					}
 				}
-				Set<ProductionCompany> allProductionCompanies = new HashSet<>();
-				Set<ProductionCompany> productionCompanies = finalMovies.stream()
-						.flatMap(movie -> movie.getProductionCompanies().stream())
-						.peek(productionCompany ->
-						{
-							if(!allProductionCompanies.contains(productionCompany))
-								allProductionCompanies.add(productionCompany);
-						})
-						.collect(Collectors.toSet());
-				finalMovies.forEach(movie -> movie.setProductionCompanies(productionCompanies));
-				Set<ProductionCountry> allProductionCountries = new HashSet<>();
-				Set<ProductionCountry> productionCountries = finalMovies.stream()
-						.flatMap(movie -> movie.getProductionCountries().stream())
-						.peek(productionCountry ->
-						{
-							if(!allProductionCountries.contains(productionCountry))
-								allProductionCountries.add(productionCountry);
-						})
-						.collect(Collectors.toSet());
-				finalMovies.forEach(movie -> movie.setProductionCountries(productionCountries));
-				Set<SpokenLanguage> allSpokenLanguages = new HashSet<>();
-				Set<SpokenLanguage> spokenLanguages = finalMovies.stream()
-						.flatMap(movie -> movie.getSpokenLanguages().stream())
-						.peek(spokenLanguage ->
-						{
-							if(!allSpokenLanguages.contains(spokenLanguage))
-								allSpokenLanguages.add(spokenLanguage);
-						})
-						.collect(Collectors.toSet());
-				finalMovies.forEach(movie -> movie.setSpokenLanguages(spokenLanguages));
 				movieCollection.setMovies(finalMovies);
 				movieCollectionRepository.save(movieCollection);
+				log.info("    Added {} movies successfully !!", finalMovies.size());
 			}
 		}
 	}
 
 	private Series addSeries(Integer tmdbId)
 	{
+		log.info("Adding series {}", tmdbId);
 		Series series = new Series();
 		// DTO can be created just to extract the necessary parts
 		ResponseEntity<Series> seriesResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Series.class);
@@ -319,6 +370,7 @@ public class ServieService
 				series.setChildtype("tv");
 				series.setGenres(genreUtils.convertTmdbGenresToTrackServieGenres(series.getGenres()));
 				servieRepository.save(series);
+				log.info("    Series {}, added successfully !!", tmdbId);
 			}
 		}
 		return series;
