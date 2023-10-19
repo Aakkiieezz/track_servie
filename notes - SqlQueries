@@ -1,89 +1,89 @@
 -- Servie - ProductionCompanies Freq
 SELECT s.tmdb_id, s.title, COUNT(*) AS CountOfProdCompanies
-FROM track_servie.servie s
-JOIN track_servie.servie_production_companies spc
+FROM track_servie_stg.servie s
+JOIN track_servie_stg.servie_production_companies spc
 ON s.tmdb_id = spc.tmdb_id AND s.childtype = spc.childtype
-JOIN track_servie.production_company pc
+JOIN track_servie_stg.production_company pc
 ON spc.production_company_id = pc.id
 GROUP BY s.tmdb_id, s.title
 ORDER BY COUNT(*) DESC, s.tmdb_id;
 
 -- Servie - ProductionCountries Freq
 SELECT s.tmdb_id, s.title, COUNT(*) AS CountOfProdCountries
-FROM track_servie.servie s
-JOIN track_servie.servie_production_countries spc
+FROM track_servie_stg.servie s
+JOIN track_servie_stg.servie_production_countries spc
 ON s.tmdb_id = spc.tmdb_id AND s.childtype = spc.childtype
-JOIN track_servie.production_country pc
+JOIN track_servie_stg.production_country pc
 ON spc.iso = pc.iso_3166_1
 GROUP BY s.tmdb_id, s.title
 ORDER BY COUNT(*) DESC, s.tmdb_id;
 
 -- Servie - SpokenLanguages Frequency
 SELECT s.tmdb_id, s.title, COUNT(*) AS CountOfSpokenLanguages
-FROM track_servie.servie s
-JOIN track_servie.servie_spoken_languages spl
+FROM track_servie_stg.servie s
+JOIN track_servie_stg.servie_spoken_languages spl
 ON s.tmdb_id = spl.tmdb_id AND s.childtype = spl.childtype
-JOIN track_servie.spoken_language sl
+JOIN track_servie_stg.spoken_language sl
 ON spl.iso = sl.iso_639_1
 GROUP BY s.tmdb_id, s.title
 ORDER BY COUNT(*) DESC, s.tmdb_id;
 
 -- Episodes - Crew Frequency
 SELECT e.tmdb_id, s.title, e.season_no, e.episode_no, COUNT(*) AS CountOfCrew
-FROM track_servie.episode e
-JOIN track_servie.servie s
+FROM track_servie_stg.episode e
+JOIN track_servie_stg.servie s
 ON s.tmdb_id = e.tmdb_id
-JOIN track_servie.episode_crew ec
+JOIN track_servie_stg.episode_crew ec
 ON e.id = ec.episode_id
-JOIN track_servie.ecrew ecw
+JOIN track_servie_stg.ecrew ecw
 ON ecw.credit_id = ec.credit_id
 GROUP BY e.tmdb_id, e.season_no, e.episode_no
 ORDER BY e.tmdb_id, e.season_no, e.episode_no;
 
 -- Episodes - GuestStars Frequency
 SELECT e.tmdb_id, s.title, e.season_no, e.episode_no, COUNT(*) AS CountOfGuestStars
-FROM track_servie.episode e
-JOIN track_servie.servie s
+FROM track_servie_stg.episode e
+JOIN track_servie_stg.servie s
 ON s.tmdb_id = e.tmdb_id
-JOIN track_servie.episode_cast ec
+JOIN track_servie_stg.episode_cast ec
 ON e.id = ec.episode_id
-JOIN track_servie.ecast ecw
+JOIN track_servie_stg.ecast ecw
 ON ecw.credit_id = ec.credit_id
 GROUP BY e.tmdb_id, e.season_no, e.episode_no
 ORDER BY e.tmdb_id, e.season_no, e.episode_no;
 
 -- Season - Cast Frequency
 SELECT ser.title, s.season_no, COUNT(*) AS CountOfCast
-FROM track_servie.season s
-JOIN track_servie.servie ser
+FROM track_servie_stg.season s
+JOIN track_servie_stg.servie ser
 ON s.tmdb_id = ser.tmdb_id
-JOIN track_servie.season_cast sc
+JOIN track_servie_stg.season_cast sc
 ON s.id = sc.season_id
-JOIN track_servie.scast sct
+JOIN track_servie_stg.scast sct
 ON sct.credit_id = sc.credit_id
 GROUP BY ser.tmdb_id, s.season_no
 ORDER BY ser.tmdb_id, s.season_no;
 
 -- Movie - Cast Frequency
 SELECT ser.title, COUNT(*) AS CountOfCasts
-FROM track_servie.movie m
-JOIN track_servie.servie ser
+FROM track_servie_stg.movie m
+JOIN track_servie_stg.servie ser
 ON m.tmdb_id = ser.tmdb_id
-JOIN track_servie.movie_cast mc
+JOIN track_servie_stg.movie_cast mc
 ON mc.tmdb_id = ser.tmdb_id
-JOIN track_servie.mcast mct
+JOIN track_servie_stg.mcast mct
 ON mct.credit_id = mc.credit_id
 GROUP BY ser.tmdb_id
 ORDER BY ser.tmdb_id;
 
 -- Movie - Crew Frequency
 SELECT ser.title, mcw.department, COUNT(*) AS CountOfCast, COUNT(DISTINCT mcw.person_id) AS CountOfDistinctPersons
-FROM track_servie.movie m
-JOIN track_servie.servie ser
+FROM track_servie_stg.movie m
+JOIN track_servie_stg.servie ser
 ON m.tmdb_id = ser.tmdb_id
-JOIN track_servie.movie_crew mc
+JOIN track_servie_stg.movie_crew mc
 ON mc.tmdb_id = ser.tmdb_id
-JOIN track_servie.mcrew mcw
+JOIN track_servie_stg.mcrew mcw
 ON mcw.credit_id = mc.credit_id
 GROUP BY ser.tmdb_id, mcw.department
 ORDER BY ser.tmdb_id;
