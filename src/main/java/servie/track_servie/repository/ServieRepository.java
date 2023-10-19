@@ -68,17 +68,17 @@ public interface ServieRepository extends JpaRepository<Servie, ServieKey>
 	@Query(	nativeQuery = true,
 			value = "SELECT s.imdb_id AS imdbId, s.tmdb_id AS tmdbId, s.childtype AS childtype, s.title AS title, m.release_date AS releaseDate, t.total_episodes AS totalEpisodes, t.first_air_date AS firstAirDate, t.last_air_date AS lastAirDate"
 					//        +" (CASE WHEN usd.poster_path IS NULL THEN s.poster_path ELSE usd.poster_path END) AS poster_path,"
-					//        +" (SELECT COUNT(*) FROM track_servie_stg.user_episode_data AS ued"
+					//        +" (SELECT COUNT(*) FROM track_servie.user_episode_data AS ued"
 					//        +"   WHERE ued.user_id = 1 AND ued.tmdb_id = s.tmdb_id AND ued.watched = 1) AS episodes_watched,"
 					//        +" (CASE WHEN usd.childtype LIKE 'movie' THEN usd.movie_watched"
-					//        +"      ELSE (SELECT CASE WHEN episodes_watched = (SELECT s.total_episodes FROM track_servie_stg.series AS s"
+					//        +"      ELSE (SELECT CASE WHEN episodes_watched = (SELECT s.total_episodes FROM track_servie.series AS s"
 					//        +"                                                  WHERE s.tmdb_id = usd.tmdb_id)"
 					//        +"      THEN true ELSE false END)"
 					//        +"  END) AS completed"
-					+" FROM track_servie_stg.servie AS s"
-					+" LEFT JOIN track_servie_stg.movie AS m ON m.childtype = s.childtype AND s.tmdb_id = m.tmdb_id"
-					+" LEFT JOIN track_servie_stg.series AS t ON s.childtype = t.childtype AND t.tmdb_id = s.tmdb_id"
-					+" JOIN track_servie_stg.user_servie_data usd ON s.tmdb_id = usd.tmdb_id AND s.childtype = usd.childtype"
+					+" FROM track_servie.servie AS s"
+					+" LEFT JOIN track_servie.movie AS m ON m.childtype = s.childtype AND s.tmdb_id = m.tmdb_id"
+					+" LEFT JOIN track_servie.series AS t ON s.childtype = t.childtype AND t.tmdb_id = s.tmdb_id"
+					+" JOIN track_servie.user_servie_data usd ON s.tmdb_id = usd.tmdb_id AND s.childtype = usd.childtype"
 					+" WHERE usd.user_id = 1")
 	Page<ServieDtoHomePage2> getServiesByHomePageFilterNATIVE(/*
 																 * @Param("user") User user, @Param("childtype") String
