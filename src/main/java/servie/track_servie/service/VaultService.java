@@ -420,7 +420,7 @@ public class VaultService
 	{
 		String username = "Akash";
 		String password = "forever21MySQL";
-		String databaseName = "track_servie_stg";
+		String databaseName = "track_servie";
 		String dumpCommand = "mysqldump -u "+username+" -p"+password+" "+databaseName;
 		try
 		{
