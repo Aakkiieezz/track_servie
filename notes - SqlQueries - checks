@@ -1,0 +1,204 @@
+-- 0
+SELECT COUNT(*) FROM track_servie_stg.catalog;
+-- 0
+SELECT COUNT(*) FROM track_servie_stg.catalog_servies;
+-- 99
+SELECT COUNT(*) FROM track_servie_stg.created_by;
+-- 12864
+SELECT COUNT(*) FROM track_servie_stg.ecast;
+-- 17779
+SELECT COUNT(*) FROM track_servie_stg.ecrew;
+-- 7827
+SELECT COUNT(*) FROM track_servie_stg.episode;
+-- 31006
+SELECT COUNT(*) FROM track_servie_stg.episode_cast;
+-- 63004
+SELECT COUNT(*) FROM track_servie_stg.episode_crew;
+-- 25
+SELECT COUNT(*) FROM track_servie_stg.genre;
+-- 66199
+SELECT COUNT(*) FROM track_servie_stg.mcast;
+-- 178237
+SELECT COUNT(*) FROM track_servie_stg.mcrew;
+-- 1815
+SELECT COUNT(*) FROM track_servie_stg.movie;
+-- 66199
+SELECT COUNT(*) FROM track_servie_stg.movie_cast;
+-- 283
+SELECT COUNT(*) FROM track_servie_stg.movie_collection;
+-- 178237
+SELECT COUNT(*) FROM track_servie_stg.movie_crew;
+-- 109
+SELECT COUNT(*) FROM track_servie_stg.movies_bkp;
+-- 102
+SELECT COUNT(*) FROM track_servie_stg.network;
+-- 109
+SELECT COUNT(*) FROM track_servie_stg.origin_country;
+-- 4
+SELECT COUNT(*) FROM track_servie_stg.permission;
+-- 0
+SELECT COUNT(*) FROM track_servie_stg.person;
+-- 1969
+SELECT COUNT(*) FROM track_servie_stg.production_company;
+-- 48
+SELECT COUNT(*) FROM track_servie_stg.production_country;
+-- 3
+SELECT COUNT(*) FROM track_servie_stg.role;
+-- 7
+SELECT COUNT(*) FROM track_servie_stg.role_permissions;
+-- 1386
+SELECT COUNT(*) FROM track_servie_stg.scast;
+-- 423
+SELECT COUNT(*) FROM track_servie_stg.season;
+-- 4712
+SELECT COUNT(*) FROM track_servie_stg.season_cast;
+-- 109
+SELECT COUNT(*) FROM track_servie_stg.series;
+-- 99
+SELECT COUNT(*) FROM track_servie_stg.series_createdby;
+-- 221
+SELECT COUNT(*) FROM track_servie_stg.series_networks;
+-- 1924
+SELECT COUNT(*) FROM track_servie_stg.servie;
+-- 5381
+SELECT COUNT(*) FROM track_servie_stg.servie_genres;
+-- 5877
+SELECT COUNT(*) FROM track_servie_stg.servie_production_companies;
+-- 2463
+SELECT COUNT(*) FROM track_servie_stg.servie_production_countries;
+-- 2849
+SELECT COUNT(*) FROM track_servie_stg.servie_spoken_languages;
+-- 64
+SELECT COUNT(*) FROM track_servie_stg.spoken_language;
+-- 0
+SELECT COUNT(*) FROM track_servie_stg.tmdb_movie_exports;
+-- 2
+SELECT COUNT(*) FROM track_servie_stg.user;
+-- 0
+SELECT COUNT(*) FROM track_servie_stg.user_episode_data;
+-- 2
+SELECT COUNT(*) FROM track_servie_stg.user_roles;
+-- 0
+SELECT COUNT(*) FROM track_servie_stg.user_season_data;
+-- 0
+SELECT COUNT(*) FROM track_servie_stg.user_servie_data;
+
+-- CreatedBy
+SELECT SUM(cb.CountOfCreatedBy)
+FROM track_servie_stg.servie s
+JOIN track_servie_stg.series tv
+    ON tv.childtype = s.childtype AND tv.tmdb_id = s.tmdb_id
+LEFT JOIN (SELECT scb.tmdb_id, scb.childtype, COUNT(*)  AS CountOfCreatedBy
+            FROM track_servie_stg.series_createdby scb
+            JOIN track_servie_stg.created_by cb
+                ON scb.credit_id = cb.credit_id
+            GROUP BY scb.tmdb_id) AS cb
+    ON tv.tmdb_id = cb.tmdb_id AND tv.childtype = cb.childtype;
+-- MUST BE EQUAL TO
+SELECT COUNT(*) FROM track_servie_stg.created_by;
+
+-- ProductionCompanies
+SELECT SUM(pc.CountOfProdCompanies)
+FROM track_servie_stg.servie s
+LEFT JOIN (SELECT spc.tmdb_id, spc.childtype, COUNT(*) AS CountOfProdCompanies
+			FROM track_servie_stg.servie_production_companies spc
+			JOIN track_servie_stg.production_company pc
+				ON spc.production_company_id = pc.id
+			GROUP BY spc.tmdb_id) AS pc
+	ON s.tmdb_id = pc.tmdb_id AND s.childtype = pc.childtype;
+-- MUST BE EQUAL TO
+SELECT COUNT(*) FROM track_servie_stg.servie_production_companies;
+
+-- ProductionCountries
+SELECT SUM(pc.CountOfProdCountries)
+FROM track_servie_stg.servie s
+LEFT JOIN (SELECT spc.tmdb_id, spc.childtype, COUNT(*) AS CountOfProdCountries
+			FROM track_servie_stg.servie_production_countries spc
+			JOIN track_servie_stg.production_country pc
+				ON spc.iso = pc.iso_3166_1
+			GROUP BY spc.tmdb_id) AS pc
+	ON s.tmdb_id = pc.tmdb_id AND s.childtype = pc.childtype;
+-- MUST BE EQUAL TO
+SELECT COUNT(*) FROM track_servie_stg.servie_production_countries;
+
+-- SpokenLanguages
+SELECT SUM(sl.CountOfSpokenLanguages)
+FROM track_servie_stg.servie s
+LEFT JOIN (SELECT spl.tmdb_id, spl.childtype, COUNT(*) AS CountOfSpokenLanguages
+			FROM track_servie_stg.servie_spoken_languages spl
+			JOIN track_servie_stg.spoken_language sl
+				ON spl.iso = sl.iso_639_1
+			GROUP BY spl.tmdb_id) AS sl
+	ON s.tmdb_id = sl.tmdb_id AND s.childtype = sl.childtype;
+-- MUST BE EQUAL TO
+SELECT COUNT(*) FROM track_servie_stg.servie_spoken_languages;
+
+-- EpisodesCrew
+SELECT SUM(crew.CountOfCrew)
+FROM track_servie_stg.episode e
+JOIN track_servie_stg.servie s
+	ON s.tmdb_id = e.tmdb_id
+LEFT JOIN (SELECT ec.episode_id, COUNT(*) AS CountOfCrew
+			FROM track_servie_stg.episode_crew ec
+			JOIN track_servie_stg.ecrew ecw
+				ON ecw.credit_id = ec.credit_id
+			GROUP BY ec.episode_id) AS crew
+	ON e.id = crew.episode_id;
+-- MUST BE EQUAL TO
+SELECT COUNT(*) FROM track_servie_stg.episode_crew;
+
+-- EpisodesGuestStars
+SELECT SUM(cast.CountOfGuestStars)
+FROM track_servie_stg.episode e
+JOIN track_servie_stg.servie s
+	ON s.tmdb_id = e.tmdb_id
+LEFT JOIN (SELECT ec.episode_id, COUNT(*) AS CountOfGuestStars
+			FROM track_servie_stg.episode_cast ec
+			JOIN track_servie_stg.ecast ecw
+				ON ecw.credit_id = ec.credit_id
+			GROUP BY ec.episode_id) AS cast
+	ON e.id = cast.episode_id;
+-- MUST BE EQUAL TO
+SELECT COUNT(*) FROM track_servie_stg.episode_cast;
+
+-- SeasonCasts
+SELECT SUM(cast.CountOfCast)
+FROM track_servie_stg.season s
+JOIN track_servie_stg.servie ser
+	ON s.tmdb_id = ser.tmdb_id
+LEFT JOIN (SELECT sc.season_id, COUNT(*) AS CountOfCast
+			FROM track_servie_stg.season_cast sc
+            JOIN track_servie_stg.scast sct
+				ON sct.credit_id = sc.credit_id
+			GROUP BY sc.season_id) AS cast
+	ON s.id = cast.season_id;
+-- MUST BE EQUAL TO
+SELECT COUNT(*) FROM track_servie_stg.season_cast;
+
+-- MovieCasts
+SELECT SUM(cast.CountOfCasts)
+FROM track_servie_stg.movie m
+JOIN track_servie_stg.servie s
+	ON m.tmdb_id = s.tmdb_id
+LEFT JOIN (SELECT mc.tmdb_id, COUNT(*) AS CountOfCasts
+			FROM track_servie_stg.movie_cast mc
+			JOIN track_servie_stg.mcast mct
+				ON mct.credit_id = mc.credit_id
+			GROUP BY mc.tmdb_id) AS cast
+	ON m.tmdb_id = cast.tmdb_id;
+-- MUST BE EQUAL TO
+SELECT COUNT(*) FROM track_servie_stg.movie_cast;
+
+-- MovieCrew
+SELECT SUM(crew.CountOfCrew)
+FROM track_servie_stg.movie m
+JOIN track_servie_stg.servie s
+    ON m.tmdb_id = s.tmdb_id
+LEFT JOIN (SELECT mc.tmdb_id, COUNT(*) AS CountOfCrew
+			FROM track_servie_stg.movie_crew mc
+			JOIN track_servie_stg.mcrew mct
+				ON mct.credit_id = mc.credit_id
+			GROUP BY mc.tmdb_id) AS crew
+    ON m.tmdb_id = crew.tmdb_id;
+-- MUST BE EQUAL TO
+SELECT COUNT(*) FROM track_servie_stg.movie_crew;

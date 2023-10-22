@@ -41,10 +41,20 @@ public class UserServieData
 	@Column(name = "backdrop_path")
 	private String backdropPath;
 	// ---------------------------------------------------------------
-	@Formula(value = "(CASE WHEN childtype = 'movie' THEN movie_watched ELSE (SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data AS ued WHERE ued.user_id = user_id AND ued.tmdb_id = tmdb_id AND ued.watched = 1) = (SELECT s.total_episodes FROM series AS s WHERE s.tmdb_id = tmdb_id) THEN true ELSE false END) END)")
+	@Formula(value = "(CASE WHEN childtype = 'movie' THEN movie_watched ELSE (SELECT CASE WHEN (SELECT COUNT(*) FROM user_episode_data AS ued"
+			+" WHERE ued.user_id = user_id"
+			+" AND ued.tmdb_id = tmdb_id"
+			+" AND ued.childtype = childtype"
+			+" AND ued.season_no > 0"
+			+" AND ued.watched = 1) = (SELECT s.total_episodes FROM series AS s WHERE s.tmdb_id = tmdb_id) THEN true ELSE false END) END)")
 	private Boolean completed = false;
 	// ---------------------------------------------------------------
-	@Formula(value = "(SELECT COUNT(*) FROM user_episode_data AS ued WHERE ued.user_id = user_id AND ued.tmdb_id = tmdb_id AND ued.childtype = childtype AND ued.watched = 1)")
+	@Formula(value = "(SELECT COUNT(*) FROM user_episode_data AS ued"
+			+" WHERE ued.user_id = user_id"
+			+" AND ued.tmdb_id = tmdb_id"
+			+" AND ued.childtype = childtype"
+			+" AND ued.season_no > 0"
+			+" AND ued.watched = 1)")
 	private Integer episodesWatched;
 	// ---------------------------------------------------------------
 	@OneToMany(mappedBy = "userServieData", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

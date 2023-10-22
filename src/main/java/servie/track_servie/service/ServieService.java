@@ -19,7 +19,6 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import lombok.extern.slf4j.Slf4j;
@@ -40,7 +39,6 @@ import servie.track_servie.entity.Episode;
 import servie.track_servie.entity.Genre;
 import servie.track_servie.entity.Movie;
 import servie.track_servie.entity.MovieCollection;
-import servie.track_servie.entity.ServieBkp;
 import servie.track_servie.entity.ProductionCompany;
 import servie.track_servie.entity.ProductionCountry;
 import servie.track_servie.entity.Season;
@@ -61,7 +59,6 @@ import servie.track_servie.exceptions.ResourceNotFoundException;
 import servie.track_servie.repository.GenreRepository;
 import servie.track_servie.repository.MovieCollectionRepository;
 import servie.track_servie.repository.MovieRepository;
-import servie.track_servie.repository.ServieBkpRepository;
 import servie.track_servie.repository.ServieRepository;
 import servie.track_servie.repository.UserEpisodeDataRepository;
 import servie.track_servie.repository.UserRepository;
@@ -99,22 +96,6 @@ public class ServieService
 	private int pageSize;
 	private HttpHeaders headers = new HttpHeaders();
 	private HttpEntity<?> httpEntity = new HttpEntity<>(headers);
-	@Autowired
-	private ServieBkpRepository bkpRepo;
-
-	// @Scheduled(fixedRate = Integer.MAX_VALUE)
-	public void abc()
-	{
-		List<ServieBkp> servieBkps = bkpRepo.findAll();
-		for(ServieBkp obj : servieBkps)
-		{
-			boolean exist = servieRepository.existsById(new ServieKey("tv", obj.getTmdbId()));
-			if(exist)
-				log.info("Servie {}{}, already exists", "tv", obj.getTmdbId());
-			else
-				addServie("tv", obj.getTmdbId());
-		}
-	}
 
 	public Servie addServie(String type, Integer tmdbId)
 	{
@@ -568,10 +549,11 @@ public class ServieService
 			//     get seasons with watched True/False
 			// else (Series 0 -> 1)
 			//     get seasons with watched Null/False
-			if(userServieData.getCompleted())
+			if(userServieData.getCompleted()) // ToDo CHECK LATER = PROBABLY NOT REQUIRED
 				seasonNos = userSeasonDataRepository.getAllNonNullSeasons(user, childtype, tmdbId);
 			else
-				seasonNos = userSeasonDataRepository.getAllIncompletedSeasons(user, childtype, tmdbId);
+				// ToDo TO THINK ABOUT USER ???
+				seasonNos = userSeasonDataRepository.getAllIncompleteSeasons(user, tmdbId);
 			for(Integer seasonNo : seasonNos)
 				toggleSeasonWatch(userId, tmdbId, seasonNo);
 		}
