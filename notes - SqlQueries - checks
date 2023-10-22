@@ -8,7 +8,7 @@ SELECT COUNT(*) FROM track_servie.created_by;
 SELECT COUNT(*) FROM track_servie.ecast;
 -- 17779
 SELECT COUNT(*) FROM track_servie.ecrew;
--- 7827
+-- 7839
 SELECT COUNT(*) FROM track_servie.episode;
 -- 31006
 SELECT COUNT(*) FROM track_servie.episode_cast;
@@ -48,7 +48,7 @@ SELECT COUNT(*) FROM track_servie.role;
 SELECT COUNT(*) FROM track_servie.role_permissions;
 -- 1386
 SELECT COUNT(*) FROM track_servie.scast;
--- 423
+-- 424
 SELECT COUNT(*) FROM track_servie.season;
 -- 4712
 SELECT COUNT(*) FROM track_servie.season_cast;
@@ -58,7 +58,7 @@ SELECT COUNT(*) FROM track_servie.series;
 SELECT COUNT(*) FROM track_servie.series_createdby;
 -- 221
 SELECT COUNT(*) FROM track_servie.series_networks;
--- 1924
+-- 1929
 SELECT COUNT(*) FROM track_servie.servie;
 -- 5381
 SELECT COUNT(*) FROM track_servie.servie_genres;
@@ -74,13 +74,13 @@ SELECT COUNT(*) FROM track_servie.spoken_language;
 SELECT COUNT(*) FROM track_servie.tmdb_movie_exports;
 -- 2
 SELECT COUNT(*) FROM track_servie.user;
--- 0
+-- 3403
 SELECT COUNT(*) FROM track_servie.user_episode_data;
 -- 2
 SELECT COUNT(*) FROM track_servie.user_roles;
--- 0
+-- 206
 SELECT COUNT(*) FROM track_servie.user_season_data;
--- 0
+-- 1554
 SELECT COUNT(*) FROM track_servie.user_servie_data;
 
 -- CreatedBy

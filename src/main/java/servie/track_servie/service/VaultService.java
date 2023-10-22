@@ -9,16 +9,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.exceptions.CsvException;
 import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
-import servie.track_servie.entity.Episode;
-import servie.track_servie.entity.Movie;
-import servie.track_servie.entity.MovieCollection;
-import servie.track_servie.entity.Season;
 import servie.track_servie.entity.Series;
 import servie.track_servie.entity.Servie;
 import servie.track_servie.entity.User;
@@ -26,17 +23,12 @@ import servie.track_servie.entity.UserEpisodeData;
 import servie.track_servie.entity.UserSeasonData;
 import servie.track_servie.entity.UserServieData;
 import servie.track_servie.exceptions.ResourceNotFoundException;
-import servie.track_servie.payload.dtos.ServieGenreMapping;
 import servie.track_servie.payload.dtos.backupData.UserEpisodeBkpDto;
 import servie.track_servie.payload.dtos.backupData.UserSeasonBkpDto;
 import servie.track_servie.payload.dtos.backupData.UserServieBkpDto;
 import servie.track_servie.payload.primaryKeys.ServieKey;
 import servie.track_servie.payload.primaryKeys.UserSeasonDataKey;
 import servie.track_servie.payload.primaryKeys.UserServieDataKey;
-import servie.track_servie.repository.EpisodeRepository;
-import servie.track_servie.repository.GenreRepository;
-import servie.track_servie.repository.MovieCollectionRepository;
-import servie.track_servie.repository.SeasonRepository;
 import servie.track_servie.repository.ServieRepository;
 import servie.track_servie.repository.UserEpisodeDataRepository;
 import servie.track_servie.repository.UserRepository;
@@ -57,16 +49,8 @@ public class VaultService
 	private UserRepository userRepository;
 	@Autowired
 	private ServieRepository servieRepository;
-	@Autowired
-	private GenreRepository genreRepository;
-	@Autowired
-	private SeasonRepository seasonRepository;
-	@Autowired
-	private EpisodeRepository episodeRepository;
-	@Autowired
-	private MovieCollectionRepository movieCollectionRepository;
 
-	// @Scheduled(fixedRate = Integer.MAX_VALUE)
+	@Scheduled(fixedRate = Integer.MAX_VALUE)
 	public void exportMasterData_mysqldump()
 	{
 		String username = "Akash";
@@ -90,195 +74,6 @@ public class VaultService
 		{
 			e.printStackTrace();
 		}
-	}
-
-	// @Scheduled(fixedRate = Integer.MAX_VALUE)
-	public void exportMasterData_csv() throws IOException
-	{
-		exportServies();
-		exportSeasons();
-		exportEpisodes();
-		exportMovieCollections();
-		exportServieGenreMappings();
-	}
-
-	private void exportServies() throws IOException
-	{
-		log.info("Exporting servie data");
-		List<Servie> servies = servieRepository.findAll();
-		String moviesFilePath = "/home/aakkiieezz/Coding/track_servie/backups/movies.csv";
-		String seriesFilePath = "/home/aakkiieezz/Coding/track_servie/backups/series.csv";
-		try(CSVWriter MovieWriter = new CSVWriter(new FileWriter(moviesFilePath));CSVWriter SeriesWriter = new CSVWriter(new FileWriter(seriesFilePath)))
-		{
-			String[] movieHeader = {"TmdbId", "Servie Type", "ImdbId", "Backdrop Path", "Poster Path", "Title", "Overview", "Status", "Tagline", "Language", "Popularity", "Collection Id", "Collection Name", "Collection Poster Path", "Collection Backdrop Path", "Release Date", "Runtime"};
-			MovieWriter.writeNext(movieHeader);
-			String[] seriesHeader = {"TmdbId", "Servie Type", "ImdbId", "Backdrop Path", "Poster Path", "Title", "Overview", "Status", "Tagline", "Language", "Popularity", "Number Of Seasons", "Number Of Episodes", "First Air Date", "Last Air Date"};
-			SeriesWriter.writeNext(seriesHeader);
-			for(Servie servie : servies)
-			{
-				String tmdbId = servie.getTmdbId().toString();
-				String childtype = servie.getChildtype();
-				if(servie instanceof Movie)
-				{
-					Movie movie = (Movie) servie;
-					String collectionId = null;
-					String collectionName = null;
-					String collectionPosterPath = null;
-					String collectionBackdropPath = null;
-					if(movie.getBelongsToCollection()!=null)
-					{
-						collectionId = movie.getBelongsToCollection().getCollectionId().toString();
-						collectionName = movie.getBelongsToCollection().getCollectionName();
-						collectionPosterPath = movie.getBelongsToCollection().getPosterPath();
-						collectionBackdropPath = movie.getBelongsToCollection().getCollectionBackdropPath();
-					}
-					String releaseDate = (movie.getReleaseDate()==null)? null : movie.getReleaseDate().toString();
-					String[] movieRow = {
-							tmdbId,
-							childtype,
-							servie.getImdbId(),
-							servie.getBackdropPath(),
-							servie.getPosterPath(),
-							servie.getTitle(),
-							servie.getOverview(),
-							servie.getStatus(),
-							servie.getTagline(),
-							servie.getOriginalLanguage(),
-							servie.getPopularity().toString(),
-							collectionId,
-							collectionName,
-							collectionPosterPath,
-							collectionBackdropPath,
-							releaseDate,
-							movie.getRuntime().toString()};
-					MovieWriter.writeNext(movieRow);
-				}
-				else
-				{
-					Series series = (Series) servie;
-					String[] seriesRow = {
-							tmdbId,
-							childtype,
-							servie.getImdbId(),
-							servie.getBackdropPath(),
-							servie.getPosterPath(),
-							servie.getTitle(),
-							servie.getOverview(),
-							servie.getStatus(),
-							servie.getTagline(),
-							servie.getOriginalLanguage(),
-							servie.getPopularity().toString(),
-							series.getTotalSeasons().toString(),
-							series.getTotalEpisodes().toString(),
-							series.getFirstAirDate().toString(),
-							series.getLastAirDate().toString()};
-					SeriesWriter.writeNext(seriesRow);
-				}
-			}
-		}
-		log.info("    Finished exporting servie data");
-	}
-
-	private void exportSeasons() throws IOException
-	{
-		log.info("Exporting seasons data");
-		List<Season> seasons = seasonRepository.findAll();
-		String seasonsFilePath = "/home/aakkiieezz/Coding/track_servie/backups/seasons.csv";
-		try(CSVWriter SeasonsWriter = new CSVWriter(new FileWriter(seasonsFilePath)))
-		{
-			String[] seasonHeader = {"TmdbId", "Servie Type", "Season Number", "Id", "Overview", "Name", "Episode Count", "Poster Path"};
-			SeasonsWriter.writeNext(seasonHeader);
-			for(Season season : seasons)
-			{
-				String[] seasonRow = {
-						season.getSeries().getTmdbId().toString(),
-						season.getSeries().getChildtype(),
-						season.getSeasonNo().toString(),
-						season.getId(),
-						season.getOverview(),
-						season.getName(),
-						season.getEpisodeCount().toString(),
-						season.getPosterPath()
-				};
-				SeasonsWriter.writeNext(seasonRow);
-			}
-		}
-		log.info("    Finished exporting seasons data");
-	}
-
-	private void exportEpisodes() throws IOException
-	{
-		log.info("Exporting episodes data");
-		List<Episode> episodes = episodeRepository.findAll();
-		String episodesFilePath = "/home/aakkiieezz/Coding/track_servie/backups/episodes.csv";
-		try(CSVWriter episodesWriter = new CSVWriter(new FileWriter(episodesFilePath)))
-		{
-			String[] episodesHeader = {"TmdbId", "Id", "Season Id", "Season Number", "Episode Number", "Overview", "Runtime", "Still Path", "Name"};
-			episodesWriter.writeNext(episodesHeader);
-			for(Episode episode : episodes)
-			{
-				String runtime = (episode.getRuntime()==null)? null : episode.getRuntime().toString();
-				String[] episodeRow = {
-						episode.getTmdbId().toString(),
-						episode.getId(),
-						episode.getSeason().getId(),
-						episode.getSeasonNo().toString(),
-						episode.getEpisodeNo().toString(),
-						episode.getOverview(),
-						runtime,
-						episode.getStillPath(),
-						episode.getName()
-				};
-				episodesWriter.writeNext(episodeRow);
-			}
-		}
-		log.info("    Finished exporting episodes data");
-	}
-
-	private void exportMovieCollections() throws IOException
-	{
-		log.info("Exporting collections data");
-		List<MovieCollection> movieCollections = movieCollectionRepository.findAll();
-		String collectionsFilePath = "/home/aakkiieezz/Coding/track_servie/backups/movie_collections.csv";
-		try(CSVWriter collectionsWriter = new CSVWriter(new FileWriter(collectionsFilePath)))
-		{
-			String[] collectionsHeader = {"Id", "Name", "Overview", "Backdrop Path", "Poster Path"};
-			collectionsWriter.writeNext(collectionsHeader);
-			for(MovieCollection movieCollection : movieCollections)
-			{
-				String[] collectionRow = {
-						movieCollection.getId().toString(),
-						movieCollection.getName(),
-						movieCollection.getOverview(),
-						movieCollection.getBackdropPath(),
-						movieCollection.getPosterPath()
-				};
-				collectionsWriter.writeNext(collectionRow);
-			}
-		}
-		log.info("    Finished exporting collections data");
-	}
-
-	private void exportServieGenreMappings() throws IOException
-	{
-		log.info("Exporting servie_genre mappings");
-		List<ServieGenreMapping> servieGenreMappings = genreRepository.getGenreMappings();
-		String servieGenresFilePath = "/home/aakkiieezz/Coding/track_servie/backups/servie_genres.csv";
-		try(CSVWriter ServieGenresWriter = new CSVWriter(new FileWriter(servieGenresFilePath)))
-		{
-			String[] servieGenreHeader = {"Genre Id", "Servie Tmdb Id", "Servie Type"};
-			ServieGenresWriter.writeNext(servieGenreHeader);
-			for(ServieGenreMapping servieGenre : servieGenreMappings)
-			{
-				String[] servieGenreRow = {
-						servieGenre.getGenreId().toString(),
-						servieGenre.getTmdbId().toString(),
-						servieGenre.getChildtype()
-				};
-				ServieGenresWriter.writeNext(servieGenreRow);
-			}
-		}
-		log.info("    Finished exporting servie_genre mappings");
 	}
 
 	// @Scheduled(fixedRate = Integer.MAX_VALUE)
@@ -424,6 +219,7 @@ public class VaultService
 		importUserServiesData(user);
 		importUserSeasonsData(user);
 		importUserEpisodesData(user);
+		log.info("Finished importing", userId);
 	}
 
 	private void importUserServiesData(User user) throws IOException, CsvException
