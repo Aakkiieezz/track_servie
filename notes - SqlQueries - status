@@ -1,11 +1,11 @@
 -- Series - CreatedBy Frequency
 SELECT s.tmdb_id, s.title, cb.CountOfCreatedBy
-FROM track_servie_stg.servie s
-JOIN track_servie_stg.series tv
+FROM track_servie.servie s
+JOIN track_servie.series tv
     ON tv.childtype = s.childtype AND tv.tmdb_id = s.tmdb_id
 LEFT JOIN (SELECT scb.tmdb_id, scb.childtype, COUNT(*)  AS CountOfCreatedBy
-            FROM track_servie_stg.series_createdby scb
-            JOIN track_servie_stg.created_by cb
+            FROM track_servie.series_createdby scb
+            JOIN track_servie.created_by cb
                 ON scb.credit_id = cb.credit_id
             GROUP BY scb.tmdb_id) AS cb
     ON tv.tmdb_id = cb.tmdb_id AND tv.childtype = cb.childtype
@@ -15,10 +15,10 @@ ORDER BY s.title;
 --------------------------------------------------------------------------------------------------
 -- Servie - ProductionCompanies Freq
 SELECT s.tmdb_id, s.title, pc.CountOfProdCompanies
-FROM track_servie_stg.servie s
+FROM track_servie.servie s
 LEFT JOIN (SELECT spc.tmdb_id, spc.childtype, COUNT(*) AS CountOfProdCompanies
-			FROM track_servie_stg.servie_production_companies spc
-			JOIN track_servie_stg.production_company pc
+			FROM track_servie.servie_production_companies spc
+			JOIN track_servie.production_company pc
 				ON spc.production_company_id = pc.id
 			GROUP BY spc.tmdb_id) AS pc
 	ON s.tmdb_id = pc.tmdb_id AND s.childtype = pc.childtype
@@ -27,10 +27,10 @@ ORDER BY s.title;
 
 -- Servie - ProductionCountries Freq
 SELECT s.tmdb_id, s.title, pc.CountOfProdCountries
-FROM track_servie_stg.servie s
+FROM track_servie.servie s
 LEFT JOIN (SELECT spc.tmdb_id, spc.childtype, COUNT(*) AS CountOfProdCountries
-			FROM track_servie_stg.servie_production_countries spc
-			JOIN track_servie_stg.production_country pc
+			FROM track_servie.servie_production_countries spc
+			JOIN track_servie.production_country pc
 				ON spc.iso = pc.iso_3166_1
 			GROUP BY spc.tmdb_id) AS pc
 	ON s.tmdb_id = pc.tmdb_id AND s.childtype = pc.childtype
@@ -39,10 +39,10 @@ ORDER BY s.title;
 
 -- Servie - SpokenLanguages Frequency
 SELECT s.tmdb_id, s.title, sl.CountOfSpokenLanguages
-FROM track_servie_stg.servie s
+FROM track_servie.servie s
 LEFT JOIN (SELECT spl.tmdb_id, spl.childtype, COUNT(*) AS CountOfSpokenLanguages
-			FROM track_servie_stg.servie_spoken_languages spl
-			JOIN track_servie_stg.spoken_language sl
+			FROM track_servie.servie_spoken_languages spl
+			JOIN track_servie.spoken_language sl
 				ON spl.iso = sl.iso_639_1
 			GROUP BY spl.tmdb_id) AS sl
 	ON s.tmdb_id = sl.tmdb_id AND s.childtype = sl.childtype
@@ -53,22 +53,22 @@ ORDER BY s.title;
 -- Servie - SpokenLanguages Frequency
 -- Servie - ProductionCountries Freq
 SELECT s.tmdb_id, s.title, company.CountOfProdCompanies, country.CountOfProdCountries, lang.CountOfSpokenLanguages
-FROM track_servie_stg.servie s
+FROM track_servie.servie s
 LEFT JOIN (SELECT spc.tmdb_id, spc.childtype, COUNT(*) AS CountOfProdCompanies
-			FROM track_servie_stg.servie_production_companies spc
-			JOIN track_servie_stg.production_company pc
+			FROM track_servie.servie_production_companies spc
+			JOIN track_servie.production_company pc
 				ON spc.production_company_id = pc.id
 			GROUP BY spc.tmdb_id) AS company
 	ON s.tmdb_id = company.tmdb_id AND s.childtype = company.childtype
 LEFT JOIN (SELECT spc.tmdb_id, spc.childtype, COUNT(*) AS CountOfProdCountries
-			FROM track_servie_stg.servie_production_countries spc
-			JOIN track_servie_stg.production_country pc
+			FROM track_servie.servie_production_countries spc
+			JOIN track_servie.production_country pc
 				ON spc.iso = pc.iso_3166_1
 			GROUP BY spc.tmdb_id) AS country
 	ON s.tmdb_id = country.tmdb_id AND s.childtype = country.childtype
 LEFT JOIN (SELECT spl.tmdb_id, spl.childtype, COUNT(*) AS CountOfSpokenLanguages
-			FROM track_servie_stg.servie_spoken_languages spl
-			JOIN track_servie_stg.spoken_language sl
+			FROM track_servie.servie_spoken_languages spl
+			JOIN track_servie.spoken_language sl
 				ON spl.iso = sl.iso_639_1
 			GROUP BY spl.tmdb_id) AS lang
 	ON s.tmdb_id = lang.tmdb_id AND s.childtype = lang.childtype
@@ -78,12 +78,12 @@ ORDER BY s.title;
 --------------------------------------------------------------------------------------------------
 -- Episodes - Crew Frequency
 SELECT e.tmdb_id, s.title, e.season_no, e.episode_no, crew.CountOfCrew
-FROM track_servie_stg.episode e
-JOIN track_servie_stg.servie s
+FROM track_servie.episode e
+JOIN track_servie.servie s
 	ON s.tmdb_id = e.tmdb_id
 LEFT JOIN (SELECT ec.episode_id, COUNT(*) AS CountOfCrew
-			FROM track_servie_stg.episode_crew ec
-			JOIN track_servie_stg.ecrew ecw
+			FROM track_servie.episode_crew ec
+			JOIN track_servie.ecrew ecw
 				ON ecw.credit_id = ec.credit_id
 			GROUP BY ec.episode_id) AS crew
 	ON e.id = crew.episode_id
@@ -92,12 +92,12 @@ ORDER BY s.title, e.season_no, e.episode_no;
 
 -- Episodes - GuestStars Frequency
 SELECT e.tmdb_id, s.title, e.season_no, e.episode_no, cast.CountOfGuestStars
-FROM track_servie_stg.episode e
-JOIN track_servie_stg.servie s
+FROM track_servie.episode e
+JOIN track_servie.servie s
 	ON s.tmdb_id = e.tmdb_id
 LEFT JOIN (SELECT ec.episode_id, COUNT(*) AS CountOfGuestStars
-			FROM track_servie_stg.episode_cast ec
-			JOIN track_servie_stg.ecast ecw
+			FROM track_servie.episode_cast ec
+			JOIN track_servie.ecast ecw
 				ON ecw.credit_id = ec.credit_id
 			GROUP BY ec.episode_id) AS cast
 	ON e.id = cast.episode_id
@@ -107,18 +107,18 @@ ORDER BY s.title, e.season_no, e.episode_no;
 -- Episodes - GuestStars Frequency
 -- Episodes - Crew Frequency
 SELECT e.tmdb_id, s.title, e.season_no, e.episode_no, cast.CountOfGuestStars, crew.CountOfCrew 
-FROM track_servie_stg.episode e
-JOIN track_servie_stg.servie s
+FROM track_servie.episode e
+JOIN track_servie.servie s
 	ON s.tmdb_id = e.tmdb_id
 LEFT JOIN (SELECT ec.episode_id, COUNT(*) AS CountOfGuestStars
-			FROM track_servie_stg.episode_cast ec
-			JOIN track_servie_stg.ecast ecw
+			FROM track_servie.episode_cast ec
+			JOIN track_servie.ecast ecw
 				ON ecw.credit_id = ec.credit_id
 			GROUP BY ec.episode_id) AS cast
 	ON e.id = cast.episode_id
 LEFT JOIN (SELECT ec.episode_id, COUNT(*) AS CountOfCrew
-			FROM track_servie_stg.episode_crew ec
-			JOIN track_servie_stg.ecrew ecw
+			FROM track_servie.episode_crew ec
+			JOIN track_servie.ecrew ecw
 				ON ecw.credit_id = ec.credit_id
 			GROUP BY ec.episode_id) AS crew
 	ON e.id = crew.episode_id
@@ -128,12 +128,12 @@ ORDER BY s.title, e.season_no, e.episode_no;
 --------------------------------------------------------------------------------------------------
 -- Season - Cast Frequency
 SELECT ser.tmdb_id, ser.title, s.season_no, cast.CountOfCast
-FROM track_servie_stg.season s
-JOIN track_servie_stg.servie ser
+FROM track_servie.season s
+JOIN track_servie.servie ser
 	ON s.tmdb_id = ser.tmdb_id
 LEFT JOIN (SELECT sc.season_id, COUNT(*) AS CountOfCast
-			FROM track_servie_stg.season_cast sc
-            JOIN track_servie_stg.scast sct
+			FROM track_servie.season_cast sc
+            JOIN track_servie.scast sct
 				ON sct.credit_id = sc.credit_id
 			GROUP BY sc.season_id) AS cast
 	ON s.id = cast.season_id
@@ -143,12 +143,12 @@ ORDER BY ser.title, s.season_no;
 --------------------------------------------------------------------------------------------------
 -- Movie - Cast Frequency
 SELECT s.tmdb_id, s.title, cast.CountOfCasts
-FROM track_servie_stg.movie m
-JOIN track_servie_stg.servie s
+FROM track_servie.movie m
+JOIN track_servie.servie s
     ON m.tmdb_id = s.tmdb_id
 LEFT JOIN (SELECT mc.tmdb_id, COUNT(*) AS CountOfCasts
-			FROM track_servie_stg.movie_cast mc
-			JOIN track_servie_stg.mcast mct
+			FROM track_servie.movie_cast mc
+			JOIN track_servie.mcast mct
 				ON mct.credit_id = mc.credit_id
 			GROUP BY mc.tmdb_id) AS cast
     ON m.tmdb_id = cast.tmdb_id
@@ -157,12 +157,12 @@ ORDER BY s.title;
 
 -- Movie - Crew Frequency -> LITTLE PROBLEM OF DISTINCT
 SELECT s.tmdb_id, s.title, crew.CountOfCrew
-FROM track_servie_stg.movie m
-JOIN track_servie_stg.servie s
+FROM track_servie.movie m
+JOIN track_servie.servie s
     ON m.tmdb_id = s.tmdb_id
 LEFT JOIN (SELECT mc.tmdb_id, COUNT(*) AS CountOfCrew
-			FROM track_servie_stg.movie_crew mc
-			JOIN track_servie_stg.mcrew mct
+			FROM track_servie.movie_crew mc
+			JOIN track_servie.mcrew mct
 				ON mct.credit_id = mc.credit_id
 			GROUP BY mc.tmdb_id) AS crew
     ON m.tmdb_id = crew.tmdb_id
