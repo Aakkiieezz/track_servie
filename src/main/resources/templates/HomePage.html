@@ -335,7 +335,7 @@
         <a class="page-link" th:href="@{'/track-servie/servies?pageNumber='+${i-1}}">[[${i}]]</a>
       </li>
       <li class="page-item" th:classappend="${response.lastPage == true} ? disabled">
-        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber+1}}">Next</a>
+        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber=' + ${response.pageNumber+1}}">Next</a>
       </li>
     </ul>
   </nav>

@@ -74,13 +74,13 @@ SELECT COUNT(*) FROM track_servie.spoken_language;
 SELECT COUNT(*) FROM track_servie.tmdb_movie_exports;
 -- 2
 SELECT COUNT(*) FROM track_servie.user;
--- 3403
+-- 3536
 SELECT COUNT(*) FROM track_servie.user_episode_data;
 -- 2
 SELECT COUNT(*) FROM track_servie.user_roles;
--- 206
+-- 214
 SELECT COUNT(*) FROM track_servie.user_season_data;
--- 1554
+-- 1561
 SELECT COUNT(*) FROM track_servie.user_servie_data;
 
 -- CreatedBy

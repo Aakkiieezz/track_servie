@@ -50,7 +50,7 @@ public class VaultService
 	@Autowired
 	private ServieRepository servieRepository;
 
-	@Scheduled(fixedRate = Integer.MAX_VALUE)
+	// @Scheduled(fixedRate = Integer.MAX_VALUE)
 	public void exportMasterData_mysqldump()
 	{
 		String username = "Akash";

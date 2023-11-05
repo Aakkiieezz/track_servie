@@ -56,6 +56,7 @@ import servie.track_servie.entity.credits.SeasonCast;
 import servie.track_servie.entity.credits.SeasonCredits;
 import servie.track_servie.enums.ServieType;
 import servie.track_servie.exceptions.ResourceNotFoundException;
+import servie.track_servie.repository.CustomServieRepositoryImpl;
 import servie.track_servie.repository.GenreRepository;
 import servie.track_servie.repository.MovieCollectionRepository;
 import servie.track_servie.repository.MovieRepository;
@@ -72,6 +73,8 @@ public class ServieService
 {
 	@Autowired
 	private ServieRepository servieRepository;
+	@Autowired
+	private CustomServieRepositoryImpl csri;
 	@Autowired
 	private GenreRepository genreRepository;
 	@Autowired
@@ -446,43 +449,24 @@ public class ServieService
 
 	public ResponseDtoHomePage getServiesByFilter(Integer userId, String childtype, Boolean watched, List<Integer> genreIds, List<String> languages, List<String> statuses, Integer startYear, Integer endYear, int pageNumber, String sortBy, String sortDir)
 	{
-		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
+		userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
 		Sort sort = null;
 		if(sortDir.equals("asc"))
 			sort = Sort.by(sortBy).ascending();
 		else if(sortDir.equals("desc"))
 			sort = Sort.by(sortBy).descending();
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+		// JPQL/HQL APPROACH (NOT WORKED FOR MULTI SELECTIONS FILTERS)
 		List<Genre> genres = new ArrayList<>();
-		for(Integer genreId : genreIds)
-		{
-			Genre genre = genreRepository.findById(genreId).orElseThrow(() -> new ResourceNotFoundException("Genre", "Id", genreId.toString()));
-			genres.add(genre);
-		}
-		// Filter 1 = type [Null, Movies/Series]
-		// Filter 2 = watched [Null, watched/unwatched]
-		// Filter 3 = genre [Null, list[Action, Drama, ...]->OR/AND]
-		// Filter 4 = language [Null, list[Eng, Jap, Hin, ...]->OR]
-		// Filter 5 = status [Null, list[In Production, Cancelled, Released, ...]->OR]
-		// Filter 6 = startDate [Null, After StartYear]
-		// Filter 7 = endDate [Null, Before EndYear]
-		// Filter 8 = 6 + 7
-		Page<ServieDtoHomePage> page;
-		// if((genreIds!=null && !genreIds.isEmpty()) && watched!=null) // genreIds != null, watched != null
-		//     page = servieRepository.findByCompletedAndGenres(userId, watched, genres, genres.size(), pageable);
-		// else if((genreIds!=null && !genreIds.isEmpty()) && watched==null) // genreIds != null, watched == null
-		//     page = servieRepository.findByGenres(userId, genres, genres.size(), pageable);
-		// else if((genreIds==null || genreIds.isEmpty()) && watched!=null) // genreIds == null, watched != null
-		//     page = servieRepository.findByCompleted(userId, watched, pageable);
-		// else // genreIds == null, watched == null
-		//     page = servieRepository.findAllServiesByUserId(userId, pageable);
-		//
-		// By All filters together
-		page = servieRepository.getServiesByHomePageFilter(user, childtype, watched, languages, statuses, startYear, endYear, pageable);
+		if(genreIds!=null)
+			for(Integer genreId : genreIds)
+			{
+				Genre genre = genreRepository.findById(genreId).orElseThrow(() -> new ResourceNotFoundException("Genre", "Id", genreId.toString()));
+				genres.add(genre);
+			}
+		// Page<ServieDtoHomePage> page = servieRepository.getServiesByHomePageFilter(user, childtype, watched, languages, statuses, startYear, endYear, pageable);
+		Page<ServieDtoHomePage> page = csri.getTempDtosCB(childtype, languages, genres, statuses, pageable);
 		List<ServieDtoHomePage> servies = page.getContent();
-		// Page<ServieDtoHomePage2> page2;
-		// page2 = servieRepository.getServiesByHomePageFilterNATIVE(/* user, childtype, watched, languages, statuses, startYear, endYear, */ pageable);
-		// List<ServieDtoHomePage2> servies2 = page2.getContent();
 		ResponseDtoHomePage responseDto = new ResponseDtoHomePage();
 		responseDto.setServies(servies);
 		responseDto.setPageNumber(page.getNumber());
@@ -492,6 +476,53 @@ public class ServieService
 		responseDto.setLastPage(page.isLast());
 		return responseDto;
 	}
+	// @Scheduled(fixedRate = Integer.MAX_VALUE)
+	// public void nativeApproach()
+	// {
+	// 	int pageNumber = 0;
+	// 	String sortBy = "title";
+	// 	String sortDir = "asc";
+	// 	Sort sort = null;
+	// 	if(sortDir.equals("asc"))
+	// 		sort = Sort.by(sortBy).ascending();
+	// 	else if(sortDir.equals("desc"))
+	// 		sort = Sort.by(sortBy).descending();
+	// 	Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+	// 	List<String> languagesfk = new ArrayList<>();
+	// 	// languagesfk.add("ko");
+	// 	// languagesfk.add("de");
+	// 	String[] langs = new String[] {"ko", "de"};
+	// 	// Page<Object[]> rs = servieRepository.getTempDtosFK(languagesfk, pageable);
+	// 	Page<ServieDtoHomePage> rs = csri.getTempDtosCB(languagesfk, statuses, pageable);
+	// 	System.out.println("lol");
+	// }
+	// private List<ServieDtoHomePage> mapper(Page<Object[]> resultSet)
+	// {
+	// 	List<Object[]> dtos = resultSet.getContent();
+	// 	List<ServieDtoHomePage> servieDtoList = dtos.stream()
+	// 			.map(row ->
+	// 			{
+	// 				String imdbId = (String) row[0];
+	// 				Integer tmdbId = (Integer) row[1];
+	// 				String childtype = (String) row[2];
+	// 				String title = (String) row[3];
+	// 				String posterPath = (String) row[4];
+	// 				java.sql.Date sqlReleaseDate = (java.sql.Date) row[5];
+	// 				LocalDate releaseDate = (sqlReleaseDate!=null? sqlReleaseDate.toLocalDate() : null);
+	// 				Integer totalEpisodes = (Integer) row[6];
+	// 				java.sql.Date sqlFirstAirDate = (java.sql.Date) row[7];
+	// 				LocalDate firstAirDate = (sqlFirstAirDate!=null? sqlFirstAirDate.toLocalDate() : null);
+	// 				java.sql.Date sqlLastAirDate = (java.sql.Date) row[8];
+	// 				LocalDate lastAirDate = (sqlLastAirDate!=null? sqlLastAirDate.toLocalDate() : null);
+	// 				// Long l = (Long) row[9];
+	// 				// Integer episodesWatched = (l!=null? l.intValue() : null);
+	// 				// BigDecimal bdCompleted = (BigDecimal) row[10];
+	// 				// Boolean completed = bdCompleted!=null? bdCompleted.intValue()==1 : null;
+	// 				return new ServieDtoHomePage(imdbId, tmdbId, childtype, title, posterPath, releaseDate, totalEpisodes, firstAirDate, lastAirDate, 2, true);
+	// 			})
+	// 			.collect(Collectors.toList());
+	// 	return servieDtoList;
+	// }
 
 	public void removeServie(Integer tmdbId, String childtype)
 	{
