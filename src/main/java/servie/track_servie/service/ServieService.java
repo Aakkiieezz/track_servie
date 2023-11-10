@@ -56,7 +56,7 @@ import servie.track_servie.entity.credits.SeasonCast;
 import servie.track_servie.entity.credits.SeasonCredits;
 import servie.track_servie.enums.ServieType;
 import servie.track_servie.exceptions.ResourceNotFoundException;
-import servie.track_servie.repository.CustomServieRepositoryImpl;
+import servie.track_servie.repository.CustomServieRepository;
 import servie.track_servie.repository.GenreRepository;
 import servie.track_servie.repository.MovieCollectionRepository;
 import servie.track_servie.repository.MovieRepository;
@@ -74,7 +74,7 @@ public class ServieService
 	@Autowired
 	private ServieRepository servieRepository;
 	@Autowired
-	private CustomServieRepositoryImpl csri;
+	private CustomServieRepository csri;
 	@Autowired
 	private GenreRepository genreRepository;
 	@Autowired
@@ -449,7 +449,7 @@ public class ServieService
 
 	public ResponseDtoHomePage getServiesByFilter(Integer userId, String childtype, Boolean watched, List<Integer> genreIds, List<String> languages, List<String> statuses, Integer startYear, Integer endYear, int pageNumber, String sortBy, String sortDir)
 	{
-		userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
+		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
 		Sort sort = null;
 		if(sortDir.equals("asc"))
 			sort = Sort.by(sortBy).ascending();
@@ -465,15 +465,19 @@ public class ServieService
 				genres.add(genre);
 			}
 		// Page<ServieDtoHomePage> page = servieRepository.getServiesByHomePageFilter(user, childtype, watched, languages, statuses, startYear, endYear, pageable);
-		Page<ServieDtoHomePage> page = csri.getTempDtosCB(childtype, languages, genres, statuses, pageable);
+		Page<ServieDtoHomePage> page = csri.getTempDtosCB(user, childtype, languages, genres, statuses, pageable);
 		List<ServieDtoHomePage> servies = page.getContent();
 		ResponseDtoHomePage responseDto = new ResponseDtoHomePage();
 		responseDto.setServies(servies);
-		responseDto.setPageNumber(page.getNumber());
-		responseDto.setPageSize(page.getSize());
-		responseDto.setTotalElements(page.getNumberOfElements());
-		responseDto.setTotalPages(page.getTotalPages());
-		responseDto.setLastPage(page.isLast());
+		responseDto.setPageNumber(page.getNumber()); // Returns the number of the current page. Is always non-negative.
+		responseDto.setPageSize(page.getSize()); // Returns the size of current page
+		responseDto.setTotalElements(page.getNumberOfElements()); // Returns the number of elements currently on this page
+		responseDto.setTotalPages(page.getTotalPages()); // Returns the number of total pages (Showing total of entire Servie)
+		responseDto.setFirstPage(page.isFirst()); // checks if first page
+		responseDto.setLastPage(page.isLast()); // checks if last page
+		responseDto.setTotalObjects(page.getTotalElements()); // Returns the number of elements (SHOWING total of entire Servie)
+		responseDto.setHasPrevious(page.hasPrevious());// Returns if there is a previous page
+		responseDto.setHasNext(page.hasNext()); //Returns if there is a next page
 		return responseDto;
 	}
 	// @Scheduled(fixedRate = Integer.MAX_VALUE)

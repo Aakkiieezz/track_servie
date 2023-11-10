@@ -50,7 +50,7 @@ public class VaultService
 	@Autowired
 	private ServieRepository servieRepository;
 
-	// @Scheduled(fixedRate = Integer.MAX_VALUE)
+	@Scheduled(fixedRate = Integer.MAX_VALUE)
 	public void exportMasterData_mysqldump()
 	{
 		String username = "Akash";
@@ -124,7 +124,7 @@ public class VaultService
 		log.info("    Finished exporting data of user id {}", userId);
 	}
 
-	// @Scheduled(fixedRate = Integer.MAX_VALUE)
+	@Scheduled(fixedRate = Integer.MAX_VALUE)
 	// EXPORTING [SERVIE + SEASON + EPISODE] separately
 	public void exportAllUserRawData() throws IOException
 	{

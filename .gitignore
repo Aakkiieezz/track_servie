@@ -33,3 +33,7 @@ build/
 .vscode/
 
 .directory
+
+
+MasterBkp*
+/user_backups/*

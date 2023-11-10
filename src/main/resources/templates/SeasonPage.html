@@ -88,14 +88,14 @@
         </a>
       </div>
       <div class="col-8">
-        <a th:href="@{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNo}+'/Episode/'+${episode.episodeNo}}"
-          th:text="${episode.name}"></a>
+        <a th:href="@{'/track-service/services/' + ${season.tmdbId} + '/Season/' + ${season.seasonNo} + '/Episode/' + ${episode.episodeNo}}"
+          th:text="'Episode: ' + ${episode.episodeNo} + ' ' + ${episode.name}"></a>
         <div th:unless="${#strings.isEmpty(episode.overview)}">
           <h3>Overview : </h3>
           <p th:text="${episode.overview}"></p>
         </div>
         Runtime :
-        <p th:text="${episode.runtime}"></p>
+        <span th:text="${episode.runtime}"></span>
         <div>
           <a
             th:href="@{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNo}+'/Episode/'+${episode.episodeNo}+'/toggleback'}">

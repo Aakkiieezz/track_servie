@@ -6,10 +6,14 @@ import lombok.Data;
 @Data
 public class ResponseDtoHomePage
 {
-    private List<ServieDtoHomePage> servies;
-    private int pageNumber;
-    private int pageSize;
-    private long totalElements;
-    private int totalPages;
-    private Boolean lastPage;
+	private List<ServieDtoHomePage> servies;
+	private int pageNumber;
+	private int pageSize;
+	private long totalElements;
+	private int totalPages;
+	private Boolean firstPage;
+	private Boolean lastPage;
+	private Boolean hasNext;
+	private Boolean hasPrevious;
+	private long totalObjects;
 }
