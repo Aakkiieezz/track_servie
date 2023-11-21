@@ -72,47 +72,22 @@ public class CustomServieRepository /* implements CustomServieRepository */
 		if(childtype!=null && !childtype.equals(""))
 			predicate = cb.and(predicate, cb.equal(servie.get("childtype"), childtype));
 		query.where(predicate);
-		// TypedQuery<ServieDtoHomePage> typedQuery = entityManager.createQuery(query);
-		// typedQuery.setFirstResult((int) pageable.getOffset()); // Offset is the starting index
-		// typedQuery.setMaxResults(pageable.getPageSize()); // PageSize is the number of items per page
-		// List<ServieDtoHomePage> results = typedQuery.getResultList();
-		// CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-		// Root<Servie> servieRoot = countQuery.from(Servie.class); // Use the Servie entity for counting
-		// countQuery.select(cb.count(servieRoot));
-		// countQuery.where(predicate);
-		// Long totalElements = entityManager.createQuery(countQuery).getSingleResult();
-		// Page<ServieDtoHomePage> page = new PageImpl<>(results, pageable, totalElements);
-		// return page;
-		// 
-		// CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-		// Root<UserServieData> countUsd = countQuery.from(UserServieData.class);
-		// Join<UserServieData, Servie> countServie = countUsd.join("servie", JoinType.INNER);
-		// countQuery.select(cb.count(countServie.get("tmdbId")));
-		// countQuery.where(predicate);
-		// Long totalRecords = entityManager.createQuery(countQuery).getSingleResult();
-		// // 
-		// if(pageable.getSort().isSorted())
-		// {
-		// 	List<Order> orders = new ArrayList<>();
-		// 	for(Sort.Order order : pageable.getSort())
-		// 		if("title".equals(order.getProperty()))
-		// 			if(order.isAscending())
-		// 				orders.add(cb.asc(servie.get("title")));
-		// 			else
-		// 				orders.add(cb.desc(servie.get("title")));
-		// 	query.orderBy(orders);
-		// }
-		// // 
-		// TypedQuery<ServieDtoHomePage> typedQuery = entityManager.createQuery(query);
-		// typedQuery.setFirstResult((int) pageable.getOffset());
-		// typedQuery.setMaxResults(pageable.getPageSize());
-		// return new PageImpl<>(typedQuery.getResultList(), pageable, totalRecords);
-		CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-		countQuery.select(cb.count(countQuery.from(Servie.class)));
-		Long totalRecords = entityManager.createQuery(countQuery).getSingleResult();
+		if(pageable.getSort().isSorted())
+		{
+			List<Order> orders = new ArrayList<>();
+			for(Sort.Order order : pageable.getSort())
+				if("title".equals(order.getProperty()))
+					if(order.isAscending())
+						orders.add(cb.asc(servie.get("title")));
+					else
+						orders.add(cb.desc(servie.get("title")));
+			query.orderBy(orders);
+		}
 		TypedQuery<ServieDtoHomePage> typedQuery = entityManager.createQuery(query);
-		typedQuery.setFirstResult((int) pageable.getOffset());
-		typedQuery.setMaxResults(pageable.getPageSize());
-		return new PageImpl<>(typedQuery.getResultList(), pageable, totalRecords);
+		typedQuery.setFirstResult((int) pageable.getOffset()); // Offset is the starting index
+		typedQuery.setMaxResults(pageable.getPageSize()); // PageSize is the number of items per page
+		List<ServieDtoHomePage> results = typedQuery.getResultList();
+		Page<ServieDtoHomePage> page = new PageImpl<>(results, pageable, 1000); // change 1000
+		return page;
 	}
 }
