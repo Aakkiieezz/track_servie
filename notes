@@ -15,12 +15,14 @@ Since I want to maintain a common database, I will need to add a letter in id an
 Changes to track of each user
 
 Episode
+
 - watched
 - personal score
 - notes
 - add to list
 
 Season
+
 - watched (marks episodes watched/unwatched)
 - posterPath
 - personal score
@@ -28,6 +30,7 @@ Season
 - add to list
 
 Series
+
 - watched (marks episodes watched/unwatched)
 - poster img
 - backdrop img
@@ -35,8 +38,8 @@ Series
 - notes
 - add to list
 
-
 Movie
+
 - watched
 - poster img
 - backdrop img
@@ -350,7 +353,7 @@ Ended
 
 ######################################################################################################################################################
 
-*** get all eps with E.watched != !S.watched
+\*\*\* get all eps with E.watched != !S.watched
 
 All watched [perfect] [DONE]
 S 1 -> 0
@@ -389,3 +392,4 @@ UI of Season page
 UI of episode page
 Add cast and crew
 
+######################################################################################################################################################

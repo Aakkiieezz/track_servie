@@ -9,11 +9,11 @@ public class ResponseDtoHomePage
 	private List<ServieDtoHomePage> servies;
 	private int pageNumber;
 	private int pageSize;
+	private long numberOfElementsOnPage;
 	private long totalElements;
 	private int totalPages;
-	private Boolean firstPage;
-	private Boolean lastPage;
-	private Boolean hasNext;
-	private Boolean hasPrevious;
-	private long totalObjects;
+	private boolean firstPage;
+	private boolean lastPage;
+	private boolean hasNext;
+	private boolean hasPrevious;
 }

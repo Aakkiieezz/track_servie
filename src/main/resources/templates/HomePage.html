@@ -21,7 +21,14 @@
   <link rel="icon" type="image/svg+xml"
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-film' viewBox='0 0 16 16'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm4 0v6h8V1H4zm8 8H4v6h8V9zM1 1v2h2V1H1zm2 3H1v2h2V4zM1 7v2h2V7H1zm2 3H1v2h2v-2zm-2 3v2h2v-2H1zM15 1h-2v2h2V1zm-2 3v2h2V4h-2zm2 3h-2v2h2V7zm-2 3v2h2v-2h-2zm2 3h-2v2h2v-2z'/%3E%3C/svg%3E">
 
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <!-- Include Bootstrap JavaScript with Popper.js and Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
+
+  <!-- jQuery (only required if Bootstrap's dropdown functionality needs it) -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha384-KyZXEAg3QhqLMpG8r+ctfLvpeMOG6AyqE+0jJWPTa8uqzdhxhxvgj3Y6z68i8+4M"
+    crossorigin="anonymous"></script>
 
   <script>
     function toggleWatch(tmdbId, childtype, watched) {
@@ -65,29 +72,46 @@
       });
     }
 
+    // previously working before having checkboxes
+    // $(document).ready(function () {
+    //   var typeDropdown = $('#type');
+    //   var genreDropdown = $('#genreIds');
+    //   typeDropdown.on('change', function () {
+    //     var selectedType = $(this).val();
+    //     genreDropdown.find('option').prop('disabled', false);
+
+    //     // Disable options in genre dropdown based on selected type
+    //     if (selectedType === 'movie') {
+    //       // Disable options with values [12, 15, 16, 17, 20, 21]
+    //       genreDropdown.find('option[value="12"], option[value="15"], option[value="16"], option[value="17"], option[value="20"], option[value="21"]').prop('disabled', true);
+    //     } else if (selectedType === 'tv') {
+    //       // Disable options with values [10, 11, 13, 18, 22, 23]
+    //       genreDropdown.find('option[value="10"], option[value="11"], option[value="13"], option[value="18"], option[value="22"], option[value="23"]').prop('disabled', true);
+    //     }
+    //   });
+    // });
+
     $(document).ready(function () {
-      // Get references to the dropdowns
-      var genreDropdown = $('#genreIds');
       var typeDropdown = $('#type');
-
-      // Add event listener to type dropdown
       typeDropdown.on('change', function () {
-        // Get selected value from type dropdown
         var selectedType = $(this).val();
-
-        // Enable all options in genre dropdown
-        genreDropdown.find('option').prop('disabled', false);
-
-        // Disable options in genre dropdown based on selected type
-        if (selectedType === 'movie') {
-          // Disable options with values [12, 15, 16, 17, 20, 21]
-          genreDropdown.find('option[value="12"], option[value="15"], option[value="16"], option[value="17"], option[value="20"], option[value="21"]').prop('disabled', true);
-        } else if (selectedType === 'tv') {
-          // Disable options with values [10, 11, 13, 18, 22, 23]
-          genreDropdown.find('option[value="10"], option[value="11"], option[value="13"], option[value="18"], option[value="22"], option[value="23"]').prop('disabled', true);
-        }
+        $('input[name="genreIds"]').each(function () {
+          var checkboxValue = $(this).val();
+          var shouldBeDisabled = shouldCheckboxBeDisabled(selectedType, checkboxValue);
+          $(this).prop('disabled', shouldBeDisabled);
+        });
       });
     });
+
+    function shouldCheckboxBeDisabled(selectedType, checkboxValue) {
+      if (selectedType === 'movie') {
+        return checkboxValue === '12' || checkboxValue === '15' || checkboxValue === '16' || checkboxValue === '17' || checkboxValue === '20' || checkboxValue === '21';
+      } else if (selectedType === 'tv') {
+        return checkboxValue === '10' || checkboxValue === '11' || checkboxValue === '13' || checkboxValue === '18' || checkboxValue === '22' || checkboxValue === '23';
+      }
+      return false;
+    }
+
   </script>
 
   <title>Home Page</title>
@@ -97,7 +121,7 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-9">
-        <form th:action="@{/track-servie/servies}">
+        <form th:action="@{/track-servie/servies}" class="d-flex flex-row align-items-center">
           <i class="bi bi-arrow-down-up"></i>
           <select name="type" id="type">
             <option value="">Servies</option>
@@ -118,79 +142,199 @@
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
           </select>
+
           &nbsp;
           &nbsp;
-          Genres :
-          <select name="genreIds" id="genreIds" multiple="multiple">
-            <!-- should unselect all the selected genres -->
-            <!-- <option value="">Any Genre</option> -->
-            <!-- <option th:each="genre : ${genres}" th:value="${genre.id}" th:text="${genre.name}"></option> -->
-            <option value="1">Action</option>
-            <option value="2">Adventure</option>
-            <option value="3">Animation</option>
-            <option value="4">Comedy</option>
-            <option value="5">Crime</option>
-            <option value="6">Documentary</option>
-            <option value="7">Drama</option>
-            <option value="8">Family</option>
-            <option value="9">Fantasy</option>
-            <option value="10">History</option>
-            <option value="11">Horror</option>
-            <option value="12">Kids</option>
-            <option value="13">Music</option>
-            <option value="14">Mystery</option>
-            <option value="15">News</option>
-            <option value="16">Politics</option>
-            <option value="17">Reality</option>
-            <option value="18">Romance</option>
-            <option value="19">Science Fiction</option>
-            <option value="20">Soap</option>
-            <option value="21">Talk</option>
-            <option value="22">TV Movie</option>
-            <option value="23">Thriller</option>
-            <option value="24">War</option>
-            <option value="25">Western</option>
-          </select>
+
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="genreDropdown" data-bs-toggle="dropdown"
+              aria-expanded="false">
+              Select Genres
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="genreDropdown" id="genreCheckboxes">
+              <li><input class="form-check-input" type="checkbox" id="genre1" name="genreIds" value="1">
+                <label class="form-check-label" for="genre1">Action</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre2" name="genreIds" value="2">
+                <label class="form-check-label" for="genre2">Adventure</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre3" name="genreIds" value="3">
+                <label class="form-check-label" for="genre3">Animation</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre4" name="genreIds" value="4">
+                <label class="form-check-label" for="genre4">Comedy</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre5" name="genreIds" value="5">
+                <label class="form-check-label" for="genre5">Crime</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre6" name="genreIds" value="6">
+                <label class="form-check-label" for="genre6">Documentary</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre7" name="genreIds" value="7">
+                <label class="form-check-label" for="genre7">Drama</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre8" name="genreIds" value="8">
+                <label class="form-check-label" for="genre8">Family</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre9" name="genreIds" value="9">
+                <label class="form-check-label" for="genre9">Fantasy</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre10" name="genreIds" value="10">
+                <label class="form-check-label" for="genre10">History</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre11" name="genreIds" value="11">
+                <label class="form-check-label" for="genre11">Horror</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre12" name="genreIds" value="12">
+                <label class="form-check-label" for="genre12">Kids</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre13" name="genreIds" value="13">
+                <label class="form-check-label" for="genre13">Music</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre14" name="genreIds" value="14">
+                <label class="form-check-label" for="genre14">Mystery</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre15" name="genreIds" value="15">
+                <label class="form-check-label" for="genre15">News</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre16" name="genreIds" value="16">
+                <label class="form-check-label" for="genre16">Politics</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre17" name="genreIds" value="17">
+                <label class="form-check-label" for="genre17">Reality</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre18" name="genreIds" value="18">
+                <label class="form-check-label" for="genre18">Romance</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre19" name="genreIds" value="19">
+                <label class="form-check-label" for="genre19">Science Fiction</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre20" name="genreIds" value="20">
+                <label class="form-check-label" for="genre20">Soap</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre21" name="genreIds" value="21">
+                <label class="form-check-label" for="genre21">Talk</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre22" name="genreIds" value="22">
+                <label class="form-check-label" for="genre22">TV Movie</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre23" name="genreIds" value="23">
+                <label class="form-check-label" for="genre23">Thriller</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre24" name="genreIds" value="24">
+                <label class="form-check-label" for="genre24">War</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="genre25" name="genreIds" value="25">
+                <label class="form-check-label" for="genre25">Western</label>
+              </li>
+              <li><button class="btn btn-primary" onclick="applyGenreSelection()">Apply</button></li>
+            </ul>
+          </div>
+
           &nbsp;
           &nbsp;
-          Languages :
-          <select name="languages" multiple="multiple">
-            <!-- should unselect all the selected languages -->
-            <!-- <option value="">Any Language</option> -->
-            <option value="cn">Cantonese</option>
-            <option value="zh">Chinese(Mandarin)</option>
-            <option value="da">Danish</option>
-            <option value="en">English</option>
-            <option value="fr">French</option>
-            <option value="de">German</option>
-            <option value="hi">Hindi</option>
-            <option value="it">Italian</option>
-            <option value="ja">Japanese</option>
-            <option value="kn">Kannada</option>
-            <option value="ko">Korean</option>
-            <option value="mr">Marathi</option>
-            <option value="ru">Russian</option>
-            <option value="es">Spanish</option>
-            <option value="ta">Tamil</option>
-            <option value="te">Telugu</option>
-            <option value="th">Thai</option>
-          </select>
+
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="languageDropdown"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              Select Languages
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="languageDropdown" id="languageCheckboxes">
+              <li><input class="form-check-input" type="checkbox" id="cn" name="languages" value="cn">
+                <label class="form-check-label" for="cn">Cantonese</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="zh" name="languages" value="zh">
+                <label class="form-check-label" for="zh">Chinese(Mandarin)</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="da" name="languages" value="da">
+                <label class="form-check-label" for="da">Danish</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="en" name="languages" value="en">
+                <label class="form-check-label" for="en">English</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="fr" name="languages" value="fr">
+                <label class="form-check-label" for="fr">French</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="de" name="languages" value="de">
+                <label class="form-check-label" for="de">German</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="hi" name="languages" value="hi">
+                <label class="form-check-label" for="hi">Hindi</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="it" name="languages" value="it">
+                <label class="form-check-label" for="it">Italian</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="ja" name="languages" value="ja">
+                <label class="form-check-label" for="ja">Japanese</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="kn" name="languages" value="kn">
+                <label class="form-check-label" for="kn">Kannada</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="ko" name="languages" value="ko">
+                <label class="form-check-label" for="ko">Korean</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="mr" name="languages" value="mr">
+                <label class="form-check-label" for="mr">Marathi</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="ru" name="languages" value="ru">
+                <label class="form-check-label" for="ru">Russian</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="es" name="languages" value="es">
+                <label class="form-check-label" for="es">Spanish</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="ta" name="languages" value="ta">
+                <label class="form-check-label" for="ta">Tamil</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="te" name="languages" value="te">
+                <label class="form-check-label" for="te">Telugu</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="th" name="languages" value="th">
+                <label class="form-check-label" for="th">Thai</label>
+              </li>
+              <li><button class="btn btn-primary" onclick="applyLanguageSelection()">Apply</button></li>
+            </ul>
+          </div>
+
           &nbsp;
           &nbsp;
-          Status :
-          <select name="statuses" multiple="multiple">
-            <!-- should unselect all the selected statuses -->
-            <!-- <option value="">Any Status</option> -->
-            <option value="Rumored">Rumored</option>
-            <option value="Planned">Planned</option>
-            <option value="Pilot">Pilot</option>
-            <option value="In Production">In Production</option>
-            <option value="Post Production">Post Production</option>
-            <option value="Cancelled">Cancelled</option>
-            <option value="Returning Series">Airing</option>
-            <option value="Released">Released</option>
-            <option value="Ended">Ended</option>
-          </select>
+
+          <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="statusDropdown"
+              data-bs-toggle="dropdown" aria-expanded="false">
+              Select Statuses
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="statusDropdown" id="statusCheckboxes">
+              <li><input class="form-check-input" type="checkbox" id="cn" name="statuses" value="Rumored">
+                <label class="form-check-label" for="Rumored">Rumored</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="zh" name="statuses" value="Planned">
+                <label class="form-check-label" for="Planned">Planned</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="zh" name="statuses" value="Pilot">
+                <label class="form-check-label" for="Pilot">Pilot</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="zh" name="statuses" value="In Production">
+                <label class="form-check-label" for="In Production">In Production</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="zh" name="statuses" value="Post Production">
+                <label class="form-check-label" for="Post Production">Post Production</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="zh" name="statuses" value="Cancelled">
+                <label class="form-check-label" for="Cancelled">Cancelled</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="zh" name="statuses" value="Returning Series">
+                <label class="form-check-label" for="Returning Series">Airing</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="zh" name="statuses" value="Released">
+                <label class="form-check-label" for="Released">Released</label>
+              </li>
+              <li><input class="form-check-input" type="checkbox" id="zh" name="statuses" value="Ended">
+                <label class="form-check-label" for="Ended">Ended</label>
+              </li>
+              <li><button class="btn btn-primary" onclick="applyStatusSelection()">Apply</button></li>
+            </ul>
+          </div>
+
           &nbsp;
           &nbsp;
           From :
@@ -326,23 +470,100 @@
     </div>
   </div>
 
-  Total Items : [[(${response.pageSize}*${response.pageNumber})+1]] -
-  [[(${response.pageSize}*${response.pageNumber})+${response.totalElements}]] on this page
+  <span th:text="'There are ' + ${response.totalElements} + ' servies matching your filters'"></span>
 
   <nav th:if="${response.totalPages > 1}">
     <ul class="pagination">
-      <li class="page-item" th:classappend="${response.pageNumber == 0} ? disabled">
-        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber-1}}">Previous</a>
+      <li class="page-item" th:classappend="${response.hasPrevious} ? '' : 'disabled'">
+        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber=' + ${response.pageNumber - 1}}">Previous</a>
       </li>
-      <li class="page-item" th:each="i: ${#numbers.sequence(1,response.totalPages)}"
-        th:classappend="${response.pageNumber == i-1} ? disabled">
-        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber='+${i-1}}">[[${i}]]</a>
+      <li class="page-item">
+        <a class="page-link" th:if="${response.pageNumber != 0}" th:href="@{'/track-servie/servies?pageNumber=0'}">1</a>
       </li>
-      <li class="page-item" th:classappend="${response.lastPage == true} ? disabled">
-        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber=' + ${response.pageNumber+1}}">Next</a>
+      <li class="page-item" th:if="${response.pageNumber > 1}">
+        <span>...</span>
+      </li>
+      <li class="active">
+        <a class="page-link"
+          th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber}}">[[${response.pageNumber+1}]]</a>
+      </li>
+      <li class="page-item" th:if="${response.pageNumber < response.totalPages - 2}">
+        <span>...</span>
+      </li>
+      <li class="page-item">
+        <a class="page-link" th:if="${response.pageNumber != response.totalPages - 1}"
+          th:href="@{'/track-servie/servies?pageNumber=' + ${response.totalPages - 1}}"
+          th:text="${response.totalPages}"></a>
+      </li>
+      <li class="page-item" th:classappend="${response.hasNext} ? '' : 'disabled'">
+        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber=' + ${response.pageNumber + 1}}">Next</a>
       </li>
     </ul>
   </nav>
+
+  <script>
+    function applyLanguageSelection() {
+      const checkboxes = document.querySelectorAll('#languageCheckboxes input[type="checkbox"]');
+      const selectedLanguages = Array.from(checkboxes)
+        .filter(checkbox => checkbox.checked)
+        .map(checkbox => checkbox.value);
+      sessionStorage.setItem('languages', JSON.stringify(selectedLanguages));
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const formCheckboxes = document.querySelectorAll('#languageCheckboxes input[type="checkbox"]');
+      const savedLanguages = sessionStorage.getItem('languages');
+
+      if (savedLanguages !== null) {
+        const selectedLanguages = JSON.parse(savedLanguages);
+        formCheckboxes.forEach(function (checkbox) {
+          if (selectedLanguages.includes(checkbox.value)) {
+            checkbox.checked = true;
+          }
+        });
+      }
+    });
+
+    function applyGenreSelection() {
+      const checkboxes = document.querySelectorAll('#genreCheckboxes input[type="checkbox"]:checked');
+      const selectedGenres = Array.from(checkboxes).map(checkbox => checkbox.value);
+      sessionStorage.setItem('genres', JSON.stringify(selectedGenres));
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const formCheckboxes = document.querySelectorAll('#genreCheckboxes input[type="checkbox"]');
+      const savedGenres = sessionStorage.getItem('genres');
+
+      if (savedGenres !== null) {
+        const selectedGenres = JSON.parse(savedGenres);
+        formCheckboxes.forEach(function (checkbox) {
+          if (selectedGenres.includes(checkbox.value)) {
+            checkbox.checked = true;
+          }
+        });
+      }
+    });
+
+    function applyStatusSelection() {
+      const checkboxes = document.querySelectorAll('#statusCheckboxes input[type="checkbox"]:checked');
+      const selectedStatuses = Array.from(checkboxes).map(checkbox => checkbox.value);
+      sessionStorage.setItem('statuses', JSON.stringify(selectedStatuses));
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const formCheckboxes = document.querySelectorAll('#statusCheckboxes input[type="checkbox"]');
+      const savedStatuses = sessionStorage.getItem('statuses');
+
+      if (savedStatuses !== null) {
+        const selectedStatuses = JSON.parse(savedStatuses);
+        formCheckboxes.forEach(function (checkbox) {
+          if (selectedStatuses.includes(checkbox.value)) {
+            checkbox.checked = true;
+          }
+        });
+      }
+    });
+  </script>
 </body>
 
 </html>

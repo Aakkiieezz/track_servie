@@ -19,6 +19,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import lombok.extern.slf4j.Slf4j;
@@ -253,6 +254,12 @@ public class ServieService
 		}
 	}
 
+	// @Scheduled(fixedRate = Integer.MAX_VALUE)
+	public void abc()
+	{
+		addSeries(95479);
+	}
+
 	private Series addSeries(Integer tmdbId)
 	{
 		log.info("Adding series {}", tmdbId);
@@ -471,11 +478,11 @@ public class ServieService
 		responseDto.setServies(servies);
 		responseDto.setPageNumber(page.getNumber()); // Returns the number of the current page. Is always non-negative.
 		responseDto.setPageSize(page.getSize()); // Returns the size of current page
-		responseDto.setTotalElements(page.getNumberOfElements()); // Returns the number of elements currently on this page
+		responseDto.setNumberOfElementsOnPage(page.getNumberOfElements()); // Returns the number of elements currently on this page
 		responseDto.setTotalPages(page.getTotalPages()); // Returns the number of total pages (Showing total of entire Servie)
 		responseDto.setFirstPage(page.isFirst()); // checks if first page
 		responseDto.setLastPage(page.isLast()); // checks if last page
-		responseDto.setTotalObjects(page.getTotalElements()); // Returns the number of elements (SHOWING total of entire Servie)
+		responseDto.setTotalElements(page.getTotalElements()); // Returns the number of elements (SHOWING total of entire Servie)
 		responseDto.setHasPrevious(page.hasPrevious());// Returns if there is a previous page
 		responseDto.setHasNext(page.hasNext()); //Returns if there is a next page
 		return responseDto;
