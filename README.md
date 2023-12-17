@@ -30,3 +30,19 @@ A simple java backend project for tracking servies (i.e. movies/series) using Sp
 - Spring Security (JWT) -->
 
 ## Screenshots
+HomePage - Series hovered
+![HomePage (SeriesHovered)](https://github.com/Aakkiieezz/track_servie/assets/67866166/6cef4b91-104a-47a0-a3dc-bd8437285e7d)
+
+HomePage - Movie hovered
+![HomePage (Movie Hovered)](https://github.com/Aakkiieezz/track_servie/assets/67866166/3c7149af-2fab-4a9d-993d-ab06c4b5b147)
+
+HomePage - Filters
+![HomePage (Filter)](https://github.com/Aakkiieezz/track_servie/assets/67866166/36b0fa62-ef17-42cb-8821-d2b4ae964d99)
+
+SeriesPage
+![SeriesPage](https://github.com/Aakkiieezz/track_servie/assets/67866166/7c6a5500-4b4f-4641-83a7-49ef044aae94)
+
+SeasonPage
+![SeasonPage](https://github.com/Aakkiieezz/track_servie/assets/67866166/707dad65-bc6a-4a17-bfee-3ae1badc09c8)
+
+
