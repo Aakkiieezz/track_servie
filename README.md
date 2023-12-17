@@ -30,6 +30,9 @@ A simple java backend project for tracking servies (i.e. movies/series) using Sp
 - Spring Security (JWT) -->
 
 ## Screenshots
+Database Structure
+![Database Structure](https://github.com/Aakkiieezz/track_servie/assets/67866166/1d99a57d-33d2-4c34-955e-470aaaedee2e)
+
 HomePage - Series hovered
 ![HomePage (SeriesHovered)](https://github.com/Aakkiieezz/track_servie/assets/67866166/6cef4b91-104a-47a0-a3dc-bd8437285e7d)
 
