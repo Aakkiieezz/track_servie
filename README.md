@@ -48,4 +48,5 @@ SeriesPage
 SeasonPage
 ![SeasonPage](https://github.com/Aakkiieezz/track_servie/assets/67866166/707dad65-bc6a-4a17-bfee-3ae1badc09c8)
 
-
+MoviePage
+![Screenshot_20240201_232751](https://github.com/Aakkiieezz/track_servie/assets/67866166/c404d152-097a-470e-9e1e-22e91b82e6bf)
