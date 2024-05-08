@@ -7,13 +7,13 @@
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
 		<version>3.1.0</version>
-		<relativePath /> <!-- lookup parent from repository -->
+		<relativePath />
 	</parent>
 	<groupId>servie</groupId>
 	<artifactId>track_servie</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>track_servie</name>
-	<description>Demo project for Spring Boot</description>
+	<description>For tracking servie</description>
 	<properties>
 		<java.version>21</java.version>
 	</properties>
@@ -58,7 +58,7 @@
 		<dependency>
 			<groupId>org.mariadb.jdbc</groupId>
 			<artifactId>mariadb-java-client</artifactId>
-			<version>3.1.4</version>
+			<version>3.3.2</version>
 		</dependency>
 		<dependency>
 			<groupId>org.modelmapper</groupId>
@@ -102,9 +102,7 @@
 			<artifactId>opencsv</artifactId>
 			<version>5.7.1</version>
 		</dependency>
-
 	</dependencies>
-
 	<build>
 		<plugins>
 			<plugin>
@@ -121,5 +119,4 @@
 			</plugin>
 		</plugins>
 	</build>
-
 </project>

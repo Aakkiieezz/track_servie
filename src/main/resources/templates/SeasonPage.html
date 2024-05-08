@@ -45,25 +45,17 @@
           </div>
         </a>
 
-        Total Episodes Watched :
-        <span th:text="${season.episodesWatched}+'/'+${season.episodeCount}"></span>
+        <p>Total Episodes Watched: <span th:text="${season.episodesWatched}+'/'+${season.episodeCount}"></span></p>
 
+        <p>Last Modified: <span th:text="${#temporals.format(season.lastModified, 'dd-MM-yyyy HH:mm:ss')}"></span></p>
 
-
-
-        Watch/Un watch multiple episodes :
-        <!-- <form th:action=" @{/track-servie/servies/search}"></form> -->
-        <form th:action=" @{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNo}+'/toggleepisodes'}">
+        <p style="display: inline-block;">Watch/Unwatch multiple episodes:</p>
+        <form th:action="@{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNo}+'/toggleepisodes'}"
+          style="display: inline-block;">
           <i class="bi bi-arrow-down-up"></i>
-          <!-- <select th:name="watchValue">
-            <option value="true">watched</option>
-            <option value="false">not watched</option>
-          </select> -->
-          <!-- <input type="number" th:field="*{fromEpisode}" placeholder="Enter episode number" />
-          <input type="number" th:field="*{toEpisode}" placeholder="Enter episode number" /> -->
           <select th:name="watch">
             <option value="true">watch</option>
-            <option value="fasle">not watched</option>
+            <option value="false">not watched</option>
           </select>
           <select th:name="fromEpisodeNumber">
             <option th:each="fromEpisodeNumber : ${#numbers.sequence(1, season.episodeCount)}"
@@ -77,6 +69,7 @@
             <i class="bi bi-search"></i>
           </button>
         </form>
+
       </div>
     </div>
     <h3><span th:text="${season.episodeCount}"></span> Episodes</h3>
@@ -89,13 +82,20 @@
       </div>
       <div class="col-8">
         <a th:href="@{'/track-service/services/' + ${season.tmdbId} + '/Season/' + ${season.seasonNo} + '/Episode/' + ${episode.episodeNo}}"
-          th:text="'Episode: ' + ${episode.episodeNo} + ' ' + ${episode.name}"></a>
+          style="text-decoration: none; color: inherit;">
+          <span style="font-weight: bold; font-size: 20px;">
+            <span th:text="${'Episode ' + episode.episodeNo}" style="color: red"></span>
+            <span th:text="${' ' + episode.name}"></span>
+          </span>
+        </a>
+        <br>
+        <span th:text="${#temporals.format(episode.airDate, 'MMMM dd, yyyy')}"></span>
+        <br><br>
         <div th:unless="${#strings.isEmpty(episode.overview)}">
-          <h3>Overview : </h3>
           <p th:text="${episode.overview}"></p>
         </div>
-        Runtime :
-        <span th:text="${episode.runtime}"></span>
+        Runtime: <span th:text="${episode.runtime} + ' mins'"></span><br>
+        Last Modified: <span th:text="${#temporals.format(episode.lastModified, 'dd-MM-yyyy HH:mm:ss')}"></span><br>
         <div>
           <a
             th:href="@{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNo}+'/Episode/'+${episode.episodeNo}+'/toggleback'}">

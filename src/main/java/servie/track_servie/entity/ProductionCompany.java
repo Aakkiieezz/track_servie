@@ -1,5 +1,6 @@
 package servie.track_servie.entity;
 
+import java.util.Objects;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
@@ -17,7 +18,7 @@ public class ProductionCompany
 	@JsonProperty("id")
 	private Integer id;
 	// ---------------------------------------------------------------
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	@JsonProperty("name")
 	private String name;
 	// ---------------------------------------------------------------
@@ -31,4 +32,21 @@ public class ProductionCompany
 	// ---------------------------------------------------------------
 	@ManyToMany(mappedBy = "productionCompanies")
 	private Set<Servie> servies;
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if(this==o)
+			return true;
+		if(o==null || getClass()!=o.getClass())
+			return false;
+		ProductionCompany productionCompany = (ProductionCompany) o;
+		return Objects.equals(id, productionCompany.id);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(id);
+	}
 }

@@ -66,7 +66,7 @@ public class VaultService
 			Process process = processBuilder.start();
 			int exitCode = process.waitFor();
 			if(exitCode==0)
-				System.out.println("Backup created successfully.");
+				System.out.println("Master backup created successfully.");
 			else
 				System.err.println("Error creating backup.");
 		}
@@ -211,7 +211,7 @@ public class VaultService
 
 	// @Scheduled(fixedRate = Integer.MAX_VALUE)
 	@Transactional // should be jakarta or of springFramework ???
-	public void importAllUserRawData() throws IOException, CsvException
+	public void importAllUserRawData()
 	{
 		Integer userId = 1;
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
@@ -222,93 +222,111 @@ public class VaultService
 		log.info("Finished importing", userId);
 	}
 
-	private void importUserServiesData(User user) throws IOException, CsvException
+	private void importUserServiesData(User user)
 	{
 		log.info("    Importing servies");
 		String serviesFilePath = "/home/aakkiieezz/Coding/track_servie/user_backups/bkp_servies.csv";
-		CSVReader reader = new CSVReader(new FileReader(serviesFilePath));
-		reader.skip(1);
-		List<String[]> rows = reader.readAll();
-		List<UserServieData> userServieDatas = new ArrayList<>();
-		for(String[] row : rows)
+		try(CSVReader reader = new CSVReader(new FileReader(serviesFilePath)))
 		{
-			// "TmdbId","Servie Type","Title","Movie Watched","Backdrop Path","Poster Path","Notes"
-			Integer tmdbId = Integer.parseInt(row[0]);
-			String childtype = row[1];
-			Boolean movieWatched = Boolean.valueOf(row[3]);
-			String backdropPath = row[4].isEmpty()? null : row[4];
-			String posterPath = row[5].isEmpty()? null : row[5];
-			String notes = row[6].isEmpty()? null : row[6];
-			Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(childtype, tmdbId).toString()));
-			UserServieData userServieData = new UserServieData();
-			userServieData.setUser(user);
-			userServieData.setServie(servie);
-			userServieData.setMovieWatched(movieWatched);
-			userServieData.setBackdropPath(backdropPath);
-			userServieData.setPosterPath(posterPath);
-			userServieData.setNotes(notes);
-			userServieDatas.add(userServieData);
+			reader.skip(1);
+			List<String[]> rows = reader.readAll();
+			List<UserServieData> userServieDatas = new ArrayList<>();
+			for(String[] row : rows)
+			{
+				// "TmdbId","Servie Type","Title","Movie Watched","Backdrop Path","Poster Path","Notes"
+				Integer tmdbId = Integer.parseInt(row[0]);
+				String childtype = row[1];
+				Boolean movieWatched = Boolean.valueOf(row[3]);
+				String backdropPath = row[4].isEmpty()? null : row[4];
+				String posterPath = row[5].isEmpty()? null : row[5];
+				String notes = row[6].isEmpty()? null : row[6];
+				Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(childtype, tmdbId).toString()));
+				UserServieData userServieData = new UserServieData();
+				userServieData.setUser(user);
+				userServieData.setServie(servie);
+				userServieData.setMovieWatched(movieWatched);
+				userServieData.setBackdropPath(backdropPath);
+				userServieData.setPosterPath(posterPath);
+				userServieData.setNotes(notes);
+				userServieDatas.add(userServieData);
+			}
+			userServieDataRepository.saveAll(userServieDatas);
+			log.info("    Finished Importing {} servies", userServieDatas.size());
 		}
-		userServieDataRepository.saveAll(userServieDatas);
-		log.info("    Finished Importing {} servies", userServieDatas.size());
+		catch(NumberFormatException | ResourceNotFoundException | IOException | CsvException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
-	private void importUserSeasonsData(User user) throws IOException, CsvException
+	private void importUserSeasonsData(User user)
 	{
 		log.info("    Importing seasons");
 		String SeasonsFilePath = "/home/aakkiieezz/Coding/track_servie/user_backups/bkp_seasons.csv";
-		CSVReader reader = new CSVReader(new FileReader(SeasonsFilePath));
-		reader.skip(1);
-		List<String[]> rows = reader.readAll();
-		List<UserSeasonData> userSeasonDatas = new ArrayList<>();
-		for(String[] row : rows)
+		try(CSVReader reader = new CSVReader(new FileReader(SeasonsFilePath)))
 		{
-			// "TmdbId","Servie Type","Title","Season Number","Poster Path","Notes"
-			Integer tmdbId = Integer.parseInt(row[0]);
-			String childtype = row[1];
-			Integer seasonNumber = Integer.parseInt(row[3]);
-			String posterPath = row[4];
-			String notes = row[5];
-			Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(childtype, tmdbId).toString()));
-			UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "UserServieDataKey", new UserServieDataKey(user, servie).toString()));
-			UserSeasonData userSeasonData = new UserSeasonData();
-			userSeasonData.setUserServieData(userServieData);
-			userSeasonData.setSeasonNo(seasonNumber);
-			userSeasonData.setPosterPath(posterPath);
-			userSeasonData.setNotes(notes);
-			userSeasonDatas.add(userSeasonData);
+			reader.skip(1);
+			List<String[]> rows = reader.readAll();
+			List<UserSeasonData> userSeasonDatas = new ArrayList<>();
+			for(String[] row : rows)
+			{
+				// "TmdbId","Servie Type","Title","Season Number","Poster Path","Notes"
+				Integer tmdbId = Integer.parseInt(row[0]);
+				String childtype = row[1];
+				Integer seasonNumber = Integer.parseInt(row[3]);
+				String posterPath = row[4].isEmpty()? null : row[4];
+				String notes = row[5].isEmpty()? null : row[5];
+				Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(childtype, tmdbId).toString()));
+				UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "UserServieDataKey", new UserServieDataKey(user, servie).toString()));
+				UserSeasonData userSeasonData = new UserSeasonData();
+				userSeasonData.setUserServieData(userServieData);
+				userSeasonData.setSeasonNo(seasonNumber);
+				userSeasonData.setPosterPath(posterPath);
+				userSeasonData.setNotes(notes);
+				userSeasonDatas.add(userSeasonData);
+			}
+			userSeasonDataRepository.saveAll(userSeasonDatas);
+			log.info("    Finished Importing {} seasons", userSeasonDatas.size());
 		}
-		userSeasonDataRepository.saveAll(userSeasonDatas);
-		log.info("    Finished Importing {} seasons", userSeasonDatas.size());
+		catch(NumberFormatException | ResourceNotFoundException | IOException | CsvException e)
+		{
+			e.printStackTrace();
+		}
 	}
 
-	private void importUserEpisodesData(User user) throws IOException, CsvException
+	private void importUserEpisodesData(User user)
 	{
 		log.info("    Importing episodes");
 		String EpisodesFilePath = "/home/aakkiieezz/Coding/track_servie/user_backups/bkp_episodes.csv";
-		CSVReader reader = new CSVReader(new FileReader(EpisodesFilePath));
-		reader.skip(1);
-		List<String[]> rows = reader.readAll();
-		List<UserEpisodeData> userEpisodeDatas = new ArrayList<>();
-		for(String[] row : rows)
+		try(CSVReader reader = new CSVReader(new FileReader(EpisodesFilePath)))
 		{
-			// "TmdbId","Title","Season Number","Episode Number","Watched","Notes"
-			Integer tmdbId = Integer.parseInt(row[0]);
-			Integer seasonNo = Integer.parseInt(row[2]);
-			Integer episodeNo = Integer.parseInt(row[3]);
-			Boolean watched = Boolean.valueOf(row[4]);
-			String notes = row[5].isEmpty()? null : row[5];
-			Servie servie = servieRepository.findById(new ServieKey("tv", tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey("tv", tmdbId).toString()));
-			UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "UserServieDataKey", new UserServieDataKey(user, servie).toString()));
-			UserSeasonData userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNo)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "UserSeasonDataKey", new UserSeasonDataKey(userServieData, seasonNo).toString()));
-			UserEpisodeData userEpisodeData = new UserEpisodeData();
-			userEpisodeData.setUserSeasonData(userSeasonData);
-			userEpisodeData.setEpisodeNo(episodeNo);
-			userEpisodeData.setWatched(watched);
-			userEpisodeData.setNotes(notes);
-			userEpisodeDatas.add(userEpisodeData);
+			reader.skip(1);
+			List<String[]> rows = reader.readAll();
+			List<UserEpisodeData> userEpisodeDatas = new ArrayList<>();
+			for(String[] row : rows)
+			{
+				// "TmdbId","Title","Season Number","Episode Number","Watched","Notes"
+				Integer tmdbId = Integer.parseInt(row[0]);
+				Integer seasonNo = Integer.parseInt(row[2]);
+				Integer episodeNo = Integer.parseInt(row[3]);
+				Boolean watched = Boolean.valueOf(row[4]);
+				String notes = row[5].isEmpty()? null : row[5];
+				Servie servie = servieRepository.findById(new ServieKey("tv", tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey("tv", tmdbId).toString()));
+				UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "UserServieDataKey", new UserServieDataKey(user, servie).toString()));
+				UserSeasonData userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNo)).orElseThrow(() -> new ResourceNotFoundException("UserServieData", "UserSeasonDataKey", new UserSeasonDataKey(userServieData, seasonNo).toString()));
+				UserEpisodeData userEpisodeData = new UserEpisodeData();
+				userEpisodeData.setUserSeasonData(userSeasonData);
+				userEpisodeData.setEpisodeNo(episodeNo);
+				userEpisodeData.setWatched(watched);
+				userEpisodeData.setNotes(notes);
+				userEpisodeDatas.add(userEpisodeData);
+			}
+			userEpisodeDataRepository.saveAll(userEpisodeDatas);
+			log.info("    Finished Importing {} episodes", userEpisodeDatas.size());
 		}
-		userEpisodeDataRepository.saveAll(userEpisodeDatas);
-		log.info("    Finished Importing {} episodes", userEpisodeDatas.size());
+		catch(NumberFormatException | ResourceNotFoundException | IOException | CsvException e)
+		{
+			e.printStackTrace();
+		}
 	}
 }

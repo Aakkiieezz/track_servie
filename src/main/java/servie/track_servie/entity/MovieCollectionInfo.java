@@ -13,7 +13,7 @@ public class MovieCollectionInfo
 	@JsonProperty("id")
 	private Integer collectionId;
 	// ---------------------------------------------------------------
-	@Column(name = "collection_name")
+	@Column(name = "collection_name", nullable = false)
 	@JsonProperty("name")
 	private String collectionName;
 	// ---------------------------------------------------------------

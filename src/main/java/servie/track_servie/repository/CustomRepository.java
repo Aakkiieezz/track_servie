@@ -26,10 +26,30 @@ import servie.track_servie.entity.UserServieData;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ServieDtoHomePage;
 
 @Repository
-public class CustomServieRepository
+public class CustomRepository
 {
 	@PersistenceContext
 	private EntityManager entityManager;
+
+	public List<UserServieData> getUserServieData(List<Object[]> valuesList)
+	{
+		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
+		CriteriaQuery<UserServieData> query = cb.createQuery(UserServieData.class);
+		Root<UserServieData> root = query.from(UserServieData.class);
+		Predicate[] predicates = new Predicate[valuesList.size()];
+		int i = 0;
+		for(Object[] values : valuesList)
+		{
+			predicates[i] = cb.and(
+					cb.equal(root.get("user").get("id"), values[0]),
+					cb.equal(root.get("servie").get("childtype"), values[1]),
+					cb.equal(root.get("servie").get("tmdbId"), values[2]));
+			i++;
+		}
+		query.where(cb.or(predicates));
+		TypedQuery<UserServieData> typedQuery = entityManager.createQuery(query);
+		return typedQuery.getResultList();
+	}
 
 	public Page<ServieDtoHomePage> getTempDtosCB(User user, String childtype, List<String> languages, List<Genre> genres, List<String> statuses, Pageable pageable)
 	{
@@ -83,38 +103,41 @@ public class CustomServieRepository
 			query.orderBy(orders);
 		}
 		TypedQuery<ServieDtoHomePage> typedQuery = entityManager.createQuery(query);
-		typedQuery.setFirstResult((int) pageable.getOffset()); // Offset is the starting index
-		typedQuery.setMaxResults(pageable.getPageSize()); // PageSize is the number of items per page
+		typedQuery.setFirstResult((int) pageable.getOffset());
+		typedQuery.setMaxResults(pageable.getPageSize());
 		List<ServieDtoHomePage> results = typedQuery.getResultList();
-		//
-		// Another query just for counting total elements present after applying all filters
-		CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-		Root<UserServieData> count_usd = countQuery.from(UserServieData.class);
-		Join<UserServieData, Servie> count_servie = count_usd.join("servie", JoinType.INNER);
-		countQuery.select(cb.count(count_usd));
-		Predicate countPredicate = cb.conjunction();
-		countPredicate = cb.and(countPredicate, cb.equal(count_usd.get("user"), user));
-		if(languages!=null && !languages.isEmpty())
-			countPredicate = cb.and(countPredicate, count_servie.get("originalLanguage").in(languages));
-		if(genres!=null && !genres.isEmpty())
+		if(results!=null)
 		{
-			List<Predicate> genrePredicates = new ArrayList<>();
-			for(Genre genre : genres)
+			// Another query just for counting total elements present after applying all filters
+			CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+			Root<UserServieData> count_usd = countQuery.from(UserServieData.class);
+			Join<UserServieData, Servie> count_servie = count_usd.join("servie", JoinType.INNER);
+			countQuery.select(cb.count(count_usd));
+			Predicate countPredicate = cb.conjunction();
+			countPredicate = cb.and(countPredicate, cb.equal(count_usd.get("user"), user));
+			if(languages!=null && !languages.isEmpty())
+				countPredicate = cb.and(countPredicate, count_servie.get("originalLanguage").in(languages));
+			if(genres!=null && !genres.isEmpty())
 			{
-				Expression<Set<Genre>> rootGenres = count_servie.get("genres");
-				Predicate genreMatch = cb.isMember(genre, rootGenres);
-				genrePredicates.add(genreMatch);
+				List<Predicate> genrePredicates = new ArrayList<>();
+				for(Genre genre : genres)
+				{
+					Expression<Set<Genre>> rootGenres = count_servie.get("genres");
+					Predicate genreMatch = cb.isMember(genre, rootGenres);
+					genrePredicates.add(genreMatch);
+				}
+				Predicate allGenresMatch = cb.and(genrePredicates.toArray(new Predicate[0]));
+				countPredicate = cb.and(countPredicate, allGenresMatch);
 			}
-			Predicate allGenresMatch = cb.and(genrePredicates.toArray(new Predicate[0]));
-			countPredicate = cb.and(countPredicate, allGenresMatch);
+			if(statuses!=null && !statuses.isEmpty())
+				countPredicate = cb.and(countPredicate, count_servie.get("status").in(statuses));
+			if(childtype!=null && !childtype.equals(""))
+				countPredicate = cb.and(countPredicate, cb.equal(count_servie.get("childtype"), childtype));
+			countQuery.where(countPredicate);
+			Long totalElements = entityManager.createQuery(countQuery).getSingleResult();
+			Page<ServieDtoHomePage> page = new PageImpl<>(results, pageable, totalElements);
+			return page;
 		}
-		if(statuses!=null && !statuses.isEmpty())
-			countPredicate = cb.and(countPredicate, count_servie.get("status").in(statuses));
-		if(childtype!=null && !childtype.equals(""))
-			countPredicate = cb.and(countPredicate, cb.equal(count_servie.get("childtype"), childtype));
-		countQuery.where(countPredicate);
-		Long totalElements = entityManager.createQuery(countQuery).getSingleResult();
-		Page<ServieDtoHomePage> page = new PageImpl<>(results, pageable, totalElements);
-		return page;
+		return null;
 	}
 }

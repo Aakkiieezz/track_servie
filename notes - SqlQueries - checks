@@ -83,19 +83,11 @@ SELECT COUNT(*) FROM track_servie.user_season_data;
 -- 1561
 SELECT COUNT(*) FROM track_servie.user_servie_data;
 
--- CreatedBy
-SELECT SUM(cb.CountOfCreatedBy)
-FROM track_servie.servie s
-JOIN track_servie.series tv
-    ON tv.childtype = s.childtype AND tv.tmdb_id = s.tmdb_id
-LEFT JOIN (SELECT scb.tmdb_id, scb.childtype, COUNT(*)  AS CountOfCreatedBy
-            FROM track_servie.series_createdby scb
-            JOIN track_servie.created_by cb
-                ON scb.credit_id = cb.credit_id
-            GROUP BY scb.tmdb_id) AS cb
-    ON tv.tmdb_id = cb.tmdb_id AND tv.childtype = cb.childtype;
--- MUST BE EQUAL TO
-SELECT COUNT(*) FROM track_servie.created_by;
+-- Need a better check for Series & CreatedBy
+
+
+
+
 
 -- ProductionCompanies
 SELECT SUM(pc.CountOfProdCompanies)

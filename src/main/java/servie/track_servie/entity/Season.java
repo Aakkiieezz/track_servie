@@ -3,6 +3,7 @@ package servie.track_servie.entity;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
@@ -26,7 +27,7 @@ public class Season
 	@JsonProperty("id")
 	private String id;
 	// ---------------------------------------------------------------
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	private String name;
 	// ---------------------------------------------------------------
 	@Column(name = "episode_count")
@@ -64,7 +65,7 @@ public class Season
 	@JsonProperty("vote_average")
 	private Double voteAverage;
 	// ---------------------------------------------------------------
-	@Column(name = "last_modified", columnDefinition = "DATETIME")
+	@Column(name = "last_modified", nullable = false, columnDefinition = "DATETIME")
 	private LocalDateTime lastModified;
 	// ---------------------------------------------------------------
 	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -72,4 +73,27 @@ public class Season
 				joinColumns = @JoinColumn(name = "season_id"),
 				inverseJoinColumns = @JoinColumn(name = "credit_id"))
 	private Set<SeasonCast> seasonCast;
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if(this==o)
+			return true;
+		if(o==null || getClass()!=o.getClass())
+			return false;
+		Season season = (Season) o;
+		return Objects.equals(id, season.id);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(id);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Season {id="+id+'}';
+	}
 }

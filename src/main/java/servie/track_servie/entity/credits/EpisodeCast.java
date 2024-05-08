@@ -21,7 +21,7 @@ public class EpisodeCast
 	@JsonProperty("credit_id")
 	private String creditId;
 	// ---------------------------------------------------------------
-	@Column(name = "media_character")
+	@Column(name = "media_character", nullable = false)
 	@JsonProperty("character")
 	private String character;
 	// ---------------------------------------------------------------
@@ -33,7 +33,7 @@ public class EpisodeCast
 	@JsonProperty("gender")
 	private Integer gender;
 	// ---------------------------------------------------------------
-	@Column(name = "person_id")
+	@Column(name = "person_id", nullable = false)
 	@JsonProperty("id")
 	private Integer personId;
 	// ---------------------------------------------------------------
@@ -45,7 +45,7 @@ public class EpisodeCast
 	@Column(name = "knownForDepartment")
 	private String knownForDepartment;
 	// ---------------------------------------------------------------
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	@JsonProperty("name")
 	private String name;
 	// ---------------------------------------------------------------

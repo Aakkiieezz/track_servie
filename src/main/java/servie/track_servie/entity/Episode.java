@@ -10,6 +10,7 @@ import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
@@ -25,15 +26,15 @@ public class Episode
 	@JsonProperty("id")
 	private String id;
 	// ---------------------------------------------------------------
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	@JsonProperty("name")
 	private String name;
 	// ---------------------------------------------------------------
-	@Column(name = "episode_no")
+	@Column(name = "episode_no", nullable = false)
 	@JsonProperty("episode_number")
 	private Integer episodeNo;
 	// ---------------------------------------------------------------
-	@Column(name = "season_no")
+	@Column(name = "season_no", nullable = false)
 	@JsonProperty("season_number")
 	private Integer seasonNo;
 	// ---------------------------------------------------------------
@@ -49,7 +50,7 @@ public class Episode
 	@JsonProperty("still_path")
 	private String stillPath;
 	// ---------------------------------------------------------------
-	@Column(name = "tmdb_id")
+	@Column(name = "tmdb_id", nullable = false)
 	@JsonProperty("show_id")
 	private Integer tmdbId;
 	// ---------------------------------------------------------------
@@ -76,7 +77,7 @@ public class Episode
 	@JsonProperty("production_code")
 	private String productionCode;
 	// ---------------------------------------------------------------
-	@Column(name = "last_modified", columnDefinition = "DATETIME")
+	@Column(name = "last_modified", nullable = false, columnDefinition = "DATETIME")
 	private LocalDateTime lastModified;
 	// ---------------------------------------------------------------
 	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
@@ -84,7 +85,7 @@ public class Episode
 	@JoinTable(	name = "episode_cast",
 				joinColumns = @JoinColumn(name = "episode_id"),
 				inverseJoinColumns = @JoinColumn(name = "credit_id"))
-	private Set<EpisodeCast> guestStars;
+	private Set<EpisodeCast> guestStars; // akash TO FIX, WHY EPISODE DELETEION IS NOT DELETING CAST AND CREW
 	// ---------------------------------------------------------------
 	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
 	@JsonProperty("crew")
@@ -92,4 +93,27 @@ public class Episode
 				joinColumns = @JoinColumn(name = "episode_id"),
 				inverseJoinColumns = @JoinColumn(name = "credit_id"))
 	private Set<EpisodeCrew> crew;
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if(this==o)
+			return true;
+		if(o==null || getClass()!=o.getClass())
+			return false;
+		Episode episode = (Episode) o;
+		return Objects.equals(id, episode.id);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(id);
+	}
+
+	@Override
+	public String toString()
+	{
+		return "Season {id="+id+'}';
+	}
 }

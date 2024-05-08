@@ -61,4 +61,8 @@ public interface UserServieDataRepository extends JpaRepository<UserServieData, 
 			+" WHERE usd.userServieData.user = :user"
 			+" ORDER BY s.title, usd.seasonNo, ued.episodeNo")
 	List<UserEpisodeBkpDto> getMagicEpData(User user);
+
+	@Query(value = "SELECT u FROM UserServieData AS u"
+			+" WHERE (u.user.id, u.servie.childtype, u.servie.tmdbId) IN :keys")
+	List<UserServieData> findAllByKeys(@Param("keys") List<Object[]> keys);
 }

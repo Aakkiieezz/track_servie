@@ -21,13 +21,13 @@ public class User
 	@Column(name = "id")
 	private Integer id;
 	// ---------------------------------------------------------------
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	private String name;
 	// ---------------------------------------------------------------
 	// @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	// private Set<Catalog> lists;
 	// ---------------------------------------------------------------
-	@Column(name = "email", unique = true)
+	@Column(name = "email", nullable = false, unique = true)
 	private String email;
 	// ---------------------------------------------------------------
 	@Column(name = "password")
