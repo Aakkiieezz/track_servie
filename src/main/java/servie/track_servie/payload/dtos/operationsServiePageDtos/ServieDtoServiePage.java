@@ -35,6 +35,8 @@ public class ServieDtoServiePage
 	// series fields
 	private Integer totalSeasons;
 	private Integer totalEpisodes;
+	private int totalRuntime;
+	private int watchedRuntime;
 	// private LocalDate firstAirDate;
 	// private LocalDate lastAirDate;
 	private List<SeasonDtoServiePage> seasons;

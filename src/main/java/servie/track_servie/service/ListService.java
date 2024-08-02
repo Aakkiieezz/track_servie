@@ -34,7 +34,7 @@ public class ListService
 			listRepository.delete(watchlistOptional.get());
 		else
 		{
-			WatchList watchList = watchlistOptional.get();
+			WatchList watchList = new WatchList();
 			watchList.setServie(servie);
 			watchList.setUser(user);
 			listRepository.save(watchList);

@@ -39,13 +39,23 @@ public class UserSeasonData
 			+"    AND ued.watched = 1) = (SELECT s.episode_count FROM season AS s WHERE s.tmdb_id = tmdb_id AND s.season_no = season_no) THEN true ELSE false END)")
 	private Boolean watched = false;
 	// ---------------------------------------------------------------
-	// ToDo ??? OFCOURSE TO USE JOIN INSTEAD
 	@Formula(value = "(SELECT COUNT(*) FROM user_episode_data AS ued"
 			+" WHERE ued.user_id = user_id"
 			+"    AND ued.tmdb_id = tmdb_id"
 			+"    AND ued.season_no = season_no"
 			+"    AND ued.watched = 1)")
 	private Integer episodesWatched;
+	// ---------------------------------------------------------------
+	@Formula(value = "(SELECT COALESCE(SUM(e.runtime), 0) FROM user_episode_data AS ued"
+			+" JOIN episode AS e"
+			+"   ON ued.tmdb_id = e.tmdb_id"
+			+"     AND ued.season_no = e.season_no"
+			+"     AND ued.episode_no = e.episode_no"
+			+" WHERE ued.user_id = user_id"
+			+"   AND ued.tmdb_id = tmdb_id"
+			+"   AND ued.season_no = season_no"
+			+"   AND ued.watched = 1)")
+	private int totalWatchedRuntime;
 	// ---------------------------------------------------------------
 	@Column(name = "poster_path")
 	private String posterPath;

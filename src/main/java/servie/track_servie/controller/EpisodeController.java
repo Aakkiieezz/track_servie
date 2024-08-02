@@ -2,7 +2,8 @@ package servie.track_servie.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import servie.track_servie.payload.dtos.episodePageDtos.EpisodeDtoEpisodePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
+import servie.track_servie.repository.UserRepository;
 import servie.track_servie.service.EpisodeService;
 
 @Controller
@@ -19,8 +21,8 @@ public class EpisodeController
 {
 	@Autowired
 	EpisodeService episodeService;
-	@Value("${user-id}")
-	private Integer userId;
+	@Autowired
+	private UserRepository userRepository;
 
 	// Returns EpisodePage containing selected Episode from SeasonPage
 	@GetMapping("")
@@ -41,16 +43,18 @@ public class EpisodeController
 
 	// Toggles the watch button of Episode located on SeasonPage
 	@GetMapping("toggleback")
-	public String toggleEpisodeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @PathVariable Integer episodeNo)
+	public String toggleEpisodeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @PathVariable Integer episodeNo, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNo, episodeNo);
 		return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNo;
 	}
 
 	// Toggles the watch button of Episode located on EpisodePage
 	@GetMapping("toggle")
-	public String toggleEpWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @PathVariable Integer episodeNo)
+	public String toggleEpWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @PathVariable Integer episodeNo, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		episodeService.toggleEpisodeWatch(userId, tmdbId, seasonNo, episodeNo);
 		return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNo+"/Episode/"+episodeNo;
 	}

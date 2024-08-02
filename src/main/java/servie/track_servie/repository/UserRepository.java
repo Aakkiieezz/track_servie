@@ -8,7 +8,7 @@ import servie.track_servie.entity.User;
 @Repository
 public interface UserRepository extends JpaRepository<User, Integer>
 {
-    User findByEmail(String email);
+	Optional<User> findByEmail(String email);
 
-    Optional<User> findOneByEmail(String email);
+	Optional<User> findByName(String login);
 }

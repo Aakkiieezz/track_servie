@@ -291,6 +291,8 @@ public class ServieService
 	{
 		// Series (Airing) -> everyday once
 		List<Series> serieses = seriesRepository.findByLastModifiedBeforeAndStatus(LocalDateTime.now(), "Returning Series");
+		serieses.clear();
+		serieses.add(seriesRepository.findById(new ServieKey("tv", 76479)).get());
 		log.info("Updating {} series which are currently airing", serieses.size());
 		for(Series series : serieses)
 			updateSeries(series.getTmdbId());
@@ -310,16 +312,15 @@ public class ServieService
 		// Movies -> once in a week
 		// movies = moviesRepo.
 	}
-	// @Transactional
-	// @Scheduled(fixedRate = Integer.MAX_VALUE)
-	// public void abc()
-	// {
-	// 	updateSeries(95479);
-	// }
 
 	private void updateSeries(Integer tmdbId)
 	{
 		Series tempSeries = fetchSeriesFromTmdb(tmdbId);
+		if(tempSeries==null)
+		{
+			log.info("No such series found, probably deleted by TMDB");
+			return;
+		}
 		log.info("Updating series {} name {}", tmdbId, tempSeries.getTitle());
 		Series oldSeries = (Series) servieRepository.findById(new ServieKey("tv", tmdbId)).get();
 		if(!oldSeries.isAdult()==tempSeries.isAdult())
@@ -327,7 +328,7 @@ public class ServieService
 			log.info("  Series 'Adult' mismatched");
 			oldSeries.setAdult(tempSeries.isAdult());
 		}
-		if(!oldSeries.getBackdropPath().equals(tempSeries.getBackdropPath()))
+		if(oldSeries.getBackdropPath()==null || !oldSeries.getBackdropPath().equals(tempSeries.getBackdropPath()))
 		{
 			log.info("  Series 'BackgroundPath' mismatched");
 			oldSeries.setBackdropPath(tempSeries.getBackdropPath());
@@ -337,7 +338,7 @@ public class ServieService
 			log.info("  Series 'CreatedBy' mismatched");
 			oldSeries.setCreatedBy(tempSeries.getCreatedBy());
 		}
-		if(!oldSeries.getFirstAirDate().equals(tempSeries.getFirstAirDate()))
+		if(oldSeries.getFirstAirDate()==null || !oldSeries.getFirstAirDate().equals(tempSeries.getFirstAirDate()))
 		{
 			log.info("  Series 'FirstAirDate' mismatched");
 			oldSeries.setFirstAirDate(tempSeries.getFirstAirDate());
@@ -392,7 +393,7 @@ public class ServieService
 			log.info("  Series 'Popularity' mismatched");
 			oldSeries.setPopularity(tempSeries.getPopularity());
 		}
-		if(!oldSeries.getPosterPath().equals(tempSeries.getPosterPath()))
+		if(oldSeries.getPosterPath()==null || !oldSeries.getPosterPath().equals(tempSeries.getPosterPath()))
 		{
 			log.info("  Series 'PosterPath' mismatched");
 			oldSeries.setPosterPath(tempSeries.getPosterPath());
@@ -749,106 +750,114 @@ public class ServieService
 		Series series = new Series();
 		// DTO can be created just to extract the necessary parts
 		HttpMethod httpMethod = Objects.requireNonNull(HttpMethod.GET);
-		ResponseEntity<Series> seriesResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"?api_key="+apiKey, httpMethod, httpEntity, Series.class);
-		if(seriesResponse.getStatusCode()==HttpStatus.OK)
+		try
 		{
-			series = seriesResponse.getBody();
-			if(series!=null)
+			ResponseEntity<Series> seriesResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"?api_key="+apiKey, httpMethod, httpEntity, Series.class);
+			if(seriesResponse.getStatusCode()==HttpStatus.OK)
 			{
-				LocalDateTime localDateTime = LocalDateTime.now();
-				series.setLastModified(localDateTime);
-				List<Season> seasons = new ArrayList<>();
-				// the seasons payload got from above servie api call does not have episodes data, therefore making api call for each
-				for(Season seasonBrief : series.getSeasons())
+				series = seriesResponse.getBody();
+				if(series!=null)
 				{
-					ResponseEntity<Season> response = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"/season/"+seasonBrief.getSeasonNo()+"?api_key="+apiKey, httpMethod, httpEntity, Season.class);
-					Season season = response.getBody();
-					if(season!=null)
+					LocalDateTime localDateTime = LocalDateTime.now();
+					series.setLastModified(localDateTime);
+					List<Season> seasons = new ArrayList<>();
+					// the seasons payload got from above servie api call does not have episodes data, therefore making api call for each
+					for(Season seasonBrief : series.getSeasons())
 					{
-						ResponseEntity<SeasonCredits> seasonCreditsResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"/season/"+seasonBrief.getSeasonNo()+"/credits?api_key="+apiKey, httpMethod, httpEntity, SeasonCredits.class);
-						SeasonCredits seasonCredits = seasonCreditsResponse.getBody();
-						if(seasonCredits!=null)
-							season.setSeasonCast(seasonCredits.getCast());
-						season.setLastModified(localDateTime);
-						season.setSeries(series);
-						season.setEpisodeCount(seasonBrief.getEpisodeCount());
+						ResponseEntity<Season> response = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"/season/"+seasonBrief.getSeasonNo()+"?api_key="+apiKey, httpMethod, httpEntity, Season.class);
+						Season season = response.getBody();
+						if(season!=null)
+						{
+							ResponseEntity<SeasonCredits> seasonCreditsResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"/season/"+seasonBrief.getSeasonNo()+"/credits?api_key="+apiKey, httpMethod, httpEntity, SeasonCredits.class);
+							SeasonCredits seasonCredits = seasonCreditsResponse.getBody();
+							if(seasonCredits!=null)
+								season.setSeasonCast(seasonCredits.getCast());
+							season.setLastModified(localDateTime);
+							season.setSeries(series);
+							season.setEpisodeCount(seasonBrief.getEpisodeCount());
+							for(Episode episode : season.getEpisodes())
+							{
+								episode.setLastModified(localDateTime);
+								episode.setSeason(season);
+							}
+							seasons.add(season);
+						}
+					}
+					// Issue - MultipleRepresentations
+					allEpGuestStars = new HashSet<>();
+					allEpCrews = new HashSet<>();
+					allSeasonCasts = new HashSet<>();
+					for(Season season : seasons)
+					{
+						Set<SeasonCast> seasonCasts = new HashSet<>();
+						for(SeasonCast cast : season.getSeasonCast())
+							if(allSeasonCasts.contains(cast))
+							{
+								for(SeasonCast allSeasonUniqueCast : allSeasonCasts)
+									if(allSeasonUniqueCast.equals(cast))
+									{
+										seasonCasts.add(allSeasonUniqueCast);
+										break;
+									}
+							}
+							else
+							{
+								allSeasonCasts.add(cast);
+								seasonCasts.add(cast);
+							}
+						season.setSeasonCast(seasonCasts);
 						for(Episode episode : season.getEpisodes())
 						{
-							episode.setLastModified(localDateTime);
-							episode.setSeason(season);
-						}
-						seasons.add(season);
-					}
-				}
-				// Issue - MultipleRepresentations
-				allEpGuestStars = new HashSet<>();
-				allEpCrews = new HashSet<>();
-				allSeasonCasts = new HashSet<>();
-				for(Season season : seasons)
-				{
-					Set<SeasonCast> seasonCasts = new HashSet<>();
-					for(SeasonCast cast : season.getSeasonCast())
-						if(allSeasonCasts.contains(cast))
-						{
-							for(SeasonCast allSeasonUniqueCast : allSeasonCasts)
-								if(allSeasonUniqueCast.equals(cast))
+							Set<EpisodeCrew> epCrews = new HashSet<>();
+							for(EpisodeCrew cast : episode.getCrew())
+								if(allEpCrews.contains(cast))
 								{
-									seasonCasts.add(allSeasonUniqueCast);
-									break;
+									for(EpisodeCrew allEpUniqueCast : allEpCrews)
+										if(allEpUniqueCast.equals(cast))
+										{
+											epCrews.add(allEpUniqueCast);
+											break;
+										}
 								}
+								else
+								{
+									allEpCrews.add(cast);
+									epCrews.add(cast);
+								}
+							episode.setCrew(epCrews);
+							Set<EpisodeCast> epCasts = new HashSet<>();
+							for(EpisodeCast cast : episode.getGuestStars())
+								if(allEpGuestStars.contains(cast))
+								{
+									for(EpisodeCast allEpUniqueCast : allEpGuestStars)
+										if(allEpUniqueCast.equals(cast))
+										{
+											epCasts.add(allEpUniqueCast);
+											break;
+										}
+								}
+								else
+								{
+									allEpGuestStars.add(cast);
+									epCasts.add(cast);
+								}
+							episode.setGuestStars(epCasts);
 						}
-						else
-						{
-							allSeasonCasts.add(cast);
-							seasonCasts.add(cast);
-						}
-					season.setSeasonCast(seasonCasts);
-					for(Episode episode : season.getEpisodes())
-					{
-						Set<EpisodeCrew> epCrews = new HashSet<>();
-						for(EpisodeCrew cast : episode.getCrew())
-							if(allEpCrews.contains(cast))
-							{
-								for(EpisodeCrew allEpUniqueCast : allEpCrews)
-									if(allEpUniqueCast.equals(cast))
-									{
-										epCrews.add(allEpUniqueCast);
-										break;
-									}
-							}
-							else
-							{
-								allEpCrews.add(cast);
-								epCrews.add(cast);
-							}
-						episode.setCrew(epCrews);
-						Set<EpisodeCast> epCasts = new HashSet<>();
-						for(EpisodeCast cast : episode.getGuestStars())
-							if(allEpGuestStars.contains(cast))
-							{
-								for(EpisodeCast allEpUniqueCast : allEpGuestStars)
-									if(allEpUniqueCast.equals(cast))
-									{
-										epCasts.add(allEpUniqueCast);
-										break;
-									}
-							}
-							else
-							{
-								allEpGuestStars.add(cast);
-								epCasts.add(cast);
-							}
-						episode.setGuestStars(epCasts);
 					}
+					allEpGuestStars = null;
+					allEpCrews = null;
+					allSeasonCasts = null;
+					series.setSeasons(seasons);
+					series.setChildtype("tv");
+					series.setGenres(genreUtils.convertTmdbGenresToTrackServieGenres(series.getGenres()));
+					series.setLastModified(LocalDateTime.now());
 				}
-				allEpGuestStars = null;
-				allEpCrews = null;
-				allSeasonCasts = null;
-				series.setSeasons(seasons);
-				series.setChildtype("tv");
-				series.setGenres(genreUtils.convertTmdbGenresToTrackServieGenres(series.getGenres()));
-				series.setLastModified(LocalDateTime.now());
 			}
+		}
+		catch(Exception e)
+		{
+			e.printStackTrace();
+			return null;
 		}
 		log.info("Fetched series {}", tmdbId);
 		return series;

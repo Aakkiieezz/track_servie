@@ -17,8 +17,12 @@ public interface UserSeasonDataRepository extends JpaRepository<UserSeasonData, 
 			+" COALESCE(userSeasonData.posterPath, season.posterPath) AS posterPath,"
 			+" season.episodeCount, userSeasonData.episodesWatched, userSeasonData.watched)"
 			+" FROM Season AS season"
-			+" LEFT JOIN UserSeasonData AS userSeasonData ON userSeasonData.seasonNo = season.seasonNo AND userSeasonData.userServieData.servie.tmdbId = season.series.tmdbId AND userSeasonData.userServieData.user = :user"
-			+" WHERE season.series.childtype = :childtype AND season.series.tmdbId = :tmdbId")
+			+" LEFT JOIN UserSeasonData AS userSeasonData"
+			+"   ON userSeasonData.seasonNo = season.seasonNo"
+			+"     AND userSeasonData.userServieData.servie.tmdbId = season.series.tmdbId"
+			+"     AND userSeasonData.userServieData.user = :user"
+			+" WHERE season.series.childtype = :childtype"
+			+"   AND season.series.tmdbId = :tmdbId")
 	List<SeasonDtoServiePage> getSeasons(@Param("user") User user, @Param("childtype") String childtype, @Param("tmdbId") Integer tmdbId);
 
 	@Query(value = "SELECT userSeasonData.seasonNo"
@@ -35,8 +39,8 @@ public interface UserSeasonDataRepository extends JpaRepository<UserSeasonData, 
 			+" LEFT JOIN (SELECT usd.userServieData.servie.tmdbId AS tmdbId, usd.seasonNo AS seasonNo"
 			+" 			  FROM UserSeasonData AS usd"
 			+"            WHERE usd.userServieData.user = :user"
-			+"                AND usd.userServieData.servie.tmdbId = :tmdbId"
-			+"                AND usd.watched = TRUE) AS usd"
+			+"              AND usd.userServieData.servie.tmdbId = :tmdbId"
+			+"              AND usd.watched = TRUE) AS usd"
 			+" ON usd.tmdbId = sea.series.tmdbId"
 			+"   AND usd.seasonNo = sea.seasonNo"
 			+" WHERE sea.series.tmdbId = :tmdbId"

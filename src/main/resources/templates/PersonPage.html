@@ -54,12 +54,12 @@
         th:id="${servie.childtype + servie.tmdbId}">
         <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}"> -->
         <div th:if="${servie.childtype == 'movie'}">
-          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=movie'}">
-            <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
-              alt="Poster Unavailable" />
-          </a>
-          <div class="buttons-container">
-            <strong th:text="${servie.title}"></strong>
+          <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
+            alt="Poster Unavailable" />
+          <div class="buttons-container rounded">
+            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=movie'}">
+              <strong th:text="${servie.title}"></strong>
+            </a>
             <br>
             <span th:if="${servie.releaseDate != null}" th:text="${#temporals.year(servie.releaseDate)}"></span>
             <!-- hyperlink -->
@@ -96,11 +96,13 @@
         </div>
         <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}" -->
         <div th:if="${servie.childtype == 'tv'}">
-          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=tv'}">
-            <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}" />
-          </a>
-          <div class="buttons-container">
-            <strong th:text="${servie.title}"></strong>
+
+          <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
+            alt="Poster Unavailable" />
+          <div class="buttons-container rounded">
+            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=tv'}">
+              <strong th:text="${servie.title}"></strong>
+            </a>
             <br>
             <span
               th:text="${#temporals.year(servie.firstAirDate)} + ' - ' + (${#temporals.year(servie.lastAirDate)} == '2023' ? 'present' : ${#temporals.format(servie.lastAirDate,'yy')})">
