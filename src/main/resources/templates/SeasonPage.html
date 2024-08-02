@@ -44,31 +44,35 @@
             <i class="bi bi-eye-fill"></i>
           </div>
         </a>
+        <div th:if="${season.episodeCount != 0}">
 
-        <p>Total Episodes Watched: <span th:text="${season.episodesWatched}+'/'+${season.episodeCount}"></span></p>
+          <p>Total Episodes Watched: <span th:text="${season.episodesWatched}+'/'+${season.episodeCount}"></span></p>
 
-        <p>Last Modified: <span th:text="${#temporals.format(season.lastModified, 'dd-MM-yyyy HH:mm:ss')}"></span></p>
+          <p>Last Modified: <span th:text="${#temporals.format(season.lastModified, 'dd-MM-yyyy HH:mm:ss')}"></span></p>
 
-        <p style="display: inline-block;">Watch/Unwatch multiple episodes:</p>
-        <form th:action="@{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNo}+'/toggleepisodes'}"
-          style="display: inline-block;">
-          <i class="bi bi-arrow-down-up"></i>
-          <select th:name="watch">
-            <option value="true">watch</option>
-            <option value="false">not watched</option>
-          </select>
-          <select th:name="fromEpisodeNumber">
-            <option th:each="fromEpisodeNumber : ${#numbers.sequence(1, season.episodeCount)}"
-              th:value="${fromEpisodeNumber}" th:text="${fromEpisodeNumber}"></option>
-          </select>
-          <select th:name="toEpisodeNumber">
-            <option th:each="toEpisodeNumber : ${#numbers.sequence(1, season.episodeCount)}"
-              th:value="${toEpisodeNumber}" th:text="${toEpisodeNumber}"></option>
-          </select>
-          <button class="btn btn-light" type="submit">
-            <i class="bi bi-search"></i>
-          </button>
-        </form>
+          <p style="display: inline-block;">Watch/Unwatch multiple episodes:</p>
+          <form th:action="@{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNo}+'/toggleepisodes'}"
+            style="display: inline-block;">
+            <i class="bi bi-arrow-down-up"></i>
+            <select th:name="watch">
+              <option value="true">Mark as Watched</option>
+              <option value="false">Mark as Unwatched</option>
+            </select>
+            <select th:name="fromEpisodeNumber">
+              <option th:each="fromEpisodeNumber : ${#numbers.sequence(1, season.episodeCount)}"
+                th:value="${fromEpisodeNumber}" th:text="${fromEpisodeNumber}"></option>
+            </select>
+            <select th:name="toEpisodeNumber">
+              <option th:each="toEpisodeNumber : ${#numbers.sequence(1, season.episodeCount)}"
+                th:value="${toEpisodeNumber}" th:text="${toEpisodeNumber}"></option>
+            </select>
+            <button class="btn btn-light" type="submit">
+              <i class="bi bi-search"></i>
+            </button>
+          </form>
+
+          <p>Total Watched Runtime: <span th:text="${season.watchedRuntime}+'/'+${season.totalRuntime}"></span></p>
+        </div>
 
       </div>
     </div>
@@ -77,7 +81,9 @@
       <div class="col-4 image-container still">
         <a
           th:href="@{'/track-servie/servies/'+${season.tmdbId}+'/Season/'+${season.seasonNo}+'/Episode/'+${episode.episodeNo}}">
-          <img th:src="'https://www.themoviedb.org/t/p/original'+${episode.stillPath}" />
+          <!-- <img th:src="'https://www.themoviedb.org/t/p/original'+${episode.stillPath}" /> -->
+          <img
+            th:src="${episode.stillPath != null} ? 'https://www.themoviedb.org/t/p/original'+${episode.stillPath} : 'https://placehold.co/428x240?text=Ep. '+${episode.episodeNo}" />
         </a>
       </div>
       <div class="col-8">

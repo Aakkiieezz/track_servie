@@ -384,64 +384,65 @@
         </form>
       </div>
 
+      <form th:action="@{/logout}" method="post">
+        <input type="submit" value="Logout">
+      </form>
+
     </div>
     <div class="row center">
       <div class="col-xxl-1 col-sm-2 col-3 image-container poster" th:each="servie : ${response.servies}"
         th:id="${servie.childtype + servie.tmdbId}">
         <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Movie)}"> -->
         <div th:if="${servie.childtype == 'movie'}">
-          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=movie'}">
-            <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
-              alt="Poster Unavailable" />
-          </a>
-          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=movie'}">
-            <div class="buttons-container rounded">
+          <img class="rounded image-border" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
+            alt="Poster Unavailable" />
+          <div class="buttons-container rounded">
+            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=movie'}">
               <strong th:text="${servie.title}"></strong>
-              <br>
-              <span th:if="${servie.releaseDate != null}" th:text="${#temporals.year(servie.releaseDate)}"></span>
-              <!-- hyperlink -->
-              <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
-                <div th:if="${servie.completed}">
-                  <i class="bi bi-eye-slash-fill"></i>
-                </div>
-                <div th:unless="${servie.completed}">
-                  <i class="bi bi-eye-fill"></i>
-                </div>
-              </a>
-              <!-- javascript+ajax+jquery -->
-              <!-- able to toggle value in backend, but not able to change the class of icon -->
-              <a href="#" th:if="${servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
-                onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), false)">
+            </a>
+            <br>
+            <span th:if="${servie.releaseDate != null}" th:text="${#temporals.year(servie.releaseDate)}"></span>
+            <!-- hyperlink -->
+            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
+              <div th:if="${servie.completed}">
                 <i class="bi bi-eye-slash-fill"></i>
-              </a>
-              <a href="#" th:if="${not servie.completed}" th:tmdbId="${servie.tmdbId}"
-                th:childtype="${servie.childtype}"
-                onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), true)">
+              </div>
+              <div th:unless="${servie.completed}">
                 <i class="bi bi-eye-fill"></i>
-              </a>
-              <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
-                <i class="bi bi-file-image"></i>
-              </a>
-              <a th:href="@{'/track-servie/list/'+${servie.tmdbId}+'?childtype='+${servie.childtype}}">
-                <i class="bi bi-clock-fill"></i>
-              </a>
-              <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
-                onclick="removeServie(this.getAttribute('tmdbId'), this.getAttribute('childtype'))">
-                <i class="bi bi-x-circle-fill"></i>
-              </a>
+              </div>
+            </a>
+            <!-- javascript+ajax+jquery -->
+            <!-- able to toggle value in backend, but not able to change the class of icon -->
+            <a href="#" th:if="${servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+              onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), false)">
+              <i class="bi bi-eye-slash-fill"></i>
+            </a>
+            <a href="#" th:if="${not servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+              onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), true)">
+              <i class="bi bi-eye-fill"></i>
+            </a>
+            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
+              <i class="bi bi-file-image"></i>
+            </a>
+            <a th:href="@{'/track-servie/list/'+${servie.tmdbId}+'?childtype='+${servie.childtype}}">
+              <i class="bi bi-clock-fill"></i>
+            </a>
+            <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+              onclick="removeServie(this.getAttribute('tmdbId'), this.getAttribute('childtype'))">
+              <i class="bi bi-x-circle-fill"></i>
+            </a>
 
-            </div>
-          </a>
+          </div>
 
 
         </div>
         <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}" -->
         <div th:if="${servie.childtype == 'tv'}">
-          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=tv'}">
-            <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}" />
-          </a>
+          <img class="rounded image-border" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}" />
           <div class="buttons-container rounded">
-            <strong th:text="${servie.title}"></strong>
+            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=tv'}">
+              <strong th:text="${servie.title}"></strong>
+            </a>
             <br>
             <span
               th:text="${#temporals.year(servie.firstAirDate)} + ' - ' + (${#temporals.year(servie.lastAirDate)} == '2023' ? 'present' : ${#temporals.format(servie.lastAirDate,'yy')})">
@@ -482,8 +483,8 @@
 
   <span th:text="'There are ' + ${response.totalElements} + ' servies matching your filters'"></span>
 
-  <nav th:if="${response.totalPages > 1}">
-    <ul class="pagination">
+  <nav id="paginationNav" th:if="${response.totalPages > 1}">
+    <ul class="pagination justify-content-center">
       <!-- Previous button (enable - if there is previous pg available) -->
       <li class="page-item" th:classappend="${response.hasPrevious} ? '' : 'disabled'">
         <a class="page-link" th:href="@{'/track-servie/servies?pageNumber=' + ${response.pageNumber - 1}}">Previous</a>
@@ -496,7 +497,7 @@
 
       <!-- Gap if ............ -->
       <li class="page-item" th:if="${response.pageNumber > 3}">
-        <span>...</span>
+        <a class="page-link disabled" href="#"><span>...</span></a>
       </li>
 
       <li class="page-item">
@@ -526,7 +527,7 @@
 
       <!-- Gap if currentPg is < totalPages-4 -->
       <li class="page-item" th:if="${response.pageNumber < response.totalPages - 4}">
-        <span>...</span>
+        <a class="page-link disabled" href="#"><span>...</span></a>
       </li>
 
       <!-- Last Page -->
@@ -544,18 +545,80 @@
   </nav>
 
   <script>
+    // Fetching data from sessionStorage to pass on to next page link clicked
+    document.addEventListener('DOMContentLoaded', function () {
+
+      const genres = sessionStorage.getItem('genres');
+      if (genres) {
+        const genresArray = JSON.parse(genres);
+        const paginationLinks = document.querySelectorAll('#paginationNav .page-link');
+        paginationLinks.forEach(link => {
+          const url = new URL(link.href);
+          const params = new URLSearchParams(url.search);
+          if (genresArray.length > 0) {
+            params.set('genreIds', genresArray.join(','));
+          }
+          url.search = params.toString();
+          link.href = url.toString();
+        });
+      }
+
+      const languages = sessionStorage.getItem('languages');
+      if (languages) {
+        const languagesArray = JSON.parse(languages);
+        const paginationLinks = document.querySelectorAll('#paginationNav .page-link');
+        paginationLinks.forEach(link => {
+          const url = new URL(link.href);
+          const params = new URLSearchParams(url.search);
+          if (languagesArray.length > 0) {
+            params.set('languages', languagesArray.join(','));
+          }
+          url.search = params.toString();
+          link.href = url.toString();
+        });
+      }
+
+      const statuses = sessionStorage.getItem('statuses');
+      if (statuses) {
+        const statusesArray = JSON.parse(statuses);
+        const paginationLinks = document.querySelectorAll('#paginationNav .page-link');
+        paginationLinks.forEach(link => {
+          const url = new URL(link.href);
+          const params = new URLSearchParams(url.search);
+          if (statusesArray.length > 0) {
+            params.set('statuses', statusesArray.join(','));
+          }
+          url.search = params.toString();
+          link.href = url.toString();
+        });
+      }
+    });
+
+    // Storing data into sessionStorage for 'languages'
     function applyLanguageSelection() {
-      const checkboxes = document.querySelectorAll('#languageCheckboxes input[type="checkbox"]');
-      const selectedLanguages = Array.from(checkboxes)
-        .filter(checkbox => checkbox.checked)
-        .map(checkbox => checkbox.value);
+      const checkboxes = document.querySelectorAll('#languageCheckboxes input[type="checkbox"]:checked');
+      const selectedLanguages = Array.from(checkboxes).map(checkbox => checkbox.value);
       sessionStorage.setItem('languages', JSON.stringify(selectedLanguages));
     }
 
+    // Storing data into sessionStorage for 'genres'
+    function applyGenreSelection() {
+      const checkboxes = document.querySelectorAll('#genreCheckboxes input[type="checkbox"]:checked');
+      const selectedGenres = Array.from(checkboxes).map(checkbox => checkbox.value);
+      sessionStorage.setItem('genres', JSON.stringify(selectedGenres));
+    }
+
+    // Storing data into sessionStorage for 'statuses'
+    function applyStatusSelection() {
+      const checkboxes = document.querySelectorAll('#statusCheckboxes input[type="checkbox"]:checked');
+      const selectedStatuses = Array.from(checkboxes).map(checkbox => checkbox.value);
+      sessionStorage.setItem('statuses', JSON.stringify(selectedStatuses));
+    }
+
+    // Check all the language check-boxes automatically on page refresh from the sessionStorage
     document.addEventListener('DOMContentLoaded', function () {
       const formCheckboxes = document.querySelectorAll('#languageCheckboxes input[type="checkbox"]');
       const savedLanguages = sessionStorage.getItem('languages');
-
       if (savedLanguages !== null) {
         const selectedLanguages = JSON.parse(savedLanguages);
         formCheckboxes.forEach(function (checkbox) {
@@ -566,16 +629,10 @@
       }
     });
 
-    function applyGenreSelection() {
-      const checkboxes = document.querySelectorAll('#genreCheckboxes input[type="checkbox"]:checked');
-      const selectedGenres = Array.from(checkboxes).map(checkbox => checkbox.value);
-      sessionStorage.setItem('genres', JSON.stringify(selectedGenres));
-    }
-
+    // Check all the genre check-boxes automatically on page refresh from the sessionStorage
     document.addEventListener('DOMContentLoaded', function () {
       const formCheckboxes = document.querySelectorAll('#genreCheckboxes input[type="checkbox"]');
       const savedGenres = sessionStorage.getItem('genres');
-
       if (savedGenres !== null) {
         const selectedGenres = JSON.parse(savedGenres);
         formCheckboxes.forEach(function (checkbox) {
@@ -586,16 +643,10 @@
       }
     });
 
-    function applyStatusSelection() {
-      const checkboxes = document.querySelectorAll('#statusCheckboxes input[type="checkbox"]:checked');
-      const selectedStatuses = Array.from(checkboxes).map(checkbox => checkbox.value);
-      sessionStorage.setItem('statuses', JSON.stringify(selectedStatuses));
-    }
-
+    // Check all the status check-boxes automatically on page refresh from the sessionStorage
     document.addEventListener('DOMContentLoaded', function () {
       const formCheckboxes = document.querySelectorAll('#statusCheckboxes input[type="checkbox"]');
       const savedStatuses = sessionStorage.getItem('statuses');
-
       if (savedStatuses !== null) {
         const selectedStatuses = JSON.parse(savedStatuses);
         formCheckboxes.forEach(function (checkbox) {

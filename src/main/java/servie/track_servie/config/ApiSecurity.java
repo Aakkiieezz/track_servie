@@ -1,69 +1,51 @@
 package servie.track_servie.config;
 
 import lombok.RequiredArgsConstructor;
-import servie.track_servie.filters.AuthenticationTokenFilter;
-// import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import servie.track_servie.service.CustomUserDetailsService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-// import org.springframework.core.Ordered;
-import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
-import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.config.annotation.web.configurers.LogoutConfigurer;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-// import org.springframework.web.cors.CorsConfiguration;
-// import org.springframework.web.cors.CorsConfigurationSource;
-// import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-// import org.springframework.web.filter.CorsFilter;
-// import java.util.Arrays;
-// import java.util.List;
 
 @Configuration
 @EnableWebSecurity
 @RequiredArgsConstructor
 public class ApiSecurity
 {
-    private final AuthenticationTokenFilter jwtAuthFilter;
-    private final AuthenticationProvider authenticationProvider;
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
+	{
+		http.authorizeHttpRequests(reuest -> reuest.requestMatchers("src/main/resources/static/css/mystyles.css", "/track-servie/auth/register", "/track-servie/auth/login").permitAll().anyRequest().authenticated())
+				.formLogin(form -> form.loginPage("/track-servie/auth/login")
+						.defaultSuccessUrl("/track-servie/servies", true).permitAll())
+				.logout(LogoutConfigurer::permitAll);
+		return http.build();
+	}
 
-    @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception
-    {
-        http.csrf().disable().authorizeHttpRequests(auth ->
-        {
-            auth.requestMatchers("/track-servie/**").permitAll();
-            auth.anyRequest().authenticated();
-        }).sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and().authenticationProvider(authenticationProvider).addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
-        return http.build();
-    }
-    // @Bean
-    // public FilterRegistrationBean corsFilter()
-    // {
-    //     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    //     CorsConfiguration config = new CorsConfiguration();
-    //     config.setAllowCredentials(true);
-    //     config.setAllowedOriginPatterns(Arrays.asList("*"));
-    //     config.setAllowedMethods(Arrays.asList("POST", "OPTIONS", "GET", "DELETE", "PUT"));
-    //     config.setAllowedHeaders(Arrays.asList("X-Requested-With", "Origin", "Content-Type", "Accept", "Authorization", "X-USER-ID"));
-    //     source.registerCorsConfiguration("/**", config);
-    //     FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-    //     bean.setOrder(Ordered.HIGHEST_PRECEDENCE);
-    //     return bean;
-    // }
-    // @Bean
-    // CorsConfigurationSource corsConfigurationSource()
-    // {
-    //     CorsConfiguration configuration = new CorsConfiguration();
-    //     configuration.setAllowedOrigins(List.of("*"));
-    //     // configuration.setAllowedOrigins(Arrays.asList("http://localhost:8080"));
-    //     configuration.setAllowedMethods(List.of("*"));
-    //     // configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    //     configuration.setAllowedHeaders(List.of("*"));
-    //     // configuration.setAllowedHeaders(Arrays.asList("*"));
-    //     configuration.setAllowCredentials(true);
-    //     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    //     source.registerCorsConfiguration("/**", configuration);
-    //     return source;
-    // }
+	@Bean
+	public PasswordEncoder passwordEncoder()
+	{
+		return new BCryptPasswordEncoder();
+	}
+
+	@Bean
+	public UserDetailsService userDetailsService()
+	{
+		return new CustomUserDetailsService();
+	}
+
+	@Bean
+	public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception
+	{
+		AuthenticationManagerBuilder authenticationManagerBuilder = http.getSharedObject(AuthenticationManagerBuilder.class);
+		authenticationManagerBuilder.userDetailsService(userDetailsService()).passwordEncoder(passwordEncoder());
+		return authenticationManagerBuilder.build();
+	}
 }

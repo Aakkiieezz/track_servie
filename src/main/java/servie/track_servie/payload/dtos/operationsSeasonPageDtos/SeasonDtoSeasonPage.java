@@ -10,12 +10,14 @@ public class SeasonDtoSeasonPage
 	private String id;
 	private String name;
 	private Integer tmdbId;
-	private Integer episodeCount;
-	private Integer episodesWatched;
-	private Boolean watched;
+	private int episodeCount;
+	private int episodesWatched;
+	private boolean watched;
 	private String overview;
 	private String posterPath;
-	private Integer seasonNo;
+	private int seasonNo;
+	private int totalRuntime;
+	private int watchedRuntime;
 	private LocalDateTime lastModified;
 	private List<EpisodeDtoSeasonPage> episodes;
 }

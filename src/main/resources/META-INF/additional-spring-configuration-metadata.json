@@ -1,29 +1,49 @@
 {
-  "properties": [
-    {
-      "name": "tmdb.api.key",
-      "type": "java.lang.String",
-      "description": "TMDB api's user token"
-    },
-    {
-      "name": "app.jwt-secret",
-      "type": "java.lang.String",
-      "description": "For creating JWT token"
-    },
-    {
-      "name": "user-id",
-      "type": "java.lang.String",
-      "description": "Temporary user id"
-    },
-    {
-      "name": "spring.thymeleaf.servlet.enabled",
-      "type": "java.lang.String",
-      "description": "A description for 'spring.thymeleaf.servlet.enabled'"
-    },
-    {
-      "name": "home-page.page.size",
-      "type": "java.lang.String",
-      "description": "A description for 'home-page.page.size'"
-    }
-  ]
+ "properties": [
+  {
+   "name": "tmdb.api.key",
+   "type": "java.lang.String",
+   "description": "TMDB api's user token"
+  },
+  {
+   "name": "app.jwt-secret",
+   "type": "java.lang.String",
+   "description": "For creating JWT token"
+  },
+  {
+   "name": "spring.thymeleaf.servlet.enabled",
+   "type": "java.lang.String",
+   "description": "A description for 'spring.thymeleaf.servlet.enabled'"
+  },
+  {
+   "name": "home-page.page.size",
+   "type": "java.lang.String",
+   "description": "A description for 'home-page.page.size'"
+  },
+  {
+   "name": "spring.datasource.ssh.host",
+   "type": "java.lang.String",
+   "description": "A description for 'spring.datasource.ssh.host'"
+  },
+  {
+   "name": "spring.datasource.ssh.enabled",
+   "type": "java.lang.String",
+   "description": "A description for 'spring.datasource.ssh.enabled'"
+  },
+  {
+   "name": "spring.datasource.ssh.port",
+   "type": "java.lang.String",
+   "description": "A description for 'spring.datasource.ssh.port'"
+  },
+  {
+   "name": "spring.datasource.ssh.username",
+   "type": "java.lang.String",
+   "description": "A description for 'spring.datasource.ssh.username'"
+  },
+  {
+   "name": "spring.datasource.ssh.local-port",
+   "type": "java.lang.String",
+   "description": "A description for 'spring.datasource.ssh.local-port'"
+  }
+ ]
 }

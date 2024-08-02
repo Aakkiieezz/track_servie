@@ -2,7 +2,8 @@ package servie.track_servie.controller;
 
 import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,6 +13,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.util.UriComponentsBuilder;
 import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsSeasonPageDtos.SeasonDtoSeasonPage;
+import servie.track_servie.repository.UserRepository;
 import servie.track_servie.service.EpisodeService;
 import servie.track_servie.service.SeasonService;
 
@@ -23,13 +25,14 @@ public class SeasonController
 	SeasonService seasonService;
 	@Autowired
 	EpisodeService episodeService;
-	@Value("${user-id}")
-	private Integer userId;
+	@Autowired
+	private UserRepository userRepository;
 
 	// Returns SeasonPage containing selected Season from SeriesPage
 	@GetMapping("")
-	public String getSeason(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, Model model)
+	public String getSeason(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, Model model, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		SeasonDtoSeasonPage season = seasonService.getSeason(userId, tmdbId, seasonNo);
 		model.addAttribute("season", season);
 		return "SeasonPage";
@@ -37,16 +40,18 @@ public class SeasonController
 
 	// Toggles the watch button of Season located on SeriesPage
 	@GetMapping("toggleback")
-	public String toggleSeasonWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo)
+	public String toggleSeasonWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		seasonService.toggleSeasonWatch(userId, tmdbId, seasonNo);
 		return "redirect:/track-servie/servies/"+tmdbId+"?type=tv";
 	}
 
 	// Toggles the watch button of Season located on SeasonPage
 	@GetMapping("toggle")
-	public String toggleSeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo)
+	public String toggleSeWatch(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		seasonService.toggleSeasonWatch(userId, tmdbId, seasonNo);
 		return "redirect:/track-servie/servies/"+tmdbId+"/Season/"+seasonNo;
 	}
@@ -57,8 +62,10 @@ public class SeasonController
 			@PathVariable Integer seasonNo,
 			@RequestParam(value = "watch", required = true) String watch,
 			@RequestParam(value = "fromEpisodeNumber", required = true) String fromEpisodeNumber,
-			@RequestParam(value = "toEpisodeNumber", required = true) String toEpisodeNumber)
+			@RequestParam(value = "toEpisodeNumber", required = true) String toEpisodeNumber,
+			@AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		Integer episodeNoInt = Integer.parseInt(fromEpisodeNumber);
 		Integer toEpisodeNumberInt = Integer.parseInt(toEpisodeNumber);
 		boolean watchValue = Boolean.parseBoolean(watch);
@@ -79,8 +86,9 @@ public class SeasonController
 
 	// Redirects to SeasonPage with changed Season Poster
 	@GetMapping("posterChange")
-	public String changeImage(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
+	public String changeImage(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		seasonService.changeImage(userId, tmdbId, seasonNo, filePath);
 		// return "redirect:/track-servie/servies/"+tmdbId;
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("redirect:/track-servie/servies/{tmdbId}")

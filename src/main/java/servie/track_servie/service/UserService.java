@@ -1,8 +1,8 @@
 package servie.track_servie.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import lombok.NonNull;
 import servie.track_servie.entity.User;
 import servie.track_servie.repository.UserRepository;
 
@@ -11,9 +11,18 @@ public class UserService
 {
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
-	public User register(@NonNull User user)
+	public void register(User user)
 	{
-		return userRepository.save(user);
+		user.setRole("USER");
+		user.setPassword(passwordEncoder.encode(user.getPassword()));
+		userRepository.save(user);
+	}
+
+	public User findByUsername(String name)
+	{
+		return userRepository.findByEmail(name).orElse(null);
 	}
 }

@@ -80,6 +80,11 @@ public class Series extends Servie
 	@JsonProperty("origin_country")
 	private Set<String> originCountry;
 	// ---------------------------------------------------------------
+	// NO USAGE
+	// @Formula(value = "(SELECT SUM(ep.runtime) FROM episode AS ep"
+	// 		+" WHERE ep.tmdb_id = tmdb_id)")
+	// private int totalRuntime;
+	// ---------------------------------------------------------------
 	// TO THINK IN FUTURE
 	// List<Integer> episode_run_time // not required
 	// List<String> languages         // not required

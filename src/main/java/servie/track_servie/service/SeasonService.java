@@ -70,6 +70,7 @@ public class SeasonService
 
 	public SeasonDtoSeasonPage getSeason(@NonNull Integer userId, Integer tmdbId, Integer seasonNo)
 	{
+		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
 		// Season season = seasonRepository.findByTmdbIdAndSeasonNo(tmdbId, seasonNo);
 		Series series = seriesRepository.findById(new ServieKey("tv", tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Series", "TmdbId", tmdbId.toString()));
 		Season season = seasonRepository.findBySeriesAndSeasonNo(series, seasonNo);
@@ -78,11 +79,10 @@ public class SeasonService
 		seasonDto.setTmdbId(tmdbId);
 		// -------------------------
 		// >>> Very bad code :
-		List<EpisodeDtoSeasonPage> episodesList = userEpisodeDataRepository.getEpisodesForSeasonPage(tmdbId, seasonNo);
+		List<EpisodeDtoSeasonPage> episodesList = userEpisodeDataRepository.getEpisodesForSeasonPage(user, tmdbId, seasonNo);
 		seasonDto.setEpisodes(episodesList);
 		// -------------------------
 		// >>> Very bad code :
-		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
 		Servie servie = servieRepository.findById(new ServieKey("tv", tmdbId)).orElseGet(() -> servieService.addServie("tv", tmdbId));
 		UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElse(new UserServieData(user, servie));
 		Optional<UserSeasonData> userSeasonDataOptional = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNo));
@@ -91,21 +91,26 @@ public class SeasonService
 			UserSeasonData userSeasonData = userSeasonDataOptional.get();
 			if(userSeasonData.getSeasonNo()>0)
 			{
+				// totalWatchedRuntime
+				seasonDto.setWatchedRuntime(userSeasonData.getTotalWatchedRuntime());
 				seasonDto.setEpisodesWatched(userSeasonData.getEpisodesWatched());
 				seasonDto.setWatched(userSeasonData.getWatched());
 			}
 		}
-		else
-		{
-			seasonDto.setEpisodesWatched(0);
-			seasonDto.setWatched(false);
-		}
+		// else // not watched this season at all
+		// {
+		// seasonDto.setEpisodesWatched(0);
+		// seasonDto.setWatched(false);
+		// }
 		// -------------------------
 		// >>> Very bad code
 		seasonDto.setEpisodes(seasonDto.getEpisodes().stream()
 				.sorted(Comparator.comparing(EpisodeDtoSeasonPage::getEpisodeNo))
 				.collect(Collectors.toList()));
 		// -------------------------
+		// System.out.println("Runtime = "+seasonDto.getTotalRuntime()+" Watched Runtime = "+seasonDto.getTotalWatchedRuntime());
+		// seasonDto.setTotalRuntime();
+		// seasonDto.setTotalWatchedRuntime();
 		return seasonDto;
 	}
 

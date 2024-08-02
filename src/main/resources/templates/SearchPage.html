@@ -49,8 +49,10 @@
           <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
             alt="Poster Unavailable" />
         </a>
-        <div class="buttons-container">
-          <strong th:text="${servie.title}"></strong>
+        <div class="buttons-container rounded">
+          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=movie'}">
+            <strong th:text="${servie.title}"></strong>
+          </a>
           <br>
           <span th:text="${#temporals.year(servie.releaseDate)}"></span>
           <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
@@ -93,8 +95,10 @@
           <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}" />
         </a>
         <!-- <div th:if="${servie.found}" class="buttons-container"> -->
-        <div class="buttons-container">
-          <strong th:text="${servie.title}"></strong>
+        <div class="buttons-container rounded">
+          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=tv'}">
+            <strong th:text="${servie.title}"></strong>
+          </a>
           <br>
           <span th:text="${#temporals.year(servie.releaseDate)}"></span>
           <br />

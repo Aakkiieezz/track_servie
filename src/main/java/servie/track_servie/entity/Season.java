@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import org.hibernate.annotations.Formula;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -73,7 +74,13 @@ public class Season
 				joinColumns = @JoinColumn(name = "season_id"),
 				inverseJoinColumns = @JoinColumn(name = "credit_id"))
 	private Set<SeasonCast> seasonCast;
+	// ---------------------------------------------------------------
+	@Formula(value = "(SELECT COALESCE(SUM(ep.runtime), 0) FROM episode AS ep"
+			+" WHERE ep.tmdb_id = tmdb_id"
+			+"   AND ep.season_no = season_no)")
+	private int totalRuntime = 0;
 
+	// ---------------------------------------------------------------
 	@Override
 	public boolean equals(Object o)
 	{

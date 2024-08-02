@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns="http://thymeleaf.com">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 
 <head>
   <!-- Required meta tags -->
@@ -22,21 +22,61 @@
     href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' fill='white' class='bi bi-film' viewBox='0 0 16 16'%3E%3Cpath fill='none' d='M0 0h24v24H0z'/%3E%3Cpath d='M0 1a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H1a1 1 0 0 1-1-1V1zm4 0v6h8V1H4zm8 8H4v6h8V9zM1 1v2h2V1H1zm2 3H1v2h2V4zM1 7v2h2V7H1zm2 3H1v2h2v-2zm-2 3v2h2v-2H1zM15 1h-2v2h2V1zm-2 3v2h2V4h-2zm2 3h-2v2h2V7zm-2 3v2h2v-2h-2zm2 3h-2v2h2v-2z'/%3E%3C/svg%3E">
 
   <title>Login Page</title>
+
+  <!-- Custom CSS for alert area -->
+  <style>
+    .alert-container {
+      height: 50px;
+      margin-bottom: 15px;
+    }
+
+    .alert-container .alert {
+      margin-bottom: 0;
+    }
+
+    @keyframes fadeOut {
+      from {
+        opacity: 1;
+      }
+
+      to {
+        opacity: 0;
+      }
+    }
+
+    .fade-out {
+      animation: fadeOut 1s;
+    }
+  </style>
 </head>
 
 <body>
   <div class="container mt-5">
     <div class="row justify-content-center">
       <div class="col-md-6">
+        <div class="alert-container">
+          <div th:if="${param.success}" class="alert alert-success fade show" role="alert">
+            You are successfully registered. Please use your credentials to log in.
+            <!-- <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
+          </div>
+          <div th:if="${param.error}" class="alert alert-danger fade show" role="alert">
+            Login or Password incorrect !!!
+            <!-- <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
+          </div>
+          <div th:if="${param.logout}" class="alert alert-info fade show" role="alert">
+            You've been logged out.
+            <!-- <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button> -->
+          </div>
+        </div>
         <div class="card">
           <div class="card-header">
             Login
           </div>
           <div class="card-body">
-            <form id="loginForm" th:action="@{/track-servie/auth/login}" method="post" th:object="${loginForm}">
+            <form id="loginForm" th:action="@{/track-servie/auth/login}" method="post">
               <div class="mb-3">
-                <label for="email" class="form-label">Username</label>
-                <input type="email" class="form-control" name="email" th:required="true">
+                <label for="username" class="form-label">Username</label>
+                <input type="username" class="form-control" name="username" th:required="true">
               </div>
               <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
@@ -46,11 +86,37 @@
                 <button type="submit" class="btn btn-primary">Login</button>
               </div>
             </form>
+            <!-- Link to Registration Page -->
+            <div class="text-center mt-3">
+              <p>Don't have an account? <a th:href="@{/track-servie/auth/register}">Register here</a></p>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- Bootstrap JS -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"
+    integrity="sha384-kenU1KFdBIe4zVF0s0G1M5b4hcpxyD9F7jL+W8RRKq2El9mOsCbI4TtwiR5fWR7x"
+    crossorigin="anonymous"></script>
+
+  <!-- JavaScript to auto-dismiss alerts after a few seconds -->
+  <script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+      setTimeout(() => {
+        const alerts = document.querySelectorAll('.alert');
+        alerts.forEach((alert) => {
+          alert.classList.add('fade-out');
+          setTimeout(() => {
+            alert.remove();
+          }, 1000); // Match this with the duration of the fade-out effect in CSS
+        });
+      }, 5000); // 5000ms = 5 seconds
+    });
+  </script>
+
+
 </body>
 
 </html>

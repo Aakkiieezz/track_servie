@@ -17,10 +17,13 @@
   <link rel="stylesheet" href="/src/main/resources/static/css/mystyles.css" th:href="@{/css/mystyles.css}">
 
   <!-- javascript library 'Slick Slider' for corousal effect -->
-  <link rel="stylesheet" type="text/css"
+  <!-- <link rel="stylesheet" type="text/css"
     href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.css" />
   <link rel="stylesheet" type="text/css"
-    href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" />
+    href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick-theme.min.css" /> -->
+
+  <!-- Gave button next and prev -->
+  <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.css" />
 
   <!-- Favicon -->
   <!-- <link rel="icon" href="path/to/favicon.ico" type="image/x-icon"> -->
@@ -57,43 +60,57 @@
           <i class="bi bi-eye-fill"></i>
         </div>
       </a>
+
       <h4>Genres</h4>
       <div class="row row-cols-auto left">
         <div class="col rounded genre" th:each="genre : ${servie.genres}">
           <a th:href="@{'/track-servie/servies?genreIds='+${genre.id}}" th:text="${genre.name}"></a>
         </div>
       </div>
+
       <div th:unless="${#strings.isEmpty(servie.overview)}">
         <h4>Overview</h4>
         <h5 th:text="${servie.tagline}"></h5>
         <p th:text="${servie.overview}"></p>
       </div>
 
+      <br />
+
       <div th:if="${servie.childtype == 'movie'}">
 
-        <div class="container">
+        <h4>Cast</h4>
+        <div class="cast-slider-container">
+          <button class="arrow left-arrow">&lt;</button>
           <div class="cast-slider">
-            <div th:each="castMember : ${servie.cast}">
+            <div class="cast-item" th:each="castMember : ${servie.cast}">
               <div class="cast-image">
-                <a th:href="@{'/track-servie/person/'+${castMember.personId}}">
+                <a th:href="@{'/track-servie/person/' + ${castMember.personId}}">
                   <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original' + ${castMember.profilePath}"
-                    alt="No poster available" width="100" height="150" />
+                    alt="No poster available" />
                 </a>
               </div>
               <p th:text="${castMember.name}"></p>
               <p th:text="${castMember.character}"></p>
             </div>
           </div>
-
-          <div th:unless="${servie.collectionId == null}">
-            <h4>Collection</h4>
-            <h5 th:text="${servie.collectionName}"></h5>
-            <a th:href="@{'/track-servie/servies/movie-collection/'+${servie.collectionId}}">
-              <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.colleactionPosterPath}"
-                alt="Poster Unavailable" />
-            </a>
+          <button class="arrow right-arrow">&gt;</button>
+          <div class="custom-scrollbar">
+            <div class="custom-scrollbar-thumb"></div>
           </div>
         </div>
+
+        <br />
+
+        <div th:unless="${servie.collectionId == null}">
+          <h4>Collection</h4>
+          <h5 th:text="${servie.collectionName}"></h5>
+          <a th:href="@{'/track-servie/servies/movie-collection/'+${servie.collectionId}}">
+            <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.colleactionPosterPath}"
+              alt="Poster Unavailable" style="width: 200px; height: 300px;" />
+          </a>
+        </div>
+
+
       </div>
 
       <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}"> -->
@@ -106,39 +123,49 @@
         <h3><span th:text="${servie.totalSeasons}"></span> Seasons</h3>
         <div class="row left">
           <div class="col-xxl-2 col-sm-3 col-4 image-container poster" th:each="season : ${servie.seasons}">
-            <div th:if="${season.episodeCount == 0}">
+            <!-- <div th:if="${season.episodeCount == 0}">
               <p th:text="${season.name}+' Coming soon'"></p>
+            </div> -->
+            <!-- <div th:if="${season.episodeCount != 0}"> -->
+
+            <!-- <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${season.posterPath}"
+                alt="No poster available" /> -->
+            <div class="image-season-poster">
+
+              <img class="rounded"
+                th:src="${season.posterPath != null} ? 'https://www.themoviedb.org/t/p/original'+${season.posterPath} : 'https://placehold.co/400x600?text=S'+${season.seasonNo}" />
             </div>
-            <div th:if="${season.episodeCount != 0}">
+            <div class="buttons-container rounded">
               <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNo}}">
-                <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${season.posterPath}"
-                  alt="No poster available" />
+                <strong th:text="${season.name}"> </strong>
               </a>
-              <div class="buttons-container">
-                <td th:text="${season.episodesWatched}+'/'+${season.episodeCount}"></td>
+              <br>
 
-                <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNo}+'/toggleback'}">
-                  <div th:if="${season.watched}">
-                    <i class="bi bi-eye-slash-fill"></i>
-                  </div>
-                  <div th:unless="${season.watched}">
-                    <i class="bi bi-eye-fill"></i>
-                  </div>
-                </a>
-                <div th:if="${season.posterPath != null}">
-                  <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNo}+'/posters'}">
-                    <i class="bi bi-file-image"></i>
-                  </a>
+              <td th:if="${season.episodeCount != 0}" th:text="${season.episodesWatched}+'/'+${season.episodeCount}">
+              </td>
+
+              <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNo}+'/toggleback'}">
+                <div th:if="${season.watched}">
+                  <i class="bi bi-eye-slash-fill"></i>
                 </div>
+                <div th:unless="${season.watched}">
+                  <i class="bi bi-eye-fill"></i>
+                </div>
+              </a>
+              <div th:if="${season.posterPath != null}">
+                <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/Season/'+${season.seasonNo}+'/posters'}">
+                  <i class="bi bi-file-image"></i>
+                </a>
+              </div>
 
-                <div class="progress-bar">
-                  <div class="progress" th:with="progress=((${season.episodesWatched}/${season.episodeCount})*100)"
-                    th:text="${#numbers.formatDecimal(progress, 1, 'DEFAULT', 0, 'DEFAULT')}+' %'"
-                    th:style="'width:' + ${progress} + '%;'">
-                  </div>
+              <div th:if="${season.episodeCount != 0}" class="progress-bar">
+                <div class="progress" th:with="progress=((${season.episodesWatched}/${season.episodeCount})*100)"
+                  th:text="${#numbers.formatDecimal(progress, 1, 'DEFAULT', 0, 'DEFAULT')}+' %'"
+                  th:style="'width:' + ${progress} + '%;'">
                 </div>
               </div>
             </div>
+            <!-- </div> -->
             <div>
               <strong th:text="${season.name}"> </strong>
             </div>
@@ -147,35 +174,84 @@
       </div>
     </div>
   </div>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"
+    integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js"></script>
+  <!-- https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.9.0/slick.min.js -->
 
   <script>
-
-
-
     $(document).ready(function () {
-      $('.cast-slider').slick({
-        slidesToShow: 7, // Display 10 slides per view
-        slidesToScroll: 5, // Scroll 10 slides at a time
+      const slider = $('.cast-slider');
+      const scrollbarThumb = $('.custom-scrollbar-thumb');
+      let scrollPosition = 0;
+
+      slider.slick({
+        slidesToShow: 10, // Display 10 slides per view
+        slidesToScroll: 1, // Scroll 1 slide at a time, we will handle this manually
         infinite: false, // Disable infinite scrolling
-        draggable: true,
         swipeToSlide: true,
-        variableWidth: true,
-        responsive: [
-          {
-            breakpoint: 768,
-            settings: {
-              slidesToShow: 3, // Adjust for smaller screens if needed
-              slidesToScroll: 3 // Adjust scrolling for smaller screens if needed
-            }
+        variableWidth: false,
+        prevArrow: $('.left-arrow'), // Custom left arrow
+        nextArrow: $('.right-arrow') // Custom right arrow
+      });
+
+      // Calculate the maximum scroll position and the width of the thumb
+      const updateScrollMetrics = () => {
+        const trackWidth = slider.find('.slick-track').width();
+        const visibleWidth = slider.width();
+        const scrollbarWidth = $('.custom-scrollbar').width();
+        const maxScroll = trackWidth - visibleWidth;
+        const thumbWidth = (visibleWidth / trackWidth) * scrollbarWidth;
+        scrollbarThumb.width(thumbWidth);
+
+        return { maxScroll, scrollbarWidth, thumbWidth };
+      };
+
+      let { maxScroll, scrollbarWidth, thumbWidth } = updateScrollMetrics();
+
+      slider.on('wheel', (e) => {
+        e.preventDefault();
+        const deltaX = e.originalEvent.deltaX;
+
+        if (Math.abs(deltaX) > 0) {
+          scrollPosition -= deltaX; // Invert the scroll direction
+
+          // Ensure the scroll position is within bounds
+          if (scrollPosition < 0) {
+            scrollPosition = 0;
+          } else if (scrollPosition > maxScroll) {
+            scrollPosition = maxScroll;
           }
-          // Add more breakpoints as needed
-        ]
+
+          // Apply the new scroll position
+          slider.slick('slickSetOption', 'swipe', false, false);
+          slider.slick('setPosition');
+          slider.find('.slick-track').css('transform', `translateX(-${scrollPosition}px)`); // Note the '-' sign
+
+          // Move the scrollbar thumb
+          const scrollPercent = scrollPosition / maxScroll;
+          const thumbPosition = scrollPercent * (scrollbarWidth - thumbWidth);
+          scrollbarThumb.css('transform', `translateX(${thumbPosition}px)`);
+        }
+      });
+
+      // Re-enable swipe after a short delay
+      slider.on('afterChange', () => {
+        setTimeout(() => {
+          slider.slick('slickSetOption', 'swipe', true, false);
+        }, 100);
+      });
+
+      // Update metrics on window resize
+      $(window).resize(() => {
+        ({ maxScroll, scrollbarWidth, thumbWidth } = updateScrollMetrics());
       });
     });
-
   </script>
+
+
+
+
 
 
 </body>

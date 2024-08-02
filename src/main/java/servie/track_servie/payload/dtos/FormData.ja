@@ -1,0 +1,17 @@
+package servie.track_servie.payload.dtos;
+
+import java.util.List;
+
+public class FormData
+{
+	private String type;
+	private String sortBy;
+	private String sortDir;
+	private List<String> genreIds;
+	private List<String> languages;
+	private List<String> statuses;
+	private String startYear;
+	private String endYear;
+	private String watched;
+	// Getters and Setters
+}

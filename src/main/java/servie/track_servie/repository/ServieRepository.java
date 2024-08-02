@@ -74,10 +74,17 @@ public interface ServieRepository extends JpaRepository<Servie, ServieKey>
 			+" CASE WHEN usd.backdropPath IS NULL THEN s.backdropPath ELSE usd.backdropPath END,"
 			+" s.lastModified, movie.releaseDate, movie.runtime, t.totalSeasons, t.totalEpisodes, usd.episodesWatched, usd.completed)"
 			+" FROM Servie AS s"
-			+" LEFT JOIN Movie AS movie ON movie.childtype = s.childtype AND s.tmdbId = movie.tmdbId"
-			+" LEFT JOIN Series AS t ON s.childtype = t.childtype AND s.tmdbId = t.tmdbId"
-			+" LEFT JOIN UserServieData AS usd ON usd.servie = s AND usd.user = :user"
-			+" WHERE s.childtype = :childtype AND s.tmdbId = :tmdbId")
+			+" LEFT JOIN Movie AS movie"
+			+"   ON movie.childtype = s.childtype"
+			+"     AND s.tmdbId = movie.tmdbId"
+			+" LEFT JOIN Series AS t"
+			+"   ON s.childtype = t.childtype"
+			+"     AND s.tmdbId = t.tmdbId"
+			+" LEFT JOIN UserServieData AS usd"
+			+"   ON usd.servie = s"
+			+"     AND usd.user = :user"
+			+" WHERE s.childtype = :childtype"
+			+"   AND s.tmdbId = :tmdbId")
 	Optional<ServieDtoServiePage> getServieForServiePage(@Param("user") User user, @Param("childtype") String childtype, @Param("tmdbId") Integer tmdbId);
 
 	@Query(	nativeQuery = true,

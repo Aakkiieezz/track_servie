@@ -17,17 +17,17 @@ import java.util.stream.Collectors;
 @Service
 public class JwtUserDetailsService implements UserDetailsService
 {
-    @Autowired
-    UserRepository userRepository;
-    @Autowired
-    PermissionRepository permissionRepository;
+	@Autowired
+	UserRepository userRepository;
+	@Autowired
+	PermissionRepository permissionRepository;
 
-    @Override
-    @Transactional
-    public AuthUser loadUserByUsername(String email) throws UsernameNotFoundException
-    {
-        User user = userRepository.findOneByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User Not Found for the email: "+email));
-        List<GrantedAuthority> authorities = user.getRoles().stream().flatMap(role -> role.getPermissions().stream()).map(permission -> new SimpleGrantedAuthority(permission.getName())).collect(Collectors.toList());
-        return new AuthUser(user.getEmail(), user.getPassword(), authorities);
-    }
+	@Override
+	@Transactional
+	public AuthUser loadUserByUsername(String email) throws UsernameNotFoundException
+	{
+		User user = userRepository.findByEmail(email).orElseThrow(() -> new UsernameNotFoundException("User Not Found for the email: "+email));
+		List<GrantedAuthority> authorities = user.getRoles().stream().flatMap(role -> role.getPermissions().stream()).map(permission -> new SimpleGrantedAuthority(permission.getName())).collect(Collectors.toList());
+		return new AuthUser(user.getEmail(), user.getPassword(), authorities);
+	}
 }

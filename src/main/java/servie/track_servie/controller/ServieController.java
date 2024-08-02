@@ -1,14 +1,18 @@
 package servie.track_servie.controller;
 
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+// import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,10 +20,12 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import jakarta.servlet.http.HttpServletRequest;
+// import servie.track_servie.payload.dtos.FormData;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ResponseDtoHomePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SearchResultDtoSearchPage;
 import servie.track_servie.payload.dtos.operationsServiePageDtos.ServieDtoServiePage;
+import servie.track_servie.repository.UserRepository;
 import servie.track_servie.service.ServieService;
 
 @Controller
@@ -28,28 +34,46 @@ public class ServieController
 {
 	@Autowired
 	private ServieService servieService;
-	@Value("${user-id}")
-	private Integer userId;
-
-	@GetMapping("login")
-	public String showLoginForm()
-	{
-		return "login";
-	}
+	@Autowired
+	private UserRepository userRepository;
 
 	// Returns HomePage containing all Servies from the database which matches the filter
 	@GetMapping("")
-	public String getServiesByFilter(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", required = false) Boolean watched, @RequestParam(value = "genreIds", required = false) List<Integer> genreIds, @RequestParam(value = "languages", required = false) List<String> languages, @RequestParam(value = "statuses", required = false) List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, Model model)
+	public String getServiesByFilter(
+			@RequestParam(value = "type", defaultValue = "") String type,
+			@RequestParam(value = "watched", required = false) Boolean watched,
+			@RequestParam(value = "genreIds", required = false) String genreIds,
+			@RequestParam(value = "languages", required = false) String languages,
+			@RequestParam(value = "statuses", required = false) String statuses,
+			@RequestParam(value = "startYear", defaultValue = "") Integer startYear,
+			@RequestParam(value = "endYear", defaultValue = "") Integer endYear,
+			@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
+			@RequestParam(value = "sortBy", defaultValue = "title") String sortBy,
+			@RequestParam(value = "sortDir", defaultValue = "asc") String sortDir,
+			// @ModelAttribute FormData formData,
+			@AuthenticationPrincipal UserDetails userDetails,
+			Model model)
 	{
-		ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, watched, genreIds, languages, statuses, startYear, endYear, pageNumber, sortBy, sortDir);
+		List<Integer> genreIdList = null;
+		if(genreIds!=null)
+			genreIdList = Arrays.stream(genreIds.split(",")).map(Integer::parseInt).collect(Collectors.toList());
+		List<String> LangList = null;
+		if(languages!=null)
+			LangList = Arrays.stream(languages.split(",")).collect(Collectors.toList());
+		List<String> StatusList = null;
+		if(statuses!=null)
+			StatusList = Arrays.stream(statuses.split(",")).collect(Collectors.toList());
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
+		ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, watched, genreIdList, LangList, StatusList, startYear, endYear, pageNumber, sortBy, sortDir);
 		model.addAttribute("response", response);
 		return "HomePage";
 	}
 
 	// Returns HomePage containing all Servies from the database which matches the filter
 	@GetMapping("js")
-	public ResponseEntity<ResponseDtoHomePage> getServiesByFilterJs(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", required = false) Boolean watched, @RequestParam(value = "genreIds", required = false) List<Integer> genreIds, @RequestParam(value = "languages", required = false) List<String> languages, @RequestParam(value = "statuses", required = false) List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir)
+	public ResponseEntity<ResponseDtoHomePage> getServiesByFilterJs(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", required = false) Boolean watched, @RequestParam(value = "genreIds", required = false) List<Integer> genreIds, @RequestParam(value = "languages", required = false) List<String> languages, @RequestParam(value = "statuses", required = false) List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, watched, genreIds, languages, statuses, startYear, endYear, pageNumber, sortBy, sortDir);
 		// model.addAttribute("response", response);
 		// return "HomePage";
@@ -57,8 +81,9 @@ public class ServieController
 	}
 
 	@GetMapping("watchlist")
-	public String getServiesForWatchList(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", required = false) Boolean watched, @RequestParam(value = "genreIds", required = false) List<Integer> genreIds, @RequestParam(value = "languages", required = false) List<String> languages, @RequestParam(value = "statuses", required = false) List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, Model model)
+	public String getServiesForWatchList(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", required = false) Boolean watched, @RequestParam(value = "genreIds", required = false) List<Integer> genreIds, @RequestParam(value = "languages", required = false) List<String> languages, @RequestParam(value = "statuses", required = false) List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, Model model, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		ResponseDtoHomePage response = servieService.getServiesForWatchList(userId, pageNumber, sortBy, sortDir);
 		model.addAttribute("response", response);
 		return "HomePage";
@@ -69,8 +94,9 @@ public class ServieController
 	public String searchServies(@RequestParam(value = "type", required = true) String type,
 			@RequestParam(value = "query", required = true) String servieName,
 			@RequestParam(value = "year", required = false) Integer year,
-			@RequestParam(value = "pageNumber", defaultValue = "1") int pageNumber, Model model, HttpServletRequest request)
+			@RequestParam(value = "pageNumber", defaultValue = "1") int pageNumber, Model model, HttpServletRequest request, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		SearchResultDtoSearchPage response = servieService.searchServies(userId, type, servieName, year, pageNumber);
 		model.addAttribute("response", response);
 		model.addAttribute("query", servieName);
@@ -80,8 +106,9 @@ public class ServieController
 
 	// Returns SeriesPage containing selected Series from HomePage
 	@GetMapping("{tmdbId}")
-	public String getServie(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, Model model)
+	public String getServie(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, Model model, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		ServieDtoServiePage servie = servieService.getServie(userId, type, tmdbId);
 		model.addAttribute("servie", servie);
 		return "ServiePage";
@@ -113,8 +140,9 @@ public class ServieController
 	// Toggle 1 - Hyperlink
 	// Toggles the watch button of Series located on HomePage
 	@GetMapping("{tmdbId}/toggleback")
-	public String toggleSeriesWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type)
+	public String toggleSeriesWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		servieService.toggleServieWatch(userId, type, tmdbId);
 		// Albummm album = albumService.getFirstFalse();
 		// album.setDone(true);
@@ -132,8 +160,9 @@ public class ServieController
 	// Toggle 2 - Javascript/AJAX
 	@PostMapping("js_toggleback")
 	@ResponseBody
-	public Map<String, Object> updateWatched(@RequestBody Map<String, Object> payload)
+	public Map<String, Object> updateWatched(@RequestBody Map<String, Object> payload, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		Integer tmdbId = Integer.parseInt((String) payload.get("tmdbId"));
 		String childtype = (String) payload.get("childtype");
 		servieService.toggleServieWatch(userId, childtype, tmdbId);
@@ -142,8 +171,9 @@ public class ServieController
 
 	// Toggles the watch button of Series located on SeriesPage
 	@GetMapping("{tmdbId}/toggle")
-	public String toggleSerWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type)
+	public String toggleSerWatch(@PathVariable Integer tmdbId, @RequestParam(value = "type", required = true) String type, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		servieService.toggleServieWatch(userId, type, tmdbId);
 		return "redirect:/track-servie/servies/"+tmdbId+"?type="+type;
 	}
@@ -160,8 +190,9 @@ public class ServieController
 
 	// Redirects to SeriesPage with changed Series Poster
 	@GetMapping("{tmdbId}/backdropChange")
-	public String changeBackdrop(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
+	public String changeBackdrop(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		servieService.changeBackdrop(userId, type, tmdbId, filePath);
 		return "redirect:/track-servie/servies/"+tmdbId+"?type="+type;
 	}
@@ -179,8 +210,9 @@ public class ServieController
 
 	// Redirects to SeriesPage with changed Series Poster
 	@GetMapping("{tmdbId}/posterChange")
-	public String changePoster(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
+	public String changePoster(@RequestParam(value = "type", required = true) String type, @PathVariable Integer tmdbId, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model, @AuthenticationPrincipal UserDetails userDetails)
 	{
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		servieService.changePoster(userId, type, tmdbId, filePath);
 		return "redirect:/track-servie/servies"; // ??? why can't we return the HomePage directly instead
 	}

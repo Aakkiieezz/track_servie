@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import servie.track_servie.entity.User;
 import servie.track_servie.entity.UserEpisodeData;
 import servie.track_servie.entity.UserSeasonData;
 import servie.track_servie.entity.UserServieData;
@@ -43,10 +44,10 @@ public interface UserEpisodeDataRepository extends JpaRepository<UserEpisodeData
 			+"   ON ued.episodeNo = episode.episodeNo"
 			+"     AND ued.userSeasonData.seasonNo = episode.seasonNo"
 			+"     AND ued.userSeasonData.userServieData.servie.tmdbId = episode.season.series.tmdbId"
-			// +"   AND (:user IS NULL OR ued.userSeasonData.userServieData.user = :user)"
+			+"     AND (:user IS NULL OR ued.userSeasonData.userServieData.user = :user)"
 			+" WHERE episode.season.series.tmdbId = :tmdbId"
 			+"   AND episode.seasonNo = :seasonNo"
 			// +"   AND ued.userSeasonData.userServieData.user = :user"
 			+"")
-	List<EpisodeDtoSeasonPage> getEpisodesForSeasonPage(Integer tmdbId, Integer seasonNo);
+	List<EpisodeDtoSeasonPage> getEpisodesForSeasonPage(User user, Integer tmdbId, Integer seasonNo);
 }

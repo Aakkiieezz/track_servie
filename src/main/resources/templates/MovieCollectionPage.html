@@ -98,18 +98,15 @@
         <p th:text="${movieCollection.overview}"></p>
       </div>
 
-
       <div>
-
         <div class="row left">
           <div class="col-xxl-2 col-sm-3 col-4 image-container poster" th:each="movie : ${movieCollection.movies}">
-
-            <a th:href="@{'/track-servie/servies/'+${movie.tmdbId}+'?type=movie'}">
-              <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${movie.posterPath}"
-                alt="Poster Unavailable" />
-            </a>
-            <div class="buttons-container">
-              <strong th:text="${movie.title}"></strong>
+            <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${movie.posterPath}"
+              alt="Poster Unavailable" />
+            <div class="buttons-container rounded">
+              <a th:href="@{'/track-servie/servies/'+${movie.tmdbId}+'?type=movie'}">
+                <strong th:text="${movie.title}"></strong>
+              </a>
               <br>
               <span th:if="${movie.releaseDate != null}" th:text="${#temporals.year(movie.releaseDate)}"></span>
               <!-- hyperlink -->
@@ -140,8 +137,6 @@
             </div>
           </div>
         </div>
-
-
       </div>
     </div>
   </div>

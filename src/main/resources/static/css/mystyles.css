@@ -141,24 +141,98 @@ nav {
  padding: 2px;
 }
 
-.cast-images {
- text-align: center;
-}
-
-.cast-image {
- display: inline-block;
- margin: 10px;
+.cast-slider-container {
+ position: relative;
+ display: flex;
+ align-items: center;
+ width: 100%;
+ overflow: hidden;
 }
 
 .cast-slider {
- overflow-x: scroll;
- white-space: nowrap;
- scrollbar-width: thin;
- scrollbar-color: #888888 #f0f0f0;
+ display: flex; /* Align children in a row */
+ overflow-x: auto; /* Enable horizontal scrolling */
+ white-space: nowrap; /* Prevent wrapping of child elements */
+ /* padding: 50px; Optional: add padding if needed */
+ /* border: 1px solid #686666; Optional: for visual debugging */
+ scroll-behavior: smooth; /* Enable smooth scrolling */
 }
 
 .cast-item {
- display: inline-block;
- vertical-align: top;
- white-space: normal;
+ display: inline-block; /* Make each item inline and block level */
+ flex-direction: column; /* Arrange children vertically */
+ align-items: center; /* Center items horizontally */
+ justify-content: center; /* Center items vertically */
+ margin-right: 100px; /* Space between items */
+ /* border: 1px solid #f70101; Optional: for visual debugging */
+ text-align: center; /* Center text */
+}
+
+.cast-image img {
+ display: block; /* Remove bottom space */
+ width: 100px; /* Fixed width for images */
+ height: 150px; /* Fixed height for images */
+ /* border: 1px solid #0af302; Optional: for visual debugging */
+ margin: 0 auto; /* Center the image horizontally */
+}
+
+.arrow {
+ background-color: #fff;
+ border: 1px solid #ccc;
+ cursor: pointer;
+ padding: 10px;
+ position: absolute;
+ top: 50%;
+ transform: translateY(-50%);
+ z-index: 1;
+ font-size: 18px; /* Ensure arrows are visible */
+ color: #000; /* Arrow color */
+}
+
+.left-arrow {
+ left: 0;
+}
+
+.right-arrow {
+ right: 0;
+}
+
+.custom-scrollbar {
+ width: 100%;
+ height: 10px;
+ background-color: #ccc;
+ position: absolute;
+ bottom: 0;
+ left: 0;
+}
+
+.custom-scrollbar-thumb {
+ height: 100%;
+ background-color: #888;
+ width: 0;
+ transform: translateX(0);
+ transition: transform 0.1s;
+}
+
+.image-border {
+ border: 1px solid rgb(217, 217, 217);
+ border-radius: 4px; /* If you want to keep the rounded corners */
+}
+
+.image-season-poster {
+ position: relative;
+ width: 100%; /* Adjust this to control the width */
+ padding-top: 158.33%; /* 276/437 * 100% = 63.16% for 276x437 aspect ratio */
+ overflow: hidden;
+ border-radius: 5px; /* Add this if you want rounded corners */
+}
+
+.image-season-poster img {
+ position: absolute;
+ top: 0;
+ left: 0;
+ width: 100%;
+ height: 100%;
+ object-fit: cover; /* This ensures the image covers the entire container */
+ border-radius: 5px; /* Ensure this matches the .image-wrapper for consistent rounded corners */
 }
