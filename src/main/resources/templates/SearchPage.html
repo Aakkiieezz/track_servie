@@ -76,6 +76,10 @@
             <i class="bi bi-file-image"></i>
           </a>
 
+          <a th:href="@{'/track-servie/list/'+${servie.tmdbId}+'?childtype='+${servie.childtype}}">
+            <i class="bi bi-clock-fill"></i>
+          </a>
+
           <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
             onclick="removeServie(this.getAttribute('tmdbId'), this.getAttribute('childtype'))">
             <i class="bi bi-x-circle-fill"></i>
@@ -106,6 +110,10 @@
           </a>
           <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
             <i class="bi bi-file-image"></i>
+          </a>
+
+          <a th:href="@{'/track-servie/list/'+${servie.tmdbId}+'?childtype='+${servie.childtype}}">
+            <i class="bi bi-clock-fill"></i>
           </a>
 
           <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"

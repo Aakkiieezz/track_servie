@@ -1,5 +1,6 @@
 package servie.track_servie.entity;
 
+import java.util.Objects;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
@@ -31,4 +32,21 @@ public class CreatedBy
 	// ---------------------------------------------------------------
 	@ManyToMany(mappedBy = "createdBy")
 	private Set<Series> series;
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if(this==o)
+			return true;
+		if(o==null || getClass()!=o.getClass())
+			return false;
+		CreatedBy createdBy = (CreatedBy) o;
+		return Objects.equals(creditId, createdBy.creditId);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(creditId);
+	}
 }

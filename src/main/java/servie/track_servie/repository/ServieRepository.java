@@ -72,9 +72,9 @@ public interface ServieRepository extends JpaRepository<Servie, ServieKey>
 
 	@Query(value = "SELECT new servie.track_servie.payload.dtos.operationsServiePageDtos.ServieDtoServiePage(s.tmdbId, s.childtype, s.title, s.status, s.tagline, s.overview,"
 			+" CASE WHEN usd.backdropPath IS NULL THEN s.backdropPath ELSE usd.backdropPath END,"
-			+" m.releaseDate, m.runtime, t.totalSeasons, t.totalEpisodes, usd.episodesWatched, usd.completed)"
+			+" s.lastModified, movie.releaseDate, movie.runtime, t.totalSeasons, t.totalEpisodes, usd.episodesWatched, usd.completed)"
 			+" FROM Servie AS s"
-			+" LEFT JOIN Movie AS m ON s.childtype = m.childtype AND s.tmdbId = m.tmdbId"
+			+" LEFT JOIN Movie AS movie ON movie.childtype = s.childtype AND s.tmdbId = movie.tmdbId"
 			+" LEFT JOIN Series AS t ON s.childtype = t.childtype AND s.tmdbId = t.tmdbId"
 			+" LEFT JOIN UserServieData AS usd ON usd.servie = s AND usd.user = :user"
 			+" WHERE s.childtype = :childtype AND s.tmdbId = :tmdbId")
@@ -147,4 +147,13 @@ public interface ServieRepository extends JpaRepository<Servie, ServieKey>
 	Servie findByImdbId(String servieId);
 
 	Servie findByTmdbIdAndChildtype(Integer tmdbId, String childtype);
+
+	@Query(value = "SELECT new servie.track_servie.payload.dtos.operationsHomePageDtos.ServieDtoHomePage(s.imdbId, s.tmdbId, s.childtype, s.title,"
+			+" s.posterPath,"
+			+" m.releaseDate, t.totalEpisodes, t.firstAirDate, t.lastAirDate, 0, true)"
+			+" FROM Servie AS s"
+			+" LEFT JOIN Movie AS m ON m.childtype = s.childtype AND s.tmdbId = m.tmdbId"
+			+" LEFT JOIN Series AS t ON s.childtype = t.childtype AND s.tmdbId = t.tmdbId"
+			+" JOIN WatchList AS w ON w.servie = s")
+	Page<ServieDtoHomePage> getServiesForWatchList(Pageable pageable);
 }

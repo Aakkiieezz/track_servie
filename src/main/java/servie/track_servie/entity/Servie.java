@@ -40,7 +40,7 @@ public class Servie
 	@JsonProperty("imdb_id")
 	private String imdbId;
 	// ---------------------------------------------------------------
-	@Column(name = "title")
+	@Column(name = "title", nullable = false)
 	@JsonAlias({"title", "name"})
 	private String title;
 	// ---------------------------------------------------------------
@@ -95,7 +95,7 @@ public class Servie
 	@JsonAlias({"original_title", "original_name"})
 	private String originalTitle;
 	// ---------------------------------------------------------------
-	@Column(name = "last_modified", columnDefinition = "DATETIME")
+	@Column(name = "last_modified", nullable = false, columnDefinition = "DATETIME")
 	private LocalDateTime lastModified;
 	// ---------------------------------------------------------------
 	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})

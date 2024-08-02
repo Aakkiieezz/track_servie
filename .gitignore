@@ -37,3 +37,4 @@ build/
 
 MasterBkp*
 /user_backups/*
+/backups/*

@@ -1,5 +1,6 @@
 package servie.track_servie.entity;
 
+import java.util.Objects;
 import java.util.Set;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.Column;
@@ -27,4 +28,21 @@ public class SpokenLanguage
 	// ---------------------------------------------------------------
 	@ManyToMany(mappedBy = "spokenLanguages")
 	private Set<Servie> servies;
+
+	@Override
+	public boolean equals(Object o)
+	{
+		if(this==o)
+			return true;
+		if(o==null || getClass()!=o.getClass())
+			return false;
+		SpokenLanguage spokenLanguage = (SpokenLanguage) o;
+		return Objects.equals(iso, spokenLanguage.iso);
+	}
+
+	@Override
+	public int hashCode()
+	{
+		return Objects.hash(iso);
+	}
 }

@@ -30,7 +30,7 @@ public class SeasonController
 	@GetMapping("")
 	public String getSeason(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, Model model)
 	{
-		SeasonDtoSeasonPage season = seasonService.getSeason(tmdbId, seasonNo);
+		SeasonDtoSeasonPage season = seasonService.getSeason(userId, tmdbId, seasonNo);
 		model.addAttribute("season", season);
 		return "SeasonPage";
 	}
@@ -81,7 +81,7 @@ public class SeasonController
 	@GetMapping("posterChange")
 	public String changeImage(@PathVariable Integer tmdbId, @PathVariable Integer seasonNo, @RequestParam(value = "filePath", defaultValue = "") String filePath, Model model)
 	{
-		seasonService.changeImage(tmdbId, seasonNo, filePath);
+		seasonService.changeImage(userId, tmdbId, seasonNo, filePath);
 		// return "redirect:/track-servie/servies/"+tmdbId;
 		UriComponentsBuilder builder = UriComponentsBuilder.fromUriString("redirect:/track-servie/servies/{tmdbId}")
 				.queryParam("type", "tv");

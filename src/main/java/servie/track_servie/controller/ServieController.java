@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -41,6 +42,24 @@ public class ServieController
 	public String getServiesByFilter(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", required = false) Boolean watched, @RequestParam(value = "genreIds", required = false) List<Integer> genreIds, @RequestParam(value = "languages", required = false) List<String> languages, @RequestParam(value = "statuses", required = false) List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, Model model)
 	{
 		ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, watched, genreIds, languages, statuses, startYear, endYear, pageNumber, sortBy, sortDir);
+		model.addAttribute("response", response);
+		return "HomePage";
+	}
+
+	// Returns HomePage containing all Servies from the database which matches the filter
+	@GetMapping("js")
+	public ResponseEntity<ResponseDtoHomePage> getServiesByFilterJs(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", required = false) Boolean watched, @RequestParam(value = "genreIds", required = false) List<Integer> genreIds, @RequestParam(value = "languages", required = false) List<String> languages, @RequestParam(value = "statuses", required = false) List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir)
+	{
+		ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, watched, genreIds, languages, statuses, startYear, endYear, pageNumber, sortBy, sortDir);
+		// model.addAttribute("response", response);
+		// return "HomePage";
+		return ResponseEntity.ok().body(response);
+	}
+
+	@GetMapping("watchlist")
+	public String getServiesForWatchList(@RequestParam(value = "type", defaultValue = "") String type, @RequestParam(value = "watched", required = false) Boolean watched, @RequestParam(value = "genreIds", required = false) List<Integer> genreIds, @RequestParam(value = "languages", required = false) List<String> languages, @RequestParam(value = "statuses", required = false) List<String> statuses, @RequestParam(value = "startYear", defaultValue = "") Integer startYear, @RequestParam(value = "endYear", defaultValue = "") Integer endYear, @RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber, @RequestParam(value = "sortBy", defaultValue = "title") String sortBy, @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir, Model model)
+	{
+		ResponseDtoHomePage response = servieService.getServiesForWatchList(userId, pageNumber, sortBy, sortDir);
 		model.addAttribute("response", response);
 		return "HomePage";
 	}

@@ -36,12 +36,4 @@ public class ServieDtoHomePage
 		this.episodesWatched = episodesWatched;
 		this.completed = completed;
 	}
-	// public ServieDtoHomePage(String imdbId, Integer tmdbId, String childtype, String title, LocalDate releaseDate)
-	// {
-	// 	this.imdbId = imdbId;
-	// 	this.tmdbId = tmdbId;
-	// 	this.childtype = childtype;
-	// 	this.title = title;
-	// 	this.releaseDate = releaseDate;
-	// }
 }

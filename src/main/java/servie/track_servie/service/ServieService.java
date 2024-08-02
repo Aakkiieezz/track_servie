@@ -4,7 +4,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -19,15 +21,18 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
+import jakarta.transaction.Transactional;
+import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ResponseDtoHomePage;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ServieDtoHomePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
 import servie.track_servie.payload.dtos.operationsImage.SeriesPageDtos.SeriesBackdropsDto;
 import servie.track_servie.payload.dtos.operationsImage.SeriesPageDtos.SeriesPostersDto;
+import servie.track_servie.payload.dtos.operationsMovieCollectionPageDtos.MovieDtoMovieCollectionPageDto;
 import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SearchResultDtoSearchPage;
 import servie.track_servie.payload.dtos.operationsSearch.SearchPageDtos.SeriesDtoSearchPage;
 import servie.track_servie.payload.dtos.operationsServiePageDtos.GenreDtoServiePage;
@@ -36,6 +41,7 @@ import servie.track_servie.payload.dtos.operationsServiePageDtos.ServieDtoServie
 import servie.track_servie.payload.primaryKeys.ServieKey;
 import servie.track_servie.payload.primaryKeys.UserSeasonDataKey;
 import servie.track_servie.payload.primaryKeys.UserServieDataKey;
+import servie.track_servie.entity.Audits;
 import servie.track_servie.entity.Episode;
 import servie.track_servie.entity.Genre;
 import servie.track_servie.entity.Movie;
@@ -51,16 +57,21 @@ import servie.track_servie.entity.UserEpisodeData;
 import servie.track_servie.entity.UserSeasonData;
 import servie.track_servie.entity.UserServieData;
 import servie.track_servie.entity.credits.EpisodeCrew;
+import servie.track_servie.entity.credits.MovieCast;
 import servie.track_servie.entity.credits.EpisodeCast;
 import servie.track_servie.entity.credits.MovieCredits;
 import servie.track_servie.entity.credits.SeasonCast;
 import servie.track_servie.entity.credits.SeasonCredits;
+import servie.track_servie.enums.AuditType;
 import servie.track_servie.enums.ServieType;
 import servie.track_servie.exceptions.ResourceNotFoundException;
-import servie.track_servie.repository.CustomServieRepository;
+import servie.track_servie.repository.AuditsRepository;
+import servie.track_servie.repository.CustomRepository;
+import servie.track_servie.repository.EpisodeRepository;
 import servie.track_servie.repository.GenreRepository;
 import servie.track_servie.repository.MovieCollectionRepository;
 import servie.track_servie.repository.MovieRepository;
+import servie.track_servie.repository.SeriesRepository;
 import servie.track_servie.repository.ServieRepository;
 import servie.track_servie.repository.UserEpisodeDataRepository;
 import servie.track_servie.repository.UserRepository;
@@ -75,7 +86,7 @@ public class ServieService
 	@Autowired
 	private ServieRepository servieRepository;
 	@Autowired
-	private CustomServieRepository csri;
+	private CustomRepository csri;
 	@Autowired
 	private GenreRepository genreRepository;
 	@Autowired
@@ -93,13 +104,22 @@ public class ServieService
 	@Autowired
 	private UserRepository userRepository;
 	@Autowired
+	private SeriesRepository seriesRepository;
+	@Autowired
+	private AuditsRepository auditsRepository;
+	@Autowired
+	private EpisodeRepository episodeRepository;
+	@Autowired
 	private GenreUtils genreUtils;
 	@Value("${tmdb.api.key}")
 	private String apiKey;
 	@Value("${home-page.page.size}")
 	private int pageSize;
 	private HttpHeaders headers = new HttpHeaders();
-	private HttpEntity<?> httpEntity = new HttpEntity<>(headers);
+	private HttpEntity<?> httpEntity = new HttpEntity<>(headers, (MultiValueMap<String, String>) null);
+	private Set<EpisodeCast> allEpGuestStars = null;
+	private Set<EpisodeCrew> allEpCrews = null;
+	private Set<SeasonCast> allSeasonCasts = null;
 
 	public Servie addServie(String type, Integer tmdbId)
 	{
@@ -113,12 +133,17 @@ public class ServieService
 
 	private Movie addMovie(Integer tmdbId)
 	{
-		log.info("Adding movie {}", tmdbId);
-		Movie movie = new Movie();
-		ResponseEntity<Movie> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+ServieType.MOVIE.toString()+"/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
+		Audits audits = new Audits(AuditType.INSERTION, "Adding movie", "movie"+tmdbId);
+		auditsRepository.save(audits);
+		HttpMethod httpMethod = Objects.requireNonNull(HttpMethod.GET);
+		ResponseEntity<Movie> movieResponse = restTemplate.exchange(
+				"https://api.themoviedb.org/3/"+ServieType.MOVIE.toString()+"/"+tmdbId+"?api_key="+apiKey,
+				httpMethod,
+				httpEntity,
+				Movie.class);
 		if(movieResponse.getStatusCode()==HttpStatus.OK)
 		{
-			movie = movieResponse.getBody();
+			Movie movie = movieResponse.getBody();
 			if(movie!=null)
 			{
 				movie.setLastModified(LocalDateTime.now());
@@ -129,7 +154,10 @@ public class ServieService
 					movie.setChildtype(ServieType.MOVIE.toString());
 					return movie;
 				}
-				ResponseEntity<MovieCredits> movieCreditsResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"movie"+"/"+tmdbId+"/credits?api_key="+apiKey, HttpMethod.GET, httpEntity, MovieCredits.class);
+				ResponseEntity<MovieCredits> movieCreditsResponse = restTemplate.exchange(
+						"https://api.themoviedb.org/3/"+"movie"+"/"+tmdbId+"/credits?api_key="+apiKey, httpMethod,
+						httpEntity,
+						MovieCredits.class);
 				MovieCredits movieCredits = movieCreditsResponse.getBody();
 				if(movieCredits!=null)
 				{
@@ -138,43 +166,48 @@ public class ServieService
 				}
 				movie.setChildtype(ServieType.MOVIE.toString());
 				movie.setGenres(genreUtils.convertTmdbGenresToTrackServieGenres(movie.getGenres()));
+				audits = new Audits(AuditType.INSERTION, "Movie added successfully", "movie"+tmdbId);
+				auditsRepository.save(audits);
+				return movieRepository.save(movie);
 			}
+			audits = new Audits(AuditType.ERROR, "Error while adding movie, tmdb api was OK, but movie object was null", "movie"+tmdbId);
+			auditsRepository.save(audits);
 		}
-		log.info("    Movie {}, added successfully !!", tmdbId);
-		return movieRepository.save(movie);
+		audits = new Audits(AuditType.ERROR, "Error while adding movie, tmdb api was not OK", "movie"+tmdbId);
+		auditsRepository.save(audits);
+		return null;
 	}
 
 	private void addMovieCollection(Integer collectionId)
 	{
-		log.info("Adding movie collection {}", collectionId);
+		Audits audits = new Audits(AuditType.INSERTION, "Adding movie collection", "movieCollection"+collectionId);
+		auditsRepository.save(audits);
 		MovieCollection movieCollection = new MovieCollection();
-		ResponseEntity<MovieCollection> movieCollectionResponse = restTemplate.exchange("https://api.themoviedb.org/3/collection/"+collectionId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, MovieCollection.class);
+		HttpMethod httpMethod = Objects.requireNonNull(HttpMethod.GET);
+		ResponseEntity<MovieCollection> movieCollectionResponse = restTemplate.exchange("https://api.themoviedb.org/3/collection/"+collectionId+"?api_key="+apiKey, httpMethod, httpEntity, MovieCollection.class);
 		if(movieCollectionResponse.getStatusCode()==HttpStatus.OK)
 		{
 			movieCollection = movieCollectionResponse.getBody();
 			if(movieCollection!=null)
 			{
 				List<Genre> allTrackServieGenres = genreRepository.findAll();
-				List<Movie> finalMovies = new ArrayList<Movie>();
+				List<Movie> allMovies = new ArrayList<Movie>();
+				// Issue - MultipleRepresentations
 				Set<ProductionCompany> allProductionCompanies = new HashSet<>();
 				Set<ProductionCountry> allProductionCountries = new HashSet<>();
 				Set<SpokenLanguage> allSpokenLanguages = new HashSet<>();
 				for(Movie movie : movieCollection.getMovies())
 				{
-					boolean exist = servieRepository.existsById(new ServieKey("movie", movie.getTmdbId()));
-					if(exist)
-					{
-						log.error("{} {}, already exists", "movie", movie.getTmdbId());
-						throw new RuntimeException("The movie already exists before saving the movie collection !!!");
-					}
+					if(servieRepository.existsById(new ServieKey("movie", movie.getTmdbId())))
+						throw new RuntimeException("The movie "+movie.getTmdbId()+" already exists before saving the movie collection !!!");
 					log.info("    Adding movie {} as a part of collection", movie.getTmdbId());
-					ResponseEntity<Movie> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+ServieType.MOVIE.toString()+"/"+movie.getTmdbId()+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Movie.class);
+					ResponseEntity<Movie> movieResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+ServieType.MOVIE.toString()+"/"+movie.getTmdbId()+"?api_key="+apiKey, httpMethod, httpEntity, Movie.class);
 					if(movieResponse.getStatusCode()==HttpStatus.OK)
 					{
 						movie = movieResponse.getBody();
 						if(movie!=null)
 						{
-							ResponseEntity<MovieCredits> movieCreditsResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"movie"+"/"+movie.getTmdbId()+"/credits?api_key="+apiKey, HttpMethod.GET, httpEntity, MovieCredits.class);
+							ResponseEntity<MovieCredits> movieCreditsResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"movie"+"/"+movie.getTmdbId()+"/credits?api_key="+apiKey, httpMethod, httpEntity, MovieCredits.class);
 							MovieCredits movieCredits = movieCreditsResponse.getBody();
 							if(movieCredits!=null)
 							{
@@ -184,7 +217,6 @@ public class ServieService
 							movie.setLastModified(LocalDateTime.now());
 							movie.setChildtype(ServieType.MOVIE.toString());
 							movie.setCollection(movieCollection);
-							// THIS APPROACH IS ALSO GOOD, BUT I THINK WE SHOULD MAINTAIN A SET WITH NEW COMMERS GENRES AND USE FROM IT
 							Set<Integer> tmdbGenreIds = movie.getGenres().stream()
 									.map(Genre::getId)
 									.collect(Collectors.toSet());
@@ -209,7 +241,6 @@ public class ServieService
 									})
 									.collect(Collectors.toSet());
 							movie.setProductionCompanies(prodCompanies);
-							// 
 							Set<ProductionCountry> prodCountries = movie.getProductionCountries().stream()
 									.map(prodCountry ->
 									{
@@ -226,7 +257,6 @@ public class ServieService
 									})
 									.collect(Collectors.toSet());
 							movie.setProductionCountries(prodCountries);
-							//
 							Set<SpokenLanguage> spokenLanguages = movie.getSpokenLanguages().stream()
 									.map(spokenLanguage ->
 									{
@@ -243,29 +273,483 @@ public class ServieService
 									})
 									.collect(Collectors.toSet());
 							movie.setSpokenLanguages(spokenLanguages);
-							finalMovies.add(movie);
+							allMovies.add(movie);
 						}
 					}
 				}
-				movieCollection.setMovies(finalMovies);
+				movieCollection.setMovies(allMovies);
 				movieCollectionRepository.save(movieCollection);
-				log.info("    Added {} movies successfully !!", finalMovies.size());
+				log.info("    Added {} movies successfully !!", allMovies.size());
 			}
 		}
 	}
 
 	// @Scheduled(fixedRate = Integer.MAX_VALUE)
-	public void abc()
+	// @Scheduled(cron = "0 0 6 * * ?") // Runs every morning at 6 AM
+	@Transactional
+	public void updateAiringSeries()
 	{
-		addSeries(95479);
+		// Series (Airing) -> everyday once
+		List<Series> serieses = seriesRepository.findByLastModifiedBeforeAndStatus(LocalDateTime.now(), "Returning Series");
+		log.info("Updating {} series which are currently airing", serieses.size());
+		for(Series series : serieses)
+			updateSeries(series.getTmdbId());
+		log.info("Finished Updating {} series which are currently airing", serieses.size());
+	}
+
+	// @Scheduled(fixedRate = Integer.MAX_VALUE)
+	// @Scheduled(cron = "0 0 6 * * ?") // Runs every morning at 6 AM
+	@Transactional
+	public void updateNonAiringSeries()
+	{
+		List<Series> serieses = seriesRepository.findByLastModifiedBefore(LocalDateTime.now().minusDays(5));
+		log.info("Updating {} series which are not updated within last 5 days", serieses.size());
+		for(Series series : serieses)
+			updateSeries(series.getTmdbId());
+		log.info("Finished Updating {} series which are not updated within last 5 days", serieses.size());
+		// Movies -> once in a week
+		// movies = moviesRepo.
+	}
+	// @Transactional
+	// @Scheduled(fixedRate = Integer.MAX_VALUE)
+	// public void abc()
+	// {
+	// 	updateSeries(95479);
+	// }
+
+	private void updateSeries(Integer tmdbId)
+	{
+		Series tempSeries = fetchSeriesFromTmdb(tmdbId);
+		log.info("Updating series {} name {}", tmdbId, tempSeries.getTitle());
+		Series oldSeries = (Series) servieRepository.findById(new ServieKey("tv", tmdbId)).get();
+		if(!oldSeries.isAdult()==tempSeries.isAdult())
+		{
+			log.info("  Series 'Adult' mismatched");
+			oldSeries.setAdult(tempSeries.isAdult());
+		}
+		if(!oldSeries.getBackdropPath().equals(tempSeries.getBackdropPath()))
+		{
+			log.info("  Series 'BackgroundPath' mismatched");
+			oldSeries.setBackdropPath(tempSeries.getBackdropPath());
+		}
+		if(!oldSeries.getCreatedBy().equals(tempSeries.getCreatedBy()))
+		{
+			log.info("  Series 'CreatedBy' mismatched");
+			oldSeries.setCreatedBy(tempSeries.getCreatedBy());
+		}
+		if(!oldSeries.getFirstAirDate().equals(tempSeries.getFirstAirDate()))
+		{
+			log.info("  Series 'FirstAirDate' mismatched");
+			oldSeries.setFirstAirDate(tempSeries.getFirstAirDate());
+		}
+		if(!oldSeries.getGenres().equals(tempSeries.getGenres()))
+		{
+			log.info("  Series 'Genres' mismatched");
+			oldSeries.setGenres(tempSeries.getGenres());
+		}
+		if(!oldSeries.getHomepage().equals(tempSeries.getHomepage()))
+		{
+			log.info("  Series 'HomePage' mismatched");
+			oldSeries.setHomepage(tempSeries.getHomepage());
+		}
+		if(!Objects.equals(oldSeries.getImdbId(), tempSeries.getImdbId()))
+		{
+			log.info("  Series 'ImdbId' mismatched");
+			oldSeries.setImdbId(tempSeries.getImdbId());
+		}
+		if(!oldSeries.isInProduction()==tempSeries.isInProduction())
+		{
+			log.info("  Series 'InProduction' mismatched");
+			oldSeries.setInProduction(tempSeries.isInProduction());
+		}
+		if(!Objects.equals(oldSeries.getLastAirDate(), tempSeries.getLastAirDate()))
+		{
+			log.info("  Series 'LastAirDate' mismatched");
+			oldSeries.setLastAirDate(tempSeries.getLastAirDate());
+		}
+		if(!oldSeries.getNetworks().equals(tempSeries.getNetworks()))
+		{
+			log.info("  Series 'Networks' mismatched");
+			oldSeries.setNetworks(tempSeries.getNetworks());
+		}
+		if(!oldSeries.getOriginCountry().equals(tempSeries.getOriginCountry()))
+		{
+			log.info("  Series 'OriginalCountry' mismatched");
+			oldSeries.setOriginCountry(tempSeries.getOriginCountry());
+		}
+		if(!oldSeries.getOriginalTitle().equals(tempSeries.getOriginalTitle()))
+		{
+			log.info("  Series 'OriginalTitle' mismatched");
+			oldSeries.setOriginalTitle(tempSeries.getOriginalTitle());
+		}
+		if(!oldSeries.getOverview().equals(tempSeries.getOverview()))
+		{
+			log.info("  Series 'Overview' mismatched");
+			oldSeries.setOverview(tempSeries.getOverview());
+		}
+		if(!oldSeries.getPopularity().equals(tempSeries.getPopularity()))
+		{
+			log.info("  Series 'Popularity' mismatched");
+			oldSeries.setPopularity(tempSeries.getPopularity());
+		}
+		if(!oldSeries.getPosterPath().equals(tempSeries.getPosterPath()))
+		{
+			log.info("  Series 'PosterPath' mismatched");
+			oldSeries.setPosterPath(tempSeries.getPosterPath());
+		}
+		if(!oldSeries.getProductionCompanies().equals(tempSeries.getProductionCompanies()))
+		{
+			log.info("  Series 'ProductionCompanies' mismatched");
+			oldSeries.setProductionCompanies(tempSeries.getProductionCompanies());
+		}
+		if(!oldSeries.getProductionCountries().equals(tempSeries.getProductionCountries()))
+		{
+			log.info("  Series 'ProductionCountries' mismatched");
+			oldSeries.setProductionCountries(tempSeries.getProductionCountries());
+		}
+		List<Season> updatedSeasons = getDeepSeasonsComparison(oldSeries.getSeasons(), tempSeries.getSeasons());
+		oldSeries.setSeasons(updatedSeasons);
+		if(!oldSeries.getSpokenLanguages().equals(tempSeries.getSpokenLanguages()))
+		{
+			log.info("  Series 'SpokenLanguages' mismatched");
+			oldSeries.setSpokenLanguages(tempSeries.getSpokenLanguages());
+		}
+		if(!oldSeries.getStatus().equals(tempSeries.getStatus()))
+		{
+			log.info("  Series 'Status' mismatched");
+			oldSeries.setStatus(tempSeries.getStatus());
+		}
+		if(!oldSeries.getTagline().equals(tempSeries.getTagline()))
+		{
+			log.info("  Series 'Tagline' mismatched");
+			oldSeries.setTagline(tempSeries.getTagline());
+		}
+		if(!oldSeries.getTitle().equals(tempSeries.getTitle()))
+		{
+			log.info("  Series 'Title' mismatched");
+			oldSeries.setTitle(tempSeries.getTitle());
+		}
+		// no check need for 'tmdbId'
+		if(!oldSeries.getTotalEpisodes().equals(tempSeries.getTotalEpisodes()))
+		{
+			log.info("  Series 'TotalEpisodes' mismatched");
+			oldSeries.setTotalEpisodes(tempSeries.getTotalEpisodes());
+		}
+		if(!oldSeries.getTotalSeasons().equals(tempSeries.getTotalSeasons()))
+		{
+			log.info("  Series 'TotalSeasons' mismatched");
+			oldSeries.setTotalSeasons(tempSeries.getTotalSeasons());
+		}
+		if(!oldSeries.getType().equals(tempSeries.getType()))
+		{
+			log.info("  Series 'Type' mismatched");
+			oldSeries.setType(tempSeries.getType());
+		}
+		if(!oldSeries.getVoteAverage().equals(tempSeries.getVoteAverage()))
+		{
+			log.info("  Series 'VoteAverage' mismatched");
+			oldSeries.setVoteAverage(tempSeries.getVoteAverage());
+		}
+		if(!oldSeries.getVoteCount().equals(tempSeries.getVoteCount()))
+		{
+			log.info("  Series 'VoteCount' mismatched");
+			oldSeries.setVoteCount(tempSeries.getVoteCount());
+		}
+		oldSeries.setLastModified(LocalDateTime.now());
+		servieRepository.save(oldSeries);
+		log.info("Series {}, updated successfully !!", tmdbId);
+	}
+
+	private List<Season> getDeepSeasonsComparison(List<Season> oldSeriesSeasons, List<Season> tempSeriesSeasons)
+	{
+		List<Season> finalSeasons = new ArrayList<>();
+		Set<Season> oldSeriesSeasonsSet = new HashSet<>(oldSeriesSeasons);
+		Set<Season> tempSeriesSeasonsSet = new HashSet<>(tempSeriesSeasons);
+		// ??? RARE = what if there are few old seasons not present in latest payload ?
+		// Issue - MultipleRepresentations
+		allSeasonCasts = new HashSet<>();
+		allEpCrews = new HashSet<>();
+		for(Season tempSeriesSeason : tempSeriesSeasonsSet)
+		{
+			log.info("    Running check for season id {} S{}", tempSeriesSeason.getId(), tempSeriesSeason.getSeasonNo());
+			Season oldSeriesSeason = findSeasonObject(oldSeriesSeasonsSet, tempSeriesSeason);
+			if(oldSeriesSeason==null)
+			{
+				log.info("      No such season available !!!");
+				Set<SeasonCast> seasonCasts = new HashSet<>();
+				for(SeasonCast cast : tempSeriesSeason.getSeasonCast())
+					if(allSeasonCasts.contains(cast))
+					{
+						for(SeasonCast allSeasonUniqueCast : allSeasonCasts)
+							if(allSeasonUniqueCast.equals(cast))
+							{
+								seasonCasts.add(allSeasonUniqueCast);
+								break;
+							}
+					}
+					else
+					{
+						allSeasonCasts.add(cast);
+						seasonCasts.add(cast);
+					}
+				tempSeriesSeason.setSeasonCast(seasonCasts);
+				tempSeriesSeason.setLastModified(LocalDateTime.now());
+				finalSeasons.add(tempSeriesSeason);
+				log.info("      Therefore added !!!");
+				continue;
+			}
+			if(!oldSeriesSeason.getName().equals(tempSeriesSeason.getName()))
+			{
+				log.info("    Season 'name' mismatched");
+				oldSeriesSeason.setName(tempSeriesSeason.getName());
+			}
+			if(!oldSeriesSeason.getEpisodeCount().equals(tempSeriesSeason.getEpisodeCount()))
+			{
+				log.info("    Season 'EpisodeCount' mismatched");
+				oldSeriesSeason.setEpisodeCount(tempSeriesSeason.getEpisodeCount());
+			}
+			if(!oldSeriesSeason.getOverview().equals(tempSeriesSeason.getOverview()))
+			{
+				log.info("    Season 'Overview' mismatched");
+				oldSeriesSeason.setOverview(tempSeriesSeason.getOverview());
+			}
+			if(!Objects.equals(oldSeriesSeason.getPosterPath(), tempSeriesSeason.getPosterPath()))
+			{
+				log.info("    Season 'PosterPath' mismatched");
+				oldSeriesSeason.setPosterPath(tempSeriesSeason.getPosterPath());
+			}
+			// no check need for 'seasonNo'
+			List<Episode> updatedEpisodes = getDeepEpisodesComparison(oldSeriesSeason.getEpisodes(), tempSeriesSeason.getEpisodes());
+			oldSeriesSeason.setEpisodes(updatedEpisodes);
+			// no check need for 'id2'
+			if(!Objects.equals(oldSeriesSeason.getAirDate(), tempSeriesSeason.getAirDate()))
+			{
+				log.info("    Season 'AirDate' mismatched");
+				oldSeriesSeason.setAirDate(tempSeriesSeason.getAirDate());
+			}
+			if(!oldSeriesSeason.getVoteAverage().equals(tempSeriesSeason.getVoteAverage()))
+			{
+				log.info("  Season 'VoteAverage' mismatched");
+				oldSeriesSeason.setVoteAverage(tempSeriesSeason.getVoteAverage());
+			}
+			log.info("  Season 'SeasonCast' Syncing");
+			Set<SeasonCast> seasonCasts = new HashSet<>();
+			for(SeasonCast cast : tempSeriesSeason.getSeasonCast())
+				if(allSeasonCasts.contains(cast))
+				{
+					for(SeasonCast allSeasonUniqueCast : allSeasonCasts)
+						if(allSeasonUniqueCast.equals(cast))
+						{
+							seasonCasts.add(allSeasonUniqueCast);
+							break;
+						}
+				}
+				else
+				{
+					allSeasonCasts.add(cast);
+					seasonCasts.add(cast);
+				}
+			oldSeriesSeason.setSeasonCast(seasonCasts);
+			oldSeriesSeason.setLastModified(LocalDateTime.now());
+			finalSeasons.add(oldSeriesSeason);
+		}
+		allSeasonCasts = null;
+		allEpCrews = null;
+		return finalSeasons;
+	}
+
+	private List<Episode> getDeepEpisodesComparison(List<Episode> oldSeriesSeasonsEpisodes, List<Episode> tempSeriesSeasonEpisodes)
+	{
+		List<Episode> finalEpisodes = new ArrayList<>();
+		Set<Episode> oldSeriesSeasonEpisodesSet = new HashSet<>(oldSeriesSeasonsEpisodes);
+		Set<Episode> tempSeriesSeasonEpisodesSet = new HashSet<>(tempSeriesSeasonEpisodes);
+		Iterator<Episode> iterator = oldSeriesSeasonEpisodesSet.iterator();
+		log.info("      Checking for such episodes which are removed from tmdb");
+		while(iterator.hasNext())
+		{
+			Episode episode = iterator.next();
+			log.info("      Running check for episode id {} S{}E{} name {}", episode.getId(), episode.getSeasonNo(), episode.getEpisodeNo(), episode.getName());
+			if(!tempSeriesSeasonEpisodesSet.contains(episode))
+			{
+				log.info("Removing");
+				iterator.remove();
+				episodeRepository.delete(episode);
+			}
+		}
+		// ??? RARE = what if there are few old episodes not present in latest payload ?
+		// Issue - MultipleRepresentations
+		allEpGuestStars = new HashSet<>();
+		for(Episode tempSeriesSeasonEpisode : tempSeriesSeasonEpisodesSet)
+		{
+			log.info("      Running check for episode id {} S{}E{}", tempSeriesSeasonEpisode.getId(), tempSeriesSeasonEpisode.getSeasonNo(), tempSeriesSeasonEpisode.getEpisodeNo());
+			Episode oldSeriesSeasonEpisode = findEpisodeObject(oldSeriesSeasonEpisodesSet, tempSeriesSeasonEpisode);
+			if(oldSeriesSeasonEpisode==null)
+			{
+				log.info("      No such episode available !!!");
+				Set<EpisodeCast> epCasts = new HashSet<>();
+				for(EpisodeCast cast : tempSeriesSeasonEpisode.getGuestStars())
+					if(allEpGuestStars.contains(cast))
+					{
+						for(EpisodeCast allEpUniqueCast : allEpGuestStars)
+							if(allEpUniqueCast.equals(cast))
+							{
+								epCasts.add(allEpUniqueCast);
+								break;
+							}
+					}
+					else
+					{
+						allEpGuestStars.add(cast);
+						epCasts.add(cast);
+					}
+				tempSeriesSeasonEpisode.setGuestStars(epCasts);
+				Set<EpisodeCrew> epCrews = new HashSet<>();
+				for(EpisodeCrew epCrew : tempSeriesSeasonEpisode.getCrew())
+					if(allEpCrews.contains(epCrew))
+					{
+						for(EpisodeCrew allEpUniqueCrew : allEpCrews)
+							if(allEpUniqueCrew.equals(epCrew))
+							{
+								epCrews.add(allEpUniqueCrew);
+								break;
+							}
+					}
+					else
+					{
+						allEpCrews.add(epCrew);
+						epCrews.add(epCrew);
+					}
+				tempSeriesSeasonEpisode.setCrew(epCrews);
+				tempSeriesSeasonEpisode.setLastModified(LocalDateTime.now());
+				finalEpisodes.add(tempSeriesSeasonEpisode);
+				log.info("      Therefore added !!!");
+				continue;
+			}
+			if(!oldSeriesSeasonEpisode.getName().equals(tempSeriesSeasonEpisode.getName()))
+			{
+				log.info("        Episode 'Name' mismatched");
+				oldSeriesSeasonEpisode.setName(tempSeriesSeasonEpisode.getName());
+			}
+			// no check need for 'episodeNo'
+			// no check need for 'seasonNo'
+			if(!Objects.equals(oldSeriesSeasonEpisode.getRuntime(), tempSeriesSeasonEpisode.getRuntime()))
+			{
+				log.info("        Episode 'Runtime' mismatched", oldSeriesSeasonEpisode.getRuntime(), oldSeriesSeasonEpisode.getRuntime());
+				oldSeriesSeasonEpisode.setRuntime(tempSeriesSeasonEpisode.getRuntime());
+			}
+			if(!Objects.equals(oldSeriesSeasonEpisode.getOverview(), tempSeriesSeasonEpisode.getOverview()))
+			{
+				log.info("        Episode 'Overview' mismatched", oldSeriesSeasonEpisode.getOverview(), oldSeriesSeasonEpisode.getOverview());
+				oldSeriesSeasonEpisode.setOverview(tempSeriesSeasonEpisode.getOverview());
+			}
+			if(!Objects.equals(oldSeriesSeasonEpisode.getStillPath(), tempSeriesSeasonEpisode.getStillPath()))
+			{
+				log.info("        Episode 'StillPath' mismatched", oldSeriesSeasonEpisode.getSeasonNo(), oldSeriesSeasonEpisode.getEpisodeNo());
+				oldSeriesSeasonEpisode.setStillPath(tempSeriesSeasonEpisode.getStillPath());
+			}
+			// no check need for 'tmdbId'
+			// no check need for 'season'
+			if(!Objects.equals(oldSeriesSeasonEpisode.getAirDate(), tempSeriesSeasonEpisode.getAirDate()))
+			{
+				log.info("        Episode 'AirDate' mismatched");
+				oldSeriesSeasonEpisode.setAirDate(tempSeriesSeasonEpisode.getAirDate());
+			}
+			if(!oldSeriesSeasonEpisode.getType().equals(tempSeriesSeasonEpisode.getType()))
+			{
+				log.info("        Episode 'Type' mismatched");
+				oldSeriesSeasonEpisode.setType(tempSeriesSeasonEpisode.getType());
+			}
+			if(!oldSeriesSeasonEpisode.getVoteAverage().equals(tempSeriesSeasonEpisode.getVoteAverage()))
+			{
+				log.info("        Episode 'VoteAverage' mismatched");
+				oldSeriesSeasonEpisode.setVoteAverage(tempSeriesSeasonEpisode.getVoteAverage());
+			}
+			if(!oldSeriesSeasonEpisode.getVoteCount().equals(tempSeriesSeasonEpisode.getVoteCount()))
+			{
+				log.info("        Episode 'VoteCount' mismatched");
+				oldSeriesSeasonEpisode.setVoteCount(tempSeriesSeasonEpisode.getVoteCount());
+			}
+			if(!oldSeriesSeasonEpisode.getProductionCode().equals(tempSeriesSeasonEpisode.getProductionCode()))
+			{
+				log.info("        Episode 'ProductionCode' mismatched");
+				oldSeriesSeasonEpisode.setProductionCode(tempSeriesSeasonEpisode.getProductionCode());
+			}
+			log.info("        Episode 'EpisodeCast' Syncing");
+			Set<EpisodeCast> epCasts = new HashSet<>();
+			for(EpisodeCast epCast : tempSeriesSeasonEpisode.getGuestStars())
+				if(allEpGuestStars.contains(epCast))
+				{
+					for(EpisodeCast allEpUniqueCast : allEpGuestStars)
+						if(allEpUniqueCast.equals(epCast))
+						{
+							epCasts.add(allEpUniqueCast);
+							break;
+						}
+				}
+				else
+				{
+					allEpGuestStars.add(epCast);
+					epCasts.add(epCast);
+				}
+			oldSeriesSeasonEpisode.setGuestStars(epCasts);
+			log.info("        Episode 'EpisodeCrew' Syncing");
+			Set<EpisodeCrew> epCrews = new HashSet<>();
+			for(EpisodeCrew cast : tempSeriesSeasonEpisode.getCrew())
+				if(allEpCrews.contains(cast))
+				{
+					for(EpisodeCrew allEpUniqueCrew : allEpCrews)
+						if(allEpUniqueCrew.equals(cast))
+						{
+							epCrews.add(allEpUniqueCrew);
+							break;
+						}
+				}
+				else
+				{
+					allEpCrews.add(cast);
+					epCrews.add(cast);
+				}
+			oldSeriesSeasonEpisode.setCrew(epCrews);
+			oldSeriesSeasonEpisode.setLastModified(LocalDateTime.now());
+			finalEpisodes.add(oldSeriesSeasonEpisode);
+		}
+		allEpGuestStars = null;
+		return finalEpisodes;
+	}
+
+	private Episode findEpisodeObject(Set<Episode> set, Episode targetObject)
+	{
+		for(Episode obj : set)
+			if(obj.equals(targetObject))
+				return obj;
+		return null;
+	}
+
+	private static Season findSeasonObject(Set<Season> seasons, Season targetObject)
+	{
+		for(Season obj : seasons)
+			if(obj.equals(targetObject))
+				return obj;
+		return null;
 	}
 
 	private Series addSeries(Integer tmdbId)
 	{
-		log.info("Adding series {}", tmdbId);
+		Series series = fetchSeriesFromTmdb(tmdbId);
+		if(series==null)
+			throw new RuntimeException("Series cannot be null !!! Require urgent fix !!!");
+		servieRepository.save(series);
+		log.info("Series {}, added successfully !!", tmdbId);
+		return series;
+	}
+
+	private Series fetchSeriesFromTmdb(Integer tmdbId)
+	{
+		log.info("Fetching series {}", tmdbId);
 		Series series = new Series();
 		// DTO can be created just to extract the necessary parts
-		ResponseEntity<Series> seriesResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Series.class);
+		HttpMethod httpMethod = Objects.requireNonNull(HttpMethod.GET);
+		ResponseEntity<Series> seriesResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"?api_key="+apiKey, httpMethod, httpEntity, Series.class);
 		if(seriesResponse.getStatusCode()==HttpStatus.OK)
 		{
 			series = seriesResponse.getBody();
@@ -277,11 +761,11 @@ public class ServieService
 				// the seasons payload got from above servie api call does not have episodes data, therefore making api call for each
 				for(Season seasonBrief : series.getSeasons())
 				{
-					ResponseEntity<Season> response = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"/season/"+seasonBrief.getSeasonNo()+"?api_key="+apiKey, HttpMethod.GET, httpEntity, Season.class);
+					ResponseEntity<Season> response = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"/season/"+seasonBrief.getSeasonNo()+"?api_key="+apiKey, httpMethod, httpEntity, Season.class);
 					Season season = response.getBody();
 					if(season!=null)
 					{
-						ResponseEntity<SeasonCredits> seasonCreditsResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"/season/"+seasonBrief.getSeasonNo()+"/credits?api_key="+apiKey, HttpMethod.GET, httpEntity, SeasonCredits.class);
+						ResponseEntity<SeasonCredits> seasonCreditsResponse = restTemplate.exchange("https://api.themoviedb.org/3/"+"tv"+"/"+tmdbId+"/season/"+seasonBrief.getSeasonNo()+"/credits?api_key="+apiKey, httpMethod, httpEntity, SeasonCredits.class);
 						SeasonCredits seasonCredits = seasonCreditsResponse.getBody();
 						if(seasonCredits!=null)
 							season.setSeasonCast(seasonCredits.getCast());
@@ -297,9 +781,9 @@ public class ServieService
 					}
 				}
 				// Issue - MultipleRepresentations
-				Set<EpisodeCast> allEpGuestStars = new HashSet<>();
-				Set<EpisodeCrew> allEpCrews = new HashSet<>();
-				Set<SeasonCast> allSeasonCasts = new HashSet<>();
+				allEpGuestStars = new HashSet<>();
+				allEpCrews = new HashSet<>();
+				allSeasonCasts = new HashSet<>();
 				for(Season season : seasons)
 				{
 					Set<SeasonCast> seasonCasts = new HashSet<>();
@@ -357,55 +841,71 @@ public class ServieService
 						episode.setGuestStars(epCasts);
 					}
 				}
+				allEpGuestStars = null;
+				allEpCrews = null;
+				allSeasonCasts = null;
 				series.setSeasons(seasons);
 				series.setChildtype("tv");
 				series.setGenres(genreUtils.convertTmdbGenresToTrackServieGenres(series.getGenres()));
-				servieRepository.save(series);
-				log.info("    Series {}, added successfully !!", tmdbId);
+				series.setLastModified(LocalDateTime.now());
 			}
 		}
+		log.info("Fetched series {}", tmdbId);
 		return series;
 	}
 
-	public ServieDtoServiePage getServie(Integer userId, String type, Integer tmdbId)
+	public ServieDtoServiePage getServie(@NonNull Integer userId, String childtype, Integer tmdbId)
 	{
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
 		// wrong -> its trying to add servie again just because its not present in user's database
-		ServieDtoServiePage servie = servieRepository.getServieForServiePage(user, type, tmdbId).orElseGet(() -> searchServie(type, tmdbId));
-		if(type.equals("tv"))
+		ServieDtoServiePage servieDtoServiePage = servieRepository.getServieForServiePage(user, childtype, tmdbId).orElseGet(() -> searchServie(childtype, tmdbId));
+		if(childtype.equals("tv"))
 		{
-			List<SeasonDtoServiePage> seasons = userSeasonDataRepository.getSeasons(user, type, tmdbId).stream().sorted(Comparator.comparing(SeasonDtoServiePage::getSeasonNo)).collect(Collectors.toList());
-			servie.setSeasons(seasons);
+			List<SeasonDtoServiePage> seasons = userSeasonDataRepository.getSeasons(user, childtype, tmdbId).stream().sorted(Comparator.comparing(SeasonDtoServiePage::getSeasonNo)).collect(Collectors.toList());
+			servieDtoServiePage.setSeasons(seasons);
 		}
-		Set<GenreDtoServiePage> genreDtos = genreRepository.getGenresForServiePage(tmdbId, type);
-		servie.setGenres(genreDtos);
-		return servie;
+		Set<GenreDtoServiePage> genreDtos = genreRepository.getGenresForServiePage(tmdbId, childtype);
+		servieDtoServiePage.setGenres(genreDtos);
+		if(childtype.equals("movie"))
+		{
+			Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(childtype, tmdbId).toString()));
+			Movie mm = (Movie) servie;
+			Set<MovieCast> movieCasts = mm.getCast();
+			List<MovieCast> movieCastsList = new ArrayList<>(movieCasts);
+			movieCastsList.sort(Comparator.comparingInt(MovieCast::getOrder));
+			servieDtoServiePage.setCast(movieCastsList);
+			if(mm.getBelongsToCollection()!=null)
+			{
+				servieDtoServiePage.setCollectionId(mm.getCollection().getId());
+				servieDtoServiePage.setCollectionName(mm.getCollection().getName());
+				servieDtoServiePage.setColleactionPosterPath(mm.getCollection().getPosterPath());
+			}
+		}
+		return servieDtoServiePage;
 	}
 
 	private ServieDtoServiePage searchServie(String childtype, Integer tmdbId)
 	{
-		// ToDo - think which approach is most suitable :
-		// *1) search servie, and save it into TrackServie database and then return it
-		// 2) just return searched servie
 		Servie servie = addServie(childtype, tmdbId);
 		if(childtype.equals("tv"))
 		{
 			Series series = (Series) servie;
-			ServieDtoServiePage ser = new ServieDtoServiePage(tmdbId, childtype, servie.getTitle(), servie.getStatus(), servie.getTagline(), servie.getOverview(), servie.getBackdropPath(), null, null, series.getTotalSeasons(), series.getTotalEpisodes(), 0, false);
+			ServieDtoServiePage ser = new ServieDtoServiePage(tmdbId, childtype, servie.getTitle(), servie.getStatus(), servie.getTagline(), servie.getOverview(), servie.getBackdropPath(), servie.getLastModified(), null, null, series.getTotalSeasons(), series.getTotalEpisodes(), 0, false);
 			return ser;
 		}
 		else
 		{
 			Movie movie = (Movie) servie;
-			ServieDtoServiePage ser = new ServieDtoServiePage(tmdbId, childtype, servie.getTitle(), servie.getStatus(), servie.getTagline(), servie.getOverview(), servie.getBackdropPath(), movie.getReleaseDate(), movie.getRuntime(), null, null, 0, false);
+			ServieDtoServiePage ser = new ServieDtoServiePage(tmdbId, childtype, servie.getTitle(), servie.getStatus(), servie.getTagline(), servie.getOverview(), servie.getBackdropPath(), servie.getLastModified(), movie.getReleaseDate(), movie.getRuntime(), null, null, 0, false);
 			return ser;
 		}
 	}
 
-	public SearchResultDtoSearchPage searchServies(Integer userId, String childtype, String servieName, Integer year, int pageNumber)
+	public SearchResultDtoSearchPage searchServies(@NonNull Integer userId, String childtype, String servieName, Integer year, int pageNumber)
 	{
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
-		ResponseEntity<SearchResultDtoSearchPage> response = restTemplate.exchange("https://api.themoviedb.org/3/search/"+childtype+"?api_key="+apiKey+"&query="+servieName+"&year="+year+"&page="+pageNumber, HttpMethod.GET, httpEntity, SearchResultDtoSearchPage.class);
+		HttpMethod httpMethod = Objects.requireNonNull(HttpMethod.GET);
+		ResponseEntity<SearchResultDtoSearchPage> response = restTemplate.exchange("https://api.themoviedb.org/3/search/"+childtype+"?api_key="+apiKey+"&query="+servieName+"&year="+year+"&page="+pageNumber, httpMethod, httpEntity, SearchResultDtoSearchPage.class);
 		SearchResultDtoSearchPage searchResult = response.getBody();
 		if(searchResult!=null)
 		{
@@ -454,20 +954,18 @@ public class ServieService
 		return searchResult;
 	}
 
-	public ResponseDtoHomePage getServiesByFilter(Integer userId, String childtype, Boolean watched, List<Integer> genreIds, List<String> languages, List<String> statuses, Integer startYear, Integer endYear, int pageNumber, String sortBy, String sortDir)
+	public ResponseDtoHomePage getServiesByFilter(@NonNull Integer userId, String childtype, Boolean watched, List<Integer> genreIds, List<String> languages, List<String> statuses, Integer startYear, Integer endYear, int pageNumber, String sortBy, String sortDir)
 	{
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
-		Sort sort = null;
-		if(sortDir.equals("asc"))
-			sort = Sort.by(sortBy).ascending();
-		else if(sortDir.equals("desc"))
-			sort = Sort.by(sortBy).descending();
+		Sort sort = (sortDir.equals("asc"))? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
 		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
 		// JPQL/HQL APPROACH (NOT WORKED FOR MULTI SELECTIONS FILTERS)
 		List<Genre> genres = new ArrayList<>();
 		if(genreIds!=null)
 			for(Integer genreId : genreIds)
 			{
+				if(genreId==null)
+					throw new RuntimeException("GenreId cannot be null !!! Require urgent fix !!!");
 				Genre genre = genreRepository.findById(genreId).orElseThrow(() -> new ResourceNotFoundException("Genre", "Id", genreId.toString()));
 				genres.add(genre);
 			}
@@ -476,74 +974,30 @@ public class ServieService
 		List<ServieDtoHomePage> servies = page.getContent();
 		ResponseDtoHomePage responseDto = new ResponseDtoHomePage();
 		responseDto.setServies(servies);
-		responseDto.setPageNumber(page.getNumber()); // Returns the number of the current page. Is always non-negative.
-		responseDto.setPageSize(page.getSize()); // Returns the size of current page
-		responseDto.setNumberOfElementsOnPage(page.getNumberOfElements()); // Returns the number of elements currently on this page
-		responseDto.setTotalPages(page.getTotalPages()); // Returns the number of total pages (Showing total of entire Servie)
-		responseDto.setFirstPage(page.isFirst()); // checks if first page
-		responseDto.setLastPage(page.isLast()); // checks if last page
-		responseDto.setTotalElements(page.getTotalElements()); // Returns the number of elements (SHOWING total of entire Servie)
-		responseDto.setHasPrevious(page.hasPrevious());// Returns if there is a previous page
-		responseDto.setHasNext(page.hasNext()); //Returns if there is a next page
+		responseDto.setPageNumber(page.getNumber());
+		responseDto.setPageSize(page.getSize());
+		responseDto.setNumberOfElementsOnPage(page.getNumberOfElements());
+		responseDto.setTotalPages(page.getTotalPages());
+		responseDto.setFirstPage(page.isFirst());
+		responseDto.setLastPage(page.isLast());
+		responseDto.setTotalElements(page.getTotalElements());
+		responseDto.setHasPrevious(page.hasPrevious());
+		responseDto.setHasNext(page.hasNext());
 		return responseDto;
 	}
-	// @Scheduled(fixedRate = Integer.MAX_VALUE)
-	// public void nativeApproach()
-	// {
-	// 	int pageNumber = 0;
-	// 	String sortBy = "title";
-	// 	String sortDir = "asc";
-	// 	Sort sort = null;
-	// 	if(sortDir.equals("asc"))
-	// 		sort = Sort.by(sortBy).ascending();
-	// 	else if(sortDir.equals("desc"))
-	// 		sort = Sort.by(sortBy).descending();
-	// 	Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
-	// 	List<String> languagesfk = new ArrayList<>();
-	// 	// languagesfk.add("ko");
-	// 	// languagesfk.add("de");
-	// 	String[] langs = new String[] {"ko", "de"};
-	// 	// Page<Object[]> rs = servieRepository.getTempDtosFK(languagesfk, pageable);
-	// 	Page<ServieDtoHomePage> rs = csri.getTempDtosCB(languagesfk, statuses, pageable);
-	// 	System.out.println("lol");
-	// }
-	// private List<ServieDtoHomePage> mapper(Page<Object[]> resultSet)
-	// {
-	// 	List<Object[]> dtos = resultSet.getContent();
-	// 	List<ServieDtoHomePage> servieDtoList = dtos.stream()
-	// 			.map(row ->
-	// 			{
-	// 				String imdbId = (String) row[0];
-	// 				Integer tmdbId = (Integer) row[1];
-	// 				String childtype = (String) row[2];
-	// 				String title = (String) row[3];
-	// 				String posterPath = (String) row[4];
-	// 				java.sql.Date sqlReleaseDate = (java.sql.Date) row[5];
-	// 				LocalDate releaseDate = (sqlReleaseDate!=null? sqlReleaseDate.toLocalDate() : null);
-	// 				Integer totalEpisodes = (Integer) row[6];
-	// 				java.sql.Date sqlFirstAirDate = (java.sql.Date) row[7];
-	// 				LocalDate firstAirDate = (sqlFirstAirDate!=null? sqlFirstAirDate.toLocalDate() : null);
-	// 				java.sql.Date sqlLastAirDate = (java.sql.Date) row[8];
-	// 				LocalDate lastAirDate = (sqlLastAirDate!=null? sqlLastAirDate.toLocalDate() : null);
-	// 				// Long l = (Long) row[9];
-	// 				// Integer episodesWatched = (l!=null? l.intValue() : null);
-	// 				// BigDecimal bdCompleted = (BigDecimal) row[10];
-	// 				// Boolean completed = bdCompleted!=null? bdCompleted.intValue()==1 : null;
-	// 				return new ServieDtoHomePage(imdbId, tmdbId, childtype, title, posterPath, releaseDate, totalEpisodes, firstAirDate, lastAirDate, 2, true);
-	// 			})
-	// 			.collect(Collectors.toList());
-	// 	return servieDtoList;
-	// }
 
 	public void removeServie(Integer tmdbId, String childtype)
 	{
 		Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(childtype, tmdbId).toString()));
+		if(servie==null)
+			throw new RuntimeException("Servie cannot be null !!! Require urgent fix !!!");
 		servieRepository.delete(servie);
 	}
 
 	public List<Image> getServieBackdrops(String type, Integer tmdbId)
 	{
-		ResponseEntity<SeriesBackdropsDto> response = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+tmdbId+"/images?api_key="+apiKey, HttpMethod.GET, httpEntity, SeriesBackdropsDto.class);
+		HttpMethod httpMethod = Objects.requireNonNull(HttpMethod.GET);
+		ResponseEntity<SeriesBackdropsDto> response = restTemplate.exchange("https://api.themoviedb.org/3/"+type+"/"+tmdbId+"/images?api_key="+apiKey, httpMethod, httpEntity, SeriesBackdropsDto.class);
 		SeriesBackdropsDto imageSearchSeriesDto = response.getBody();
 		List<Image> images = new ArrayList<>();
 		if(imageSearchSeriesDto!=null)
@@ -551,7 +1005,7 @@ public class ServieService
 		return images;
 	}
 
-	public void changeBackdrop(Integer userId, String childtype, Integer tmdbId, String filePath)
+	public void changeBackdrop(@NonNull Integer userId, String childtype, Integer tmdbId, String filePath)
 	{
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
 		Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(childtype, tmdbId).toString()));
@@ -562,7 +1016,8 @@ public class ServieService
 
 	public List<Image> getServiePosters(String childtype, Integer tmdbId)
 	{
-		ResponseEntity<SeriesPostersDto> response = restTemplate.exchange("https://api.themoviedb.org/3/"+childtype+"/"+tmdbId+"/images?api_key="+apiKey, HttpMethod.GET, httpEntity, SeriesPostersDto.class);
+		HttpMethod httpMethod = Objects.requireNonNull(HttpMethod.GET);
+		ResponseEntity<SeriesPostersDto> response = restTemplate.exchange("https://api.themoviedb.org/3/"+childtype+"/"+tmdbId+"/images?api_key="+apiKey, httpMethod, httpEntity, SeriesPostersDto.class);
 		SeriesPostersDto imageSearchSeriesDto = response.getBody();
 		List<Image> images = new ArrayList<>();
 		if(imageSearchSeriesDto!=null)
@@ -570,7 +1025,7 @@ public class ServieService
 		return images;
 	}
 
-	public void changePoster(Integer userId, String childtype, Integer tmdbId, String filePath)
+	public void changePoster(@NonNull Integer userId, String childtype, Integer tmdbId, String filePath)
 	{
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
 		Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseThrow(() -> new ResourceNotFoundException("Servie", "ServieKey", new ServieKey(childtype, tmdbId).toString()));
@@ -579,7 +1034,7 @@ public class ServieService
 		userServieDataRepository.save(userServieData);
 	}
 
-	public void toggleServieWatch(Integer userId, String childtype, Integer tmdbId)
+	public void toggleServieWatch(@NonNull Integer userId, String childtype, Integer tmdbId)
 	{
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
 		Servie servie = servieRepository.findById(new ServieKey(childtype, tmdbId)).orElseGet(() -> addServie(childtype, tmdbId));
@@ -612,15 +1067,47 @@ public class ServieService
 	// Pattern for entities [UserServieData , UserSeasonData , UserEpisodeData]:
 	// * AkashPersistSeparatelyPattern -> Save each entity individually
 	// AkashPersistTogetherPattern -> Save the parent entity along with all the modifications in the child entities
-	public void toggleSeasonWatch(Integer userId, Integer tmdbId, Integer seasonNo)
+	public void toggleSeasonWatch(@NonNull Integer userId, Integer tmdbId, Integer seasonNo)
 	{
 		User user = userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
 		Servie servie = servieRepository.findById(new ServieKey("tv", tmdbId)).orElseGet(() -> addServie("tv", tmdbId));
 		UserServieData userServieData = userServieDataRepository.findById(new UserServieDataKey(user, servie)).orElseGet(() -> userServieDataRepository.save(new UserServieData(user, servie)));
 		UserSeasonData userSeasonData = userSeasonDataRepository.findById(new UserSeasonDataKey(userServieData, seasonNo)).orElseGet(() -> userSeasonDataRepository.save(new UserSeasonData(userServieData, seasonNo)));
 		List<UserEpisodeData> userEpisodeDatas = userEpisodeDataRepository.getToggledEpisodes(tmdbId, seasonNo, !userSeasonData.getWatched());
+		if(userEpisodeDatas==null)
+			throw new RuntimeException("UserEpisodeData list cannot be null !!! Require urgent fix !!!");
 		for(UserEpisodeData userEpisodeData : userEpisodeDatas)
 			userEpisodeData.setUserSeasonData(userSeasonData);
 		userEpisodeDataRepository.saveAll(userEpisodeDatas);
+	}
+
+	public ResponseDtoHomePage getServiesForWatchList(@NonNull Integer userId, int pageNumber, String sortBy, String sortDir)
+	{
+		userRepository.findById(userId).orElseThrow(() -> new ResourceNotFoundException("User", "Id", userId.toString()));
+		Sort sort = (sortDir.equals("asc"))? Sort.by(sortBy).ascending() : Sort.by(sortBy).descending();
+		Pageable pageable = PageRequest.of(pageNumber, pageSize, sort);
+		Page<ServieDtoHomePage> page = servieRepository.getServiesForWatchList(pageable);
+		List<ServieDtoHomePage> servies = page.getContent();
+		ResponseDtoHomePage responseDto = new ResponseDtoHomePage();
+		responseDto.setServies(servies);
+		responseDto.setPageNumber(page.getNumber());
+		responseDto.setPageSize(page.getSize());
+		responseDto.setNumberOfElementsOnPage(page.getNumberOfElements());
+		responseDto.setTotalPages(page.getTotalPages());
+		responseDto.setFirstPage(page.isFirst());
+		responseDto.setLastPage(page.isLast());
+		responseDto.setTotalElements(page.getTotalElements());
+		responseDto.setHasPrevious(page.hasPrevious());
+		responseDto.setHasNext(page.hasNext());
+		return responseDto;
+	}
+
+	public List<MovieDtoMovieCollectionPageDto> getMovieDtoMovieCollectionPageDtos(Integer id)
+	{
+		List<MovieDtoMovieCollectionPageDto> dtos = movieRepository.getMovieDtoMovieCollectionPageDtos(id);
+		dtos = dtos.stream()
+				.sorted(Comparator.comparing(dto -> dto.getReleaseDate()))
+				.collect(Collectors.toList());
+		return dtos;
 	}
 }

@@ -37,7 +37,7 @@ public class EpisodeCrew
 	@JsonProperty("gender")
 	private Integer gender;
 	// ---------------------------------------------------------------
-	@Column(name = "person_id")
+	@Column(name = "person_id", nullable = false)
 	@JsonProperty("id")
 	private Integer personId;
 	// ---------------------------------------------------------------
@@ -45,7 +45,7 @@ public class EpisodeCrew
 	@Column(name = "knownForDepartment")
 	private String knownForDepartment;
 	// ---------------------------------------------------------------
-	@Column(name = "name")
+	@Column(name = "name", nullable = false)
 	@JsonProperty("name")
 	private String name;
 	// ---------------------------------------------------------------

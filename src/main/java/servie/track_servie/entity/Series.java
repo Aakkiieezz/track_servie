@@ -28,11 +28,11 @@ import lombok.EqualsAndHashCode;
 @Table(name = "series")
 public class Series extends Servie
 {
-	@Column(name = "total_seasons")
+	@Column(name = "total_seasons", nullable = false)
 	@JsonProperty("number_of_seasons")
 	private Integer totalSeasons;
 	// ---------------------------------------------------------------
-	@Column(name = "total_episodes")
+	@Column(name = "total_episodes", nullable = false)
 	@JsonProperty("number_of_episodes")
 	private Integer totalEpisodes;
 	// ---------------------------------------------------------------
@@ -85,4 +85,10 @@ public class Series extends Servie
 	// List<String> languages         // not required
 	// Object last_episode_to_air     // not required
 	// Object next_episode_to_air     // not required
+
+	@Override
+	public String toString()
+	{
+		return "Series {id="+this.getTmdbId()+'}';
+	}
 }

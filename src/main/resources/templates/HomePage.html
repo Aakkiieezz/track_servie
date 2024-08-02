@@ -241,7 +241,7 @@
             </button>
             <ul class="dropdown-menu" aria-labelledby="languageDropdown" id="languageCheckboxes">
               <li><input class="form-check-input" type="checkbox" id="cn" name="languages" value="cn">
-                <label class="form-check-label" for="cn">Cantonese</label>
+                <label class="form-check-label" for="cn">Chinese(Cantonese)</label>
               </li>
               <li><input class="form-check-input" type="checkbox" id="zh" name="languages" value="zh">
                 <label class="form-check-label" for="zh">Chinese(Mandarin)</label>
@@ -394,47 +394,53 @@
             <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}"
               alt="Poster Unavailable" />
           </a>
-          <div class="buttons-container">
-            <strong th:text="${servie.title}"></strong>
-            <br>
-            <span th:if="${servie.releaseDate != null}" th:text="${#temporals.year(servie.releaseDate)}"></span>
-            <!-- hyperlink -->
-            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
-              <div th:if="${servie.completed}">
+          <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=movie'}">
+            <div class="buttons-container rounded">
+              <strong th:text="${servie.title}"></strong>
+              <br>
+              <span th:if="${servie.releaseDate != null}" th:text="${#temporals.year(servie.releaseDate)}"></span>
+              <!-- hyperlink -->
+              <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/toggleback?type='+${servie.childtype}}">
+                <div th:if="${servie.completed}">
+                  <i class="bi bi-eye-slash-fill"></i>
+                </div>
+                <div th:unless="${servie.completed}">
+                  <i class="bi bi-eye-fill"></i>
+                </div>
+              </a>
+              <!-- javascript+ajax+jquery -->
+              <!-- able to toggle value in backend, but not able to change the class of icon -->
+              <a href="#" th:if="${servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+                onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), false)">
                 <i class="bi bi-eye-slash-fill"></i>
-              </div>
-              <div th:unless="${servie.completed}">
+              </a>
+              <a href="#" th:if="${not servie.completed}" th:tmdbId="${servie.tmdbId}"
+                th:childtype="${servie.childtype}"
+                onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), true)">
                 <i class="bi bi-eye-fill"></i>
-              </div>
-            </a>
-            <!-- javascript+ajax+jquery -->
-            <!-- able to toggle value in backend, but not able to change the class of icon -->
-            <a href="#" th:if="${servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
-              onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), false)">
-              <i class="bi bi-eye-slash-fill"></i>
-            </a>
-            <a href="#" th:if="${not servie.completed}" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
-              onclick="toggleWatch(this.getAttribute('tmdbId'), this.getAttribute('childtype'), true)">
-              <i class="bi bi-eye-fill"></i>
-            </a>
+              </a>
+              <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
+                <i class="bi bi-file-image"></i>
+              </a>
+              <a th:href="@{'/track-servie/list/'+${servie.tmdbId}+'?childtype='+${servie.childtype}}">
+                <i class="bi bi-clock-fill"></i>
+              </a>
+              <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
+                onclick="removeServie(this.getAttribute('tmdbId'), this.getAttribute('childtype'))">
+                <i class="bi bi-x-circle-fill"></i>
+              </a>
 
-            <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
-              <i class="bi bi-file-image"></i>
-            </a>
+            </div>
+          </a>
 
-            <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
-              onclick="removeServie(this.getAttribute('tmdbId'), this.getAttribute('childtype'))">
-              <i class="bi bi-x-circle-fill"></i>
-            </a>
 
-          </div>
         </div>
         <!-- <div th:if="${servie instanceof T(servie.track_servie.entities.Series)}" -->
         <div th:if="${servie.childtype == 'tv'}">
           <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'?type=tv'}">
             <img class="rounded" th:src="'https://www.themoviedb.org/t/p/original'+${servie.posterPath}" />
           </a>
-          <div class="buttons-container">
+          <div class="buttons-container rounded">
             <strong th:text="${servie.title}"></strong>
             <br>
             <span
@@ -452,6 +458,10 @@
             </a>
             <a th:href="@{'/track-servie/servies/'+${servie.tmdbId}+'/posters?type='+${servie.childtype}}">
               <i class="bi bi-file-image"></i>
+            </a>
+
+            <a th:href="@{'/track-servie/list/'+${servie.tmdbId}+'?childtype='+${servie.childtype}}">
+              <i class="bi bi-clock-fill"></i>
             </a>
 
             <a href="#" th:tmdbId="${servie.tmdbId}" th:childtype="${servie.childtype}"
@@ -474,27 +484,59 @@
 
   <nav th:if="${response.totalPages > 1}">
     <ul class="pagination">
+      <!-- Previous button (enable - if there is previous pg available) -->
       <li class="page-item" th:classappend="${response.hasPrevious} ? '' : 'disabled'">
         <a class="page-link" th:href="@{'/track-servie/servies?pageNumber=' + ${response.pageNumber - 1}}">Previous</a>
       </li>
+
+      <!-- First Page -->
       <li class="page-item">
         <a class="page-link" th:if="${response.pageNumber != 0}" th:href="@{'/track-servie/servies?pageNumber=0'}">1</a>
       </li>
-      <li class="page-item" th:if="${response.pageNumber > 1}">
+
+      <!-- Gap if ............ -->
+      <li class="page-item" th:if="${response.pageNumber > 3}">
         <span>...</span>
       </li>
+
+      <li class="page-item">
+        <a class="page-link" th:if="${response.pageNumber > 2}"
+          th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber-2}}">[[${response.pageNumber-1}]]</a>
+      </li>
+
+      <li class="page-item">
+        <a class="page-link" th:if="${response.pageNumber > 1}"
+          th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber-1}}">[[${response.pageNumber}]]</a>
+      </li>
+
       <li class="active">
         <a class="page-link"
           th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber}}">[[${response.pageNumber+1}]]</a>
       </li>
-      <li class="page-item" th:if="${response.pageNumber < response.totalPages - 2}">
+
+      <li class="page-item">
+        <a class="page-link" th:if="${response.pageNumber < response.totalPages - 2}"
+          th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber+1}}">[[${response.pageNumber+2}]]</a>
+      </li>
+
+      <li class="page-item">
+        <a class="page-link" th:if="${response.pageNumber < response.totalPages - 3}"
+          th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber+2}}">[[${response.pageNumber+3}]]</a>
+      </li>
+
+      <!-- Gap if currentPg is < totalPages-4 -->
+      <li class="page-item" th:if="${response.pageNumber < response.totalPages - 4}">
         <span>...</span>
       </li>
+
+      <!-- Last Page -->
       <li class="page-item">
         <a class="page-link" th:if="${response.pageNumber != response.totalPages - 1}"
           th:href="@{'/track-servie/servies?pageNumber=' + ${response.totalPages - 1}}"
           th:text="${response.totalPages}"></a>
       </li>
+
+      <!-- Next button (enable - if there is next pg available) -->
       <li class="page-item" th:classappend="${response.hasNext} ? '' : 'disabled'">
         <a class="page-link" th:href="@{'/track-servie/servies?pageNumber=' + ${response.pageNumber + 1}}">Next</a>
       </li>
