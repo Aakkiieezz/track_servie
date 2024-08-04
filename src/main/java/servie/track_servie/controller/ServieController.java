@@ -2,7 +2,9 @@ package servie.track_servie.controller;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 // import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -19,7 +22,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+import org.thymeleaf.context.Context;
+import org.thymeleaf.context.WebContext;
+import org.thymeleaf.spring6.SpringTemplateEngine;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 // import servie.track_servie.payload.dtos.FormData;
 import servie.track_servie.payload.dtos.operationsHomePageDtos.ResponseDtoHomePage;
 import servie.track_servie.payload.dtos.operationsImage.Image;
@@ -36,37 +43,37 @@ public class ServieController
 	private ServieService servieService;
 	@Autowired
 	private UserRepository userRepository;
+	@Autowired
+	private SpringTemplateEngine templateEngine;
+
+	@GetMapping("")
+	public String showForm(Model model, @AuthenticationPrincipal UserDetails userDetails)
+	{
+		ServiceForm serviceForm = new ServiceForm();
+		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
+		model.addAttribute("serviceForm", serviceForm);
+		ResponseDtoHomePage response = servieService.getServiesByFilter(userId, serviceForm.getType(), serviceForm.getWatched(), serviceForm.getGenreIds(), serviceForm.getLanguages(), serviceForm.getStatuses(), serviceForm.getStartYear(), serviceForm.getEndYear(), serviceForm.getPageNumber(), serviceForm.getSortBy(), serviceForm.getSortDir());
+		model.addAttribute("response", response);
+		model.addAttribute("serviceForm", new ServiceForm());
+		return "HomePage";
+	}
 
 	// Returns HomePage containing all Servies from the database which matches the filter
-	@GetMapping("")
-	public String getServiesByFilter(
-			@RequestParam(value = "type", defaultValue = "") String type,
-			@RequestParam(value = "watched", required = false) Boolean watched,
-			@RequestParam(value = "genreIds", required = false) String genreIds,
-			@RequestParam(value = "languages", required = false) String languages,
-			@RequestParam(value = "statuses", required = false) String statuses,
-			@RequestParam(value = "startYear", defaultValue = "") Integer startYear,
-			@RequestParam(value = "endYear", defaultValue = "") Integer endYear,
-			@RequestParam(value = "pageNumber", defaultValue = "0") int pageNumber,
-			@RequestParam(value = "sortBy", defaultValue = "title") String sortBy,
-			@RequestParam(value = "sortDir", defaultValue = "asc") String sortDir,
-			// @ModelAttribute FormData formData,
-			@AuthenticationPrincipal UserDetails userDetails,
-			Model model)
+	@PostMapping("js")
+	public ResponseEntity<Map<String, String>> getServiesByFilterJs(@RequestBody ServiceForm serviceForm, @AuthenticationPrincipal UserDetails userDetails, Model model, HttpServletRequest request,
+			HttpServletResponse response)
 	{
-		List<Integer> genreIdList = null;
-		if(genreIds!=null)
-			genreIdList = Arrays.stream(genreIds.split(",")).map(Integer::parseInt).collect(Collectors.toList());
-		List<String> LangList = null;
-		if(languages!=null)
-			LangList = Arrays.stream(languages.split(",")).collect(Collectors.toList());
-		List<String> StatusList = null;
-		if(statuses!=null)
-			StatusList = Arrays.stream(statuses.split(",")).collect(Collectors.toList());
 		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
-		ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, watched, genreIdList, LangList, StatusList, startYear, endYear, pageNumber, sortBy, sortDir);
-		model.addAttribute("response", response);
-		return "HomePage";
+		ResponseDtoHomePage responseDto = servieService.getServiesByFilter(userId, serviceForm.getType(), serviceForm.getWatched(), serviceForm.getGenreIds(), serviceForm.getLanguages(), serviceForm.getStatuses(), serviceForm.getStartYear(), serviceForm.getEndYear(), serviceForm.getPageNumber(), serviceForm.getSortBy(), serviceForm.getSortDir());
+		// Prepare the context for Thymeleaf
+		Locale locale = request.getLocale();
+		WebContext context = new WebContext(request, response, request.getServletContext(), locale);
+		context.setVariable("response", responseDto);
+		// Specify the main page template
+		String homePageHtml = templateEngine.process("HomePage", context);
+		Map<String, String> result = new HashMap<>();
+		result.put("homePageHtml", homePageHtml);
+		return ResponseEntity.ok(result);
 	}
 
 	// Returns HomePage containing all Servies from the database which matches the filter
@@ -75,8 +82,6 @@ public class ServieController
 	{
 		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		ResponseDtoHomePage response = servieService.getServiesByFilter(userId, type, watched, genreIds, languages, statuses, startYear, endYear, pageNumber, sortBy, sortDir);
-		// model.addAttribute("response", response);
-		// return "HomePage";
 		return ResponseEntity.ok().body(response);
 	}
 
@@ -86,6 +91,7 @@ public class ServieController
 		Integer userId = userRepository.findByEmail(userDetails.getUsername()).get().getId();
 		ResponseDtoHomePage response = servieService.getServiesForWatchList(userId, pageNumber, sortBy, sortDir);
 		model.addAttribute("response", response);
+		model.addAttribute("serviceForm", new ServiceForm());
 		return "HomePage";
 	}
 

@@ -121,24 +121,33 @@
   <div class="container-fluid">
     <div class="row">
       <div class="col-9">
-        <form th:action="@{/track-servie/servies}" class="d-flex flex-row align-items-center">
+        <form th:action="@{/track-servie/servies}" th:object="${serviceForm}" method="post"
+          class="d-flex flex-row align-items-center">
+
           <i class="bi bi-arrow-down-up"></i>
-          <select name="type" id="type">
+          <!-- <select name="type" id="type"> -->
+          <select th:field="*{type}" id="type">
             <option value="">Servies</option>
             <option value="movie">Movies</option>
             <option value="tv">Series</option>
           </select>
+
           &nbsp;
           &nbsp;
+
           <i class="bi bi-filter-right"></i>
-          <select name="sortBy">
+          <!-- <select name="sortBy"> -->
+          <select th:field="*{sortBy}">
             <option value="title">Title</option>
             <option value="date">Release Date</option>
           </select>
+
           &nbsp;
           &nbsp;
+
           <i class="bi bi-arrow-down-up"></i>
-          <select name="sortDir">
+          <!-- <select name="sortDir"> -->
+          <select th:field="*{sortDir}">
             <option value="asc">Ascending</option>
             <option value="desc">Descending</option>
           </select>
@@ -337,35 +346,41 @@
 
           &nbsp;
           &nbsp;
+
           From :
-          <select name="startYear">
+          <!-- <select name="startYear"> -->
+          <select th:field="*{startYear}">
             <option value="">Year</option>
             <option th:value="${year}" th:text="${year}" th:each="year : ${#numbers.sequence(2023, 1950, -1)}"></option>
           </select>
+
           &nbsp;
           &nbsp;
+
           To :
-          <select name="endYear">
+          <!-- <select name="endYear"> -->
+          <select th:field="*{endYear}">
             <option value="">Year</option>
             <option th:value="${year}" th:text="${year}" th:each="year : ${#numbers.sequence(2023, 1950, -1)}"></option>
           </select>
+
           &nbsp;
           &nbsp;
+
           <i class="bi bi-eye-fill"></i>
-          <select name="watched">
+          <!-- <select name="watched"> -->
+          <select th:field="*{watched}">
             <option value="">All</option>
             <option value="true">Watched</option>
             <option value="false">Un-watched</option>
           </select>
+
           &nbsp;
           &nbsp;
-          <i class="bi bi-list"></i>
-          <i class="bi bi-grid-fill"></i>
-          <i class="bi bi-grid-3x3-gap-fill"></i>
-          &nbsp;
-          &nbsp;
+
           <button class="btn btn-light" type="submit">Submit</button>
         </form>
+
       </div>
       <div class="col-3 justify-content-end">
         <form th:action=" @{/track-servie/servies/search}">
@@ -487,12 +502,14 @@
     <ul class="pagination justify-content-center">
       <!-- Previous button (enable - if there is previous pg available) -->
       <li class="page-item" th:classappend="${response.hasPrevious} ? '' : 'disabled'">
-        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber=' + ${response.pageNumber - 1}}">Previous</a>
+        <a class="page-link" href="javascript:void(0);"
+          th:onclick="'submitPaginationForm(' + (${response.pageNumber - 1}) + ');'">Previous</a>
       </li>
 
       <!-- First Page -->
       <li class="page-item">
-        <a class="page-link" th:if="${response.pageNumber != 0}" th:href="@{'/track-servie/servies?pageNumber=0'}">1</a>
+        <a class="page-link" th:if="${response.pageNumber != 0}" href="javascript:void(0);"
+          th:onclick="'submitPaginationForm(0);'">1</a>
       </li>
 
       <!-- Gap if ............ -->
@@ -501,28 +518,28 @@
       </li>
 
       <li class="page-item">
-        <a class="page-link" th:if="${response.pageNumber > 2}"
-          th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber-2}}">[[${response.pageNumber-1}]]</a>
+        <a class="page-link" th:if="${response.pageNumber > 2}" href="javascript:void(0);"
+          th:onclick="'submitPaginationForm(' + (${response.pageNumber - 2}) + ');'">[[${response.pageNumber-1}]]</a>
       </li>
 
       <li class="page-item">
-        <a class="page-link" th:if="${response.pageNumber > 1}"
-          th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber-1}}">[[${response.pageNumber}]]</a>
+        <a class="page-link" th:if="${response.pageNumber > 1}" href="javascript:void(0);"
+          th:onclick="'submitPaginationForm(' + (${response.pageNumber - 1}) + ');'">[[${response.pageNumber}]]</a>
       </li>
 
       <li class="active">
-        <a class="page-link"
-          th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber}}">[[${response.pageNumber+1}]]</a>
+        <a class="page-link" href="javascript:void(0);"
+          th:onclick="'submitPaginationForm(' + ${response.pageNumber} + ');'">[[${response.pageNumber+1}]]</a>
       </li>
 
       <li class="page-item">
-        <a class="page-link" th:if="${response.pageNumber < response.totalPages - 2}"
-          th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber+1}}">[[${response.pageNumber+2}]]</a>
+        <a class="page-link" th:if="${response.pageNumber < response.totalPages - 2}" href="javascript:void(0);"
+          th:onclick="'submitPaginationForm(' + (${response.pageNumber + 1}) + ');'">[[${response.pageNumber+2}]]</a>
       </li>
 
       <li class="page-item">
-        <a class="page-link" th:if="${response.pageNumber < response.totalPages - 3}"
-          th:href="@{'/track-servie/servies?pageNumber='+${response.pageNumber+2}}">[[${response.pageNumber+3}]]</a>
+        <a class="page-link" th:if="${response.pageNumber < response.totalPages - 3}" href="javascript:void(0);"
+          th:onclick="'submitPaginationForm(' + (${response.pageNumber + 2}) + ');'">[[${response.pageNumber+3}]]</a>
       </li>
 
       <!-- Gap if currentPg is < totalPages-4 -->
@@ -532,67 +549,85 @@
 
       <!-- Last Page -->
       <li class="page-item">
-        <a class="page-link" th:if="${response.pageNumber != response.totalPages - 1}"
-          th:href="@{'/track-servie/servies?pageNumber=' + ${response.totalPages - 1}}"
+        <a class="page-link" th:if="${response.pageNumber != response.totalPages - 1}" href="javascript:void(0);"
+          th:onclick="'submitPaginationForm(' + (${response.totalPages - 1}) + ');'"
           th:text="${response.totalPages}"></a>
       </li>
 
       <!-- Next button (enable - if there is next pg available) -->
       <li class="page-item" th:classappend="${response.hasNext} ? '' : 'disabled'">
-        <a class="page-link" th:href="@{'/track-servie/servies?pageNumber=' + ${response.pageNumber + 1}}">Next</a>
+        <a class="page-link" href="javascript:void(0);"
+          th:onclick="'submitPaginationForm(' + (${response.pageNumber + 1}) + ');'">Next</a>
       </li>
     </ul>
   </nav>
 
   <script>
-    // Fetching data from sessionStorage to pass on to next page link clicked
-    document.addEventListener('DOMContentLoaded', function () {
 
-      const genres = sessionStorage.getItem('genres');
-      if (genres) {
-        const genresArray = JSON.parse(genres);
-        const paginationLinks = document.querySelectorAll('#paginationNav .page-link');
-        paginationLinks.forEach(link => {
-          const url = new URL(link.href);
-          const params = new URLSearchParams(url.search);
-          if (genresArray.length > 0) {
-            params.set('genreIds', genresArray.join(','));
-          }
-          url.search = params.toString();
-          link.href = url.toString();
-        });
-      }
+    function submitPaginationForm(pageNumber) {
 
-      const languages = sessionStorage.getItem('languages');
-      if (languages) {
-        const languagesArray = JSON.parse(languages);
-        const paginationLinks = document.querySelectorAll('#paginationNav .page-link');
-        paginationLinks.forEach(link => {
-          const url = new URL(link.href);
-          const params = new URLSearchParams(url.search);
-          if (languagesArray.length > 0) {
-            params.set('languages', languagesArray.join(','));
-          }
-          url.search = params.toString();
-          link.href = url.toString();
-        });
-      }
+      console.log('pageNumber:', pageNumber);
 
-      const statuses = sessionStorage.getItem('statuses');
-      if (statuses) {
-        const statusesArray = JSON.parse(statuses);
-        const paginationLinks = document.querySelectorAll('#paginationNav .page-link');
-        paginationLinks.forEach(link => {
-          const url = new URL(link.href);
-          const params = new URLSearchParams(url.search);
-          if (statusesArray.length > 0) {
-            params.set('statuses', statusesArray.join(','));
+      // Create the ServiceForm object
+      const serviceForm = {
+        sortDir: "asc",
+        genreIds: JSON.parse(sessionStorage.getItem('genres')) || [],
+        languages: JSON.parse(sessionStorage.getItem('languages')) || [],
+        statuses: JSON.parse(sessionStorage.getItem('statuses')) || [],
+        watched: null, // Set as needed
+        type: "",
+        startYear: null, // Set as needed
+        endYear: null, // Set as needed
+        pageNumber: pageNumber,
+        sortBy: "title"
+      };
+
+      // Print the ServiceForm object to the console for debugging
+      console.log('ServiceForm:', serviceForm);
+
+      // Send the ServiceForm object via a POST request using fetch
+      fetch('/track-servie/servies/js', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(serviceForm)
+      })
+        .then(response => response.json())
+        .then(data => {
+          console.log('Success:', data);
+          // Check if the elements exist before updating them
+          const contentElement = document.getElementById('content');
+          const paginationNavElement = document.getElementById('paginationNav');
+
+          if (contentElement) {
+            contentElement.innerHTML = data.contentHtml;
+          } else {
+            console.error('Element with ID "content" not found.');
           }
-          url.search = params.toString();
-          link.href = url.toString();
+
+          if (paginationNavElement) {
+            paginationNavElement.innerHTML = data.paginationHtml;
+          } else {
+            console.error('Element with ID "paginationNav" not found.');
+          }
+        })
+        .catch((error) => {
+          console.error('Error:', error);
         });
-      }
-    });
+    }
+
+    function updatePageContent(data) {
+      // Assuming 'data' contains the HTML to update the content
+      // This part should be adjusted based on the actual structure of your response
+
+      // Example: Updating the content of a div with id 'content'
+      document.getElementById('content').innerHTML = data.htmlContent;
+
+      // Update other parts of the page as needed
+      // Example: Update the pagination controls
+      document.getElementById('paginationNav').innerHTML = data.paginationHtml;
+    }
 
     // Storing data into sessionStorage for 'languages'
     function applyLanguageSelection() {

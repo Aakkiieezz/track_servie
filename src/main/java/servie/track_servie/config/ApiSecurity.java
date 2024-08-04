@@ -23,7 +23,9 @@ public class ApiSecurity
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception
 	{
 		http.authorizeHttpRequests(reuest -> reuest.requestMatchers("src/main/resources/static/css/mystyles.css", "/track-servie/auth/register", "/track-servie/auth/login").permitAll().anyRequest().authenticated())
-				.formLogin(form -> form.loginPage("/track-servie/auth/login")
+				.csrf(csrf -> csrf
+						.ignoringRequestMatchers("/track-servie/servies/js") // Disable CSRF protection for this endpoint, hence others have thymeleaf csrf protection
+				).formLogin(form -> form.loginPage("/track-servie/auth/login")
 						.defaultSuccessUrl("/track-servie/servies", true).permitAll())
 				.logout(LogoutConfigurer::permitAll);
 		return http.build();
